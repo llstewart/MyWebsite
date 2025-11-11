@@ -1,0 +1,19 @@
+{
+  "name": "Lincoln Stewart - Software Engineer Portfolio",
+  "short_name": "Lincoln Stewart",
+  "description": "Software Engineer specializing in Intelligent Automation & Systems Integration",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#00ff00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/favicon.ico",
+      "sizes": "16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["portfolio", "software", "engineering", "automation"],
+  "lang": "en-US"
+}
