@@ -3,6 +3,14 @@
 // Console startup message
 console.log('🚀 System Online — Intelligent Automation Portfolio Loaded');
 
+// Ensure page starts at top on load/refresh
+if (history.scrollRestoration) {
+  history.scrollRestoration = 'manual';
+}
+
+// Force scroll to top immediately
+window.scrollTo(0, 0);
+
 // ===== CONFIGURATION =====
 const CONFIG = {
   reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -38,16 +46,18 @@ const Utils = {
   }
 };
 
-// ===== NAVIGATION ACTIVE STATE =====
+// ===== NAVIGATION ACTIVE STATE & HEADER SCROLL EFFECTS =====
 class NavigationController {
   constructor() {
     this.navLinks = document.querySelectorAll('.main-nav a[href^="#"]');
+    this.header = document.getElementById('header');
     this.sections = Array.from(this.navLinks).map(link => {
       const id = Utils.getSectionId(link.getAttribute('href'));
       return document.getElementById(id);
     }).filter(Boolean);
     
     this.currentActive = null;
+    this.lastScrollY = 0;
     this.init();
   }
 
@@ -65,6 +75,29 @@ class NavigationController {
 
     // Observe all sections
     this.sections.forEach(section => this.observer.observe(section));
+
+    // Add scroll listener for header effects
+    window.addEventListener('scroll', Utils.debounce(() => {
+      this.handleHeaderScroll();
+    }, 10));
+
+    // Set initial scroll state
+    this.handleHeaderScroll();
+  }
+
+  handleHeaderScroll() {
+    const currentScrollY = window.scrollY;
+    
+    if (this.header) {
+      // Add scrolled class when past header height
+      if (currentScrollY > 50) {
+        this.header.classList.add('scrolled');
+      } else {
+        this.header.classList.remove('scrolled');
+      }
+    }
+    
+    this.lastScrollY = currentScrollY;
   }
 
   handleIntersection(entries) {
@@ -345,63 +378,7 @@ class ScrollAnimationController {
   }
 }
 
-// ===== THEME TOGGLE (Optional Enhancement) =====
-class ThemeController {
-  constructor() {
-    this.currentTheme = this.getPreferredTheme();
-    this.init();
-  }
-
-  init() {
-    this.applyTheme(this.currentTheme);
-    this.createToggleButton();
-    this.watchSystemPreferences();
-  }
-
-  getPreferredTheme() {
-    const stored = localStorage.getItem('theme');
-    if (stored) return stored;
-    
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  }
-
-  createToggleButton() {
-    const header = document.querySelector('header .header-container');
-    if (!header) return;
-
-    const toggleButton = document.createElement('button');
-    toggleButton.className = 'theme-toggle';
-    toggleButton.setAttribute('aria-label', 'Toggle theme');
-    toggleButton.innerHTML = this.currentTheme === 'dark' ? '☀️' : '🌙';
-    
-    toggleButton.addEventListener('click', () => this.toggleTheme());
-    
-    header.appendChild(toggleButton);
-    this.toggleButton = toggleButton;
-  }
-
-  toggleTheme() {
-    this.currentTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-    this.applyTheme(this.currentTheme);
-    localStorage.setItem('theme', this.currentTheme);
-  }
-
-  applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (this.toggleButton) {
-      this.toggleButton.innerHTML = theme === 'dark' ? '☀️' : '🌙';
-    }
-  }
-
-  watchSystemPreferences() {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem('theme')) {
-        this.currentTheme = e.matches ? 'dark' : 'light';
-        this.applyTheme(this.currentTheme);
-      }
-    });
-  }
-}
+// ===== THEME TOGGLE (Removed for minimal dark theme only) =====
 
 // ===== CSS FOR DYNAMIC ELEMENTS =====
 const DynamicStyles = {
@@ -454,45 +431,13 @@ const DynamicStyles = {
       /* Section fade-in animations */
       section {
         opacity: 0;
-        transform: translateY(30px);
-        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transform: translateY(20px);
+        transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       }
 
       section.is-visible {
         opacity: 1;
         transform: translateY(0);
-      }
-
-      /* Theme toggle button */
-      .theme-toggle {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 1.2rem;
-        backdrop-filter: blur(12px);
-      }
-
-      .theme-toggle:hover {
-        border-color: var(--accent);
-        box-shadow: 0 0 12px var(--accent);
-      }
-
-      /* Light theme variables */
-      [data-theme="light"] {
-        --bg: #ffffff;
-        --fg: #24292e;
-        --muted: #586069;
-        --card-bg: rgba(0, 0, 0, 0.02);
-        --card-border: rgba(0, 0, 0, 0.08);
-        --glass-bg: rgba(0, 0, 0, 0.05);
-        --grid-line: rgba(0, 0, 0, 0.03);
       }
 
       /* Reduced motion overrides */
@@ -542,6 +487,9 @@ class PortfolioApp {
   }
 
   start() {
+    // Ensure we're at the top of the page
+    window.scrollTo(0, 0);
+    
     // Inject dynamic styles
     DynamicStyles.inject();
 
@@ -550,7 +498,6 @@ class PortfolioApp {
     this.controllers.smoothScroll = new SmoothScrollController();
     this.controllers.pipeline = new PipelineAnimation();
     this.controllers.scrollAnimation = new ScrollAnimationController();
-    this.controllers.theme = new ThemeController();
 
     // Handle reduced motion preference changes
     window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {
@@ -562,6 +509,13 @@ class PortfolioApp {
         this.controllers.pipeline.startAnimation();
       }
     });
+
+    // Ensure header is properly positioned after initialization
+    setTimeout(() => {
+      if (this.controllers.navigation && this.controllers.navigation.header) {
+        this.controllers.navigation.handleHeaderScroll();
+      }
+    }, 100);
 
     // Performance monitoring
     this.logPerformance();
