@@ -126,6 +126,38 @@ body {
     color: var(--text-secondary);
     font-size: 0.9rem;
     letter-spacing: 2px;
+.loading-messages {
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    max-width: 90vw;
+}
+
+.loading-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.2rem 0;
+}
+
+.loading-line .chevron {
+    color: var(--accent-blue);
+}
+
+.loading-line .text {
+    letter-spacing: 0.2px;
+}
+
+.loading-line .cursor {
+    width: 8px;
+    height: 1.1em;
+    background: var(--accent-blue);
+    display: inline-block;
+    opacity: 0.6;
+    animation: blink-cursor 0.9s steps(1) infinite;
+}
+
 }
 
 /* ===================================

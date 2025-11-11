@@ -9,21 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeApp() {
     console.log('🚀 Initializing app...');
     console.log('📊 Resume data available:', typeof resumeData !== 'undefined');
-    
-    // Hide loading screen
-    setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        loadingScreen.classList.add('hidden');
-    }, 1500);
 
-    // Initialize all components
+    // Play the loading message sequence and then hide loader
+    playLoadingSequence().then(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) loadingScreen.classList.add('hidden');
+    });
+
+    // Initialize all components while loader is showing
     initializeNavigation();
     initializeHeroAnimations();
     initializeTypingEffect();
     initializeNeuralNetwork();
     initializePipeline();
     initializeScrollAnimations();
-    
+
     // Populate dynamic content
     console.log('📝 Populating dynamic content...');
     populateExperience();
@@ -31,8 +31,64 @@ function initializeApp() {
     initializeSkillsInterface();
     initializeContactForm();
     animateStats();
-    
+
     console.log('✅ App initialization complete!');
+}
+
+// ===================================
+// Loading Message Sequence
+// ===================================
+
+function playLoadingSequence() {
+    const container = document.getElementById('loading-messages');
+    if (!container) return Promise.resolve();
+
+    const messages = [
+        'Initializing system architecture...',
+        'Establishing connection...',
+        'Connected: Lincoln Stewart / Software Engineer'
+    ];
+
+    // Chain typing of each line in sequence
+    let chain = Promise.resolve();
+    messages.forEach((msg, idx) => {
+        chain = chain.then(() => typeLoadingLine(container, msg));
+    });
+
+    return chain;
+}
+
+function typeLoadingLine(container, text, speed = 24) {
+    return new Promise((resolve) => {
+        const line = document.createElement('div');
+        line.className = 'loading-line';
+
+        const chevron = document.createElement('span');
+        chevron.className = 'chevron';
+        chevron.textContent = '>';
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'text';
+
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+
+        line.appendChild(chevron);
+        line.appendChild(textSpan);
+        line.appendChild(cursor);
+        container.appendChild(line);
+
+        let i = 0;
+        const timer = setInterval(() => {
+            textSpan.textContent = text.substring(0, i);
+            i++;
+            if (i > text.length) {
+                clearInterval(timer);
+                cursor.remove();
+                setTimeout(resolve, 250);
+            }
+        }, speed);
+    });
 }
 
 // ===================================
