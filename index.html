@@ -4,436 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Lincoln Stewart - Software Engineer specializing in Intelligent Automation & Systems Integration">
-    <title>Lincoln Stewart - Software Engineer</title>
+    <meta name="author" content="Lincoln Stewart">
+    <title>Lincoln Stewart | Software Engineer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Header -->
-    <header id="header">
-        <div class="header-container">
-            <div class="logo">
-                <span class="logo-text">LS</span>
-            </div>
-            <nav class="main-nav" role="navigation">
-                <ul class="nav-list">
-                    <li><a href="#overview">Overview</a></li>
-                    <li><a href="#systems">Systems</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#experience">Experience</a></li>
-                    <li><a href="#education">Education</a></li>
-                    <li><a href="#skills">Skills</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader">
+            <div class="system-pulse"></div>
+            <p>Initializing System...</p>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content -->
-    <main>
-        <!-- Hero Section -->
-        <section id="overview" class="hero-section">
-            <div class="hero-container">
-                <div class="hero-content">
-                    <h1 class="hero-title">Lincoln Stewart</h1>
-                    <h2 class="hero-subtitle">Software Engineer</h2>
-                    <p class="hero-tagline">I design and develop enterprise-grade applications, real-time monitoring systems, and AI-powered automation solutions.</p>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">LS</span>
+                <span class="status-indicator"></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#experience" class="nav-link">Experience</a></li>
+                <li><a href="#projects" class="nav-link">Projects</a></li>
+                <li><a href="#skills" class="nav-link">Skills</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-background">
+            <div class="grid-overlay"></div>
+            <canvas id="neural-network"></canvas>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="glitch-text" data-text="Lincoln Stewart">Lincoln Stewart</span>
+            </h1>
+            <h2 class="hero-subtitle">
+                <span class="typing-text"></span>
+            </h2>
+            <p class="hero-description">
+                I design connected systems that blend software, data<br>
+                and AI into real-time automation.
+            </p>
+            
+            <!-- System Metrics -->
+            <div class="metrics-bar">
+                <div class="metric">
+                    <span class="metric-label">Performance</span>
+                    <div class="metric-value">
+                        <div class="metric-fill" data-value="25">
+                            <span class="metric-text">−15% Latency</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Pipeline -->
+            <div class="pipeline">
+                <div class="pipeline-step" data-step="1">
+                    <div class="step-node"></div>
+                    <span class="step-label">Ingest</span>
+                </div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-step" data-step="2">
+                    <div class="step-node"></div>
+                    <span class="step-label">Process</span>
+                </div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-step" data-step="3">
+                    <div class="step-node"></div>
+                    <span class="step-label">Optimize</span>
+                </div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-step" data-step="4">
+                    <div class="step-node"></div>
+                    <span class="step-label">Deliver</span>
+                </div>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="hero-cta">
+                <button class="btn btn-primary" onclick="scrollToSection('projects')">
+                    <span>View Projects</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="btn btn-secondary" onclick="scrollToSection('contact')">
+                    <span>Contact Me</span>
+                    <i class="fas fa-envelope"></i>
+                </button>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="hero-contact">
+                <a href="mailto:lincolnstewart4@gmail.com" class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>lincolnstewart4@gmail.com</span>
+                </a>
+                <a href="https://www.linkedin.com/in/lincoln-stewart01" target="_blank" class="contact-item">
+                    <i class="fab fa-linkedin"></i>
+                    <span>LinkedIn</span>
+                </a>
+                <a href="https://github.com/llstewart" target="_blank" class="contact-item">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <div class="contact-item location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Hyattsville, MD, USA</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section about-section">
+        <div class="container">
+            <h2 class="section-title" data-number="01">About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p class="lead">Transforming complexity into intelligent systems.</p>
+                    <p>As a Software Engineer specializing in Intelligent Automation & Systems Integration, I architect solutions that bridge software, data, and AI to create seamless, real-time automation systems.</p>
+                    <p>My work spans from designing enterprise-grade applications to building deep learning models and orchestrating complex middleware systems—all with a focus on efficiency, precision, and scalability.</p>
                     
-                    <div class="hero-buttons">
-                        <a href="#projects" class="btn btn-primary">View Projects</a>
-                        <a href="#contact" class="btn btn-secondary">Contact Me</a>
-                    </div>
-                </div>
-
-                <div class="hero-visualization">
-                    <svg class="pipeline-svg" viewBox="0 0 400 120" aria-labelledby="pipeline-title" role="img">
-                        <title id="pipeline-title">Automation Pipeline Visualization</title>
-                        <desc>A visual representation of the automation pipeline with four stages: Ingest, Process, Optimize, and Deliver</desc>
-                        
-                        <!-- Pipeline Flow -->
-                        <defs>
-                            <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                                    refX="9" refY="3.5" orient="auto">
-                                <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
-                            </marker>
-                        </defs>
-                        
-                        <!-- Connecting Lines -->
-                        <line x1="90" y1="60" x2="130" y2="60" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" />
-                        <line x1="190" y1="60" x2="230" y2="60" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" />
-                        <line x1="290" y1="60" x2="330" y2="60" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" />
-                        
-                        <!-- Node 1: Ingest -->
-                        <circle cx="60" cy="60" r="25" fill="#4CAF50" stroke="#333" stroke-width="2" />
-                        <text x="60" y="66" text-anchor="middle" font-family="Arial" font-size="10" fill="white">Ingest</text>
-                        
-                        <!-- Node 2: Process -->
-                        <circle cx="160" cy="60" r="25" fill="#2196F3" stroke="#333" stroke-width="2" />
-                        <text x="160" y="66" text-anchor="middle" font-family="Arial" font-size="10" fill="white">Process</text>
-                        
-                        <!-- Node 3: Optimize -->
-                        <circle cx="260" cy="60" r="25" fill="#FF9800" stroke="#333" stroke-width="2" />
-                        <text x="260" y="66" text-anchor="middle" font-family="Arial" font-size="10" fill="white">Optimize</text>
-                        
-                        <!-- Node 4: Deliver -->
-                        <circle cx="360" cy="60" r="25" fill="#9C27B0" stroke="#333" stroke-width="2" />
-                        <text x="360" y="66" text-anchor="middle" font-family="Arial" font-size="10" fill="white">Deliver</text>
-                    </svg>
-                </div>
-            </div>
-        </section>
-
-        <!-- Systems Section -->
-        <section id="systems" class="systems-section">
-            <div class="systems-container">
-                <h2 class="section-title">Systems Architecture</h2>
-                <p class="section-description">Visual map of integrated automation systems</p>
-                
-                <div class="systems-map">
-                    <svg class="systems-svg" viewBox="0 0 600 300" aria-labelledby="systems-title" role="img">
-                        <title id="systems-title">Systems Integration Map</title>
-                        <desc>Flow diagram showing PLC to Edge to API/Database to AI Inference to User Interface</desc>
-                        
-                        <!-- Connecting Lines -->
-                        <line x1="120" y1="150" x2="150" y2="150" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" />
-                        <line x1="210" y1="150" x2="240" y2="150" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" />
-                        <line x1="330" y1="150" x2="360" y2="150" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" />
-                        <line x1="450" y1="150" x2="480" y2="150" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)" />
-                        
-                        <!-- PLC -->
-                        <rect x="60" y="125" width="60" height="50" rx="5" fill="#FF5722" stroke="#333" stroke-width="2" />
-                        <text x="90" y="155" text-anchor="middle" font-family="Arial" font-size="12" fill="white">PLC</text>
-                        
-                        <!-- Edge -->
-                        <rect x="150" y="125" width="60" height="50" rx="5" fill="#607D8B" stroke="#333" stroke-width="2" />
-                        <text x="180" y="155" text-anchor="middle" font-family="Arial" font-size="12" fill="white">Edge</text>
-                        
-                        <!-- API/DB -->
-                        <rect x="240" y="125" width="90" height="50" rx="5" fill="#3F51B5" stroke="#333" stroke-width="2" />
-                        <text x="285" y="146" text-anchor="middle" font-family="Arial" font-size="11" fill="white">API/DB</text>
-                        <text x="285" y="160" text-anchor="middle" font-family="Arial" font-size="11" fill="white">Layer</text>
-                        
-                        <!-- AI Inference -->
-                        <rect x="360" y="125" width="90" height="50" rx="5" fill="#E91E63" stroke="#333" stroke-width="2" />
-                        <text x="405" y="146" text-anchor="middle" font-family="Arial" font-size="11" fill="white">AI</text>
-                        <text x="405" y="160" text-anchor="middle" font-family="Arial" font-size="11" fill="white">Inference</text>
-                        
-                        <!-- UI -->
-                        <rect x="480" y="125" width="60" height="50" rx="5" fill="#00BCD4" stroke="#333" stroke-width="2" />
-                        <text x="510" y="155" text-anchor="middle" font-family="Arial" font-size="12" fill="white">UI</text>
-                        
-                        <!-- Labels -->
-                        <text x="90" y="200" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Hardware</text>
-                        <text x="180" y="200" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Gateway</text>
-                        <text x="285" y="200" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Backend</text>
-                        <text x="405" y="200" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Intelligence</text>
-                        <text x="510" y="200" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Interface</text>
-                    </svg>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section id="projects" class="projects-section">
-            <div class="projects-container">
-                <h2 class="section-title">Featured Projects</h2>
-                <p class="section-description">AI-powered solutions and real-time system integrations</p>
-                
-                <div class="projects-grid">
-                    <!-- Project 1 -->
-                    <article class="project-card">
-                        <h3 class="project-title">Sellorie - AI Restaurant Automation</h3>
-                        <div class="project-content">
-                            <div class="project-problem">
-                                <h4>Overview</h4>
-                                <p>AI-powered SaaS that automates restaurant phone orders and reservations using voice interfaces and third-party API integrations.</p>
-                            </div>
-                            <div class="project-solution">
-                                <h4>Implementation</h4>
-                                <p>Built with Next.js, TypeScript, and React hooks. Integrated ElevenLabs AI voice API for natural phone interactions. Engineered middleware orchestration between voice engine, n8n automation, and backend systems.</p>
-                            </div>
-                            <div class="project-impact">
-                                <h4>Technologies</h4>
-                                <ul class="impact-metrics">
-                                    <li>Next.js, TypeScript, React</li>
-                                    <li>ElevenLabs AI Voice API</li>
-                                    <li>n8n automation, webhook integration</li>
-                                    <li>Clover & Stripe payment APIs</li>
-                                </ul>
-                            </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" data-target="25">0</div>
+                            <div class="stat-label">% Efficiency Boost</div>
                         </div>
-                    </article>
-
-                    <!-- Project 2 -->
-                    <article class="project-card">
-                        <h3 class="project-title">PulseHue - Spotify × Govee Lighting Sync</h3>
-                        <div class="project-content">
-                            <div class="project-problem">
-                                <h4>Overview</h4>
-                                <p>Real-time ambient lighting synchronization with Spotify music, using local middleware for low-latency control and edge communication.</p>
-                            </div>
-                            <div class="project-solution">
-                                <h4>Implementation</h4>
-                                <p>Connected Spotify Web API with Govee Local LAN API. Built Node.js/Express middleware for real-time event streaming and asynchronous lighting commands with HSL-to-RGB color mapping.</p>
-                            </div>
-                            <div class="project-impact">
-                                <h4>Technologies</h4>
-                                <ul class="impact-metrics">
-                                    <li>Spotify Web API (OAuth 2.0)</li>
-                                    <li>Govee Local LAN API</li>
-                                    <li>Node.js/Express middleware</li>
-                                    <li>Image analysis for color extraction</li>
-                                </ul>
-                            </div>
+                        <div class="stat-card">
+                            <div class="stat-number" data-target="98">0</div>
+                            <div class="stat-label">% Model Accuracy</div>
                         </div>
-                    </article>
-
-                    <!-- Project 3 - Enterprise Experience -->
-                    <article class="project-card">
-                        <h3 class="project-title">Enterprise SCADA & Monitoring Systems</h3>
-                        <div class="project-content">
-                            <div class="project-problem">
-                                <h4>Overview</h4>
-                                <p>Real-time monitoring dashboards and alarm systems for industrial operations, integrated with telemetry and anomaly detection.</p>
-                            </div>
-                            <div class="project-solution">
-                                <h4>Implementation</h4>
-                                <p>Developed using React, JavaScript, Python, SQL, and Ignition SCADA. Built secure REST APIs and CI/CD pipelines with GitHub Actions for enterprise deployment.</p>
-                            </div>
-                            <div class="project-impact">
-                                <h4>Results</h4>
-                                <ul class="impact-metrics">
-                                    <li>25% reduction in operational downtime</li>
-                                    <li>40% faster deployments with zero downtime</li>
-                                    <li>15% reduction in data retrieval latency</li>
-                                    <li>25% improvement in system efficiency</li>
-                                </ul>
-                            </div>
+                        <div class="stat-card">
+                            <div class="stat-number" data-target="40">0</div>
+                            <div class="stat-label">% Faster Deployments</div>
                         </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Experience Section -->
-        <section id="experience" class="experience-section">
-            <div class="experience-container">
-                <h2 class="section-title">Professional Experience</h2>
-                <p class="section-description">Building enterprise solutions and automation systems</p>
-                
-                <div class="timeline">
-                    <!-- Experience 1 -->
-                    <article class="timeline-item">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <h3 class="experience-title">Software Engineer</h3>
-                            <h4 class="company-name">Oshkosh Corporation / JLG</h4>
-                            <time class="experience-period">Jan 2024 - Present</time>
-                            <div class="experience-metrics">
-                                <ul class="metrics-list">
-                                    <li>Design and develop enterprise applications using Python, React.js, ASP.NET, Vue.js, and Ignition SCADA</li>
-                                    <li>Implement CI/CD pipelines with GitHub Actions, achieving 40% faster deployments with zero downtime</li>
-                                    <li>Build real-time monitoring dashboards with telemetry and anomaly detection integration</li>
-                                    <li>Develop secure REST APIs reducing data retrieval latency by 15% and boosting system efficiency by 25%</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Experience 2 -->
-                    <article class="timeline-item">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <h3 class="experience-title">System Engineer Intern</h3>
-                            <h4 class="company-name">Oshkosh Corporation / JLG</h4>
-                            <time class="experience-period">Jun 2022 - Dec 2023</time>
-                            <div class="experience-metrics">
-                                <ul class="metrics-list">
-                                    <li>Built and deployed deep learning models using Azure ML and TensorFlow for real-time text recognition with 98% accuracy</li>
-                                    <li>Created real-time alarm dashboards with React, JavaScript, Python, and SQL, reducing operational downtime by 25%</li>
-                                    <li>Reconfigured robotic system operations in C++ improving welding precision by 30%</li>
-                                    <li>Configured Linux servers for 24/7 diagnostics, enhancing uptime by 20% across multiple manufacturing sites</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Education Section -->
-        <section id="education" class="education-section">
-            <div class="education-container">
-                <h2 class="section-title">Education</h2>
-                <p class="section-description">Academic foundation in software engineering and information systems</p>
-                
-                <div class="education-content">
-                    <article class="education-card">
-                        <div class="education-header">
-                            <h3 class="degree-title">Bachelor of Science in Information Science</h3>
-                            <h4 class="institution-name">University of Maryland College Park</h4>
-                            <time class="education-period">Jan 2021 - Dec 2023</time>
-                        </div>
-                        
-                        <div class="education-details">
-                            <div class="coursework-section">
-                                <h5 class="section-subtitle">Core Coursework</h5>
-                                <ul class="coursework-list">
-                                    <li>Software Engineering Methodologies</li>
-                                    <li>Data Structures and Algorithms</li>
-                                    <li>Database Design and Modeling</li>
-                                    <li>Cloud Computing and Distributed Systems</li>
-                                    <li>Machine Learning Fundamentals</li>
-                                    <li>Web Development and APIs</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="achievements-section">
-                                <h5 class="section-subtitle">Key Achievements</h5>
-                                <ul class="achievements-list">
-                                    <li>Developed strong foundation in Python, JavaScript, and system architecture</li>
-                                    <li>Applied academic knowledge through internships and collaborative industry projects</li>
-                                    <li>Focused on practical implementation of software engineering principles</li>
-                                    <li>Completed capstone projects involving real-world automation solutions</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills Section -->
-        <section id="skills" class="skills-section">
-            <div class="skills-container">
-                <h2 class="section-title">Core Skills & Technologies</h2>
-                <p class="section-description">Technical expertise across full-stack development and systems integration</p>
-                
-                <div class="skills-grid">
-                    <!-- Skill Category 1 -->
-                    <article class="skill-card">
-                        <h3 class="skill-title">Programming & Frameworks</h3>
-                        <div class="skill-content">
-                            <div class="skill-category">
-                                <h4>Languages</h4>
-                                <p>Python, TypeScript, JavaScript, C++, HTML, CSS</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>Frontend</h4>
-                                <p>React.js, Vue.js, Next.js, Bootstrap</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>Backend</h4>
-                                <p>Node.js, ASP.NET, Django/Flask, REST APIs</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>Databases</h4>
-                                <p>SQL, PostgreSQL, SQL Server</p>
-                            </div>
-                            <div class="skill-status">
-                                <span class="status-badge production">Production Ready</span>
-                                <span class="skill-tech">Enterprise Application Development</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Skill Category 2 -->
-                    <article class="skill-card">
-                        <h3 class="skill-title">Cloud & DevOps</h3>
-                        <div class="skill-content">
-                            <div class="skill-category">
-                                <h4>Cloud Platforms</h4>
-                                <p>Azure ML, Google Cloud, Microsoft Power Platform</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>AI/ML</h4>
-                                <p>TensorFlow, PyTorch, OpenCV</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>DevOps</h4>
-                                <p>Docker, CI/CD, GitHub Actions</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>Industrial</h4>
-                                <p>Ignition SCADA, OPC-UA, MQTT</p>
-                            </div>
-                            <div class="skill-status">
-                                <span class="status-badge production">Production Ready</span>
-                                <span class="skill-tech">Cloud Deployment & Automation</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Skill Category 3 -->
-                    <article class="skill-card">
-                        <h3 class="skill-title">System Administration</h3>
-                        <div class="skill-content">
-                            <div class="skill-category">
-                                <h4>Operating Systems</h4>
-                                <p>Linux/Unix, Windows Server</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>Development Tools</h4>
-                                <p>Git, GitHub, VS Code, Bash/Shell</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>Architecture</h4>
-                                <p>Database Design, Server Configuration</p>
-                            </div>
-                            <div class="skill-category">
-                                <h4>Integration</h4>
-                                <p>API Development, Real-time Systems</p>
-                            </div>
-                            <div class="skill-status">
-                                <span class="status-badge production">Production Ready</span>
-                                <span class="skill-tech">Systems Integration & Infrastructure</span>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="contact-section">
-            <div class="contact-container">
-                <h2 class="section-title">Let's Build Something</h2>
-                <p class="section-description">Ready to discuss your next automation challenge</p>
-                
-                <div class="contact-content">
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <h3 class="contact-label">Email</h3>
-                            <a href="mailto:lincolnstewart4@gmail.com" class="contact-link">lincolnstewart4@gmail.com</a>
-                        </div>
-                        
-                        <div class="contact-item">
-                            <h3 class="contact-label">LinkedIn</h3>
-                            <a href="https://www.linkedin.com/in/lincoln-stewart01" class="contact-link" target="_blank" rel="noopener noreferrer">linkedin.com/in/lincoln-stewart01</a>
-                        </div>
-                        
-                        <div class="contact-item">
-                            <h3 class="contact-label">GitHub</h3>
-                            <a href="https://github.io/MyWebsite/" class="contact-link" target="_blank" rel="noopener noreferrer">github.io/MyWebsite</a>
-                        </div>
-
-                        <div class="contact-item">
-                            <h3 class="contact-label">Phone</h3>
-                            <a href="tel:+14434608224" class="contact-link">443-460-8224</a>
+                        <div class="stat-card">
+                            <div class="stat-number" data-target="15">0</div>
+                            <div class="stat-label">% Reduced Latency</div>
                         </div>
                     </div>
                 </div>
+                
+                <div class="education-card">
+                    <div class="card-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>Education</h3>
+                    </div>
+                    <div class="card-content">
+                        <h4>University of Maryland College Park</h4>
+                        <p class="degree">B.S Information Science</p>
+                        <p class="timeline">Jan 2021 - Dec 2023</p>
+                    </div>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="section experience-section">
+        <div class="container">
+            <h2 class="section-title" data-number="02">Work Experience</h2>
+            <div class="timeline" id="experience-timeline">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section projects-section">
+        <div class="container">
+            <h2 class="section-title" data-number="03">Featured Projects</h2>
+            <div class="projects-grid" id="projects-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section skills-section">
+        <div class="container">
+            <h2 class="section-title" data-number="04">Core Skills</h2>
+            <div class="skills-interface">
+                <div class="skills-tabs">
+                    <button class="skill-tab active" data-category="languages">Languages</button>
+                    <button class="skill-tab" data-category="frameworks">Frameworks</button>
+                    <button class="skill-tab" data-category="tools">Tools & Platforms</button>
+                    <button class="skill-tab" data-category="systems">Systems</button>
+                </div>
+                <div class="skills-content" id="skills-content">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section contact-section">
+        <div class="container">
+            <h2 class="section-title" data-number="05">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <p class="contact-lead">Let's build something innovative together.</p>
+                    <p>I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
+                    
+                    <div class="contact-methods">
+                        <a href="mailto:lincolnstewart4@gmail.com" class="contact-method">
+                            <div class="method-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>Email</h4>
+                                <p>lincolnstewart4@gmail.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="tel:443-460-8224" class="contact-method">
+                            <div class="method-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>Phone</h4>
+                                <p>443-460-8224</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://www.linkedin.com/in/lincoln-stewart01" target="_blank" class="contact-method">
+                            <div class="method-icon">
+                                <i class="fab fa-linkedin"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>LinkedIn</h4>
+                                <p>lincoln-stewart01</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://github.com/llstewart" target="_blank" class="contact-method">
+                            <div class="method-icon">
+                                <i class="fab fa-github"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>GitHub</h4>
+                                <p>llstewart</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
-    <footer id="footer" class="site-footer">
-        <div class="footer-container">
-            <p class="copyright">&copy; 2025 Lincoln Stewart. All rights reserved.</p>
-            <p class="location">Hyattsville, MD, USA</p>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Lincoln Stewart. All rights reserved.</p>
+            <p class="footer-tagline">Engineered with precision. Designed for the future.</p>
         </div>
     </footer>
 
-    <script src="main.js"></script>
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
