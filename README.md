@@ -16,8 +16,11 @@ criteria are in [`docs/PRD.md`](docs/PRD.md). Colour, type, material, and motion
 are in [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md).
 
 The short version: near white paper, a drawn contour field behind it, glass used
-as chrome rather than as decoration, and content organised as a landing hub, one
-featured system, and an index of the rest.
+as chrome rather than as decoration, and content ordered the way a recruiter
+reads. Landing, then skills, then projects, then experience.
+
+It is a resume companion, not a services page. Nothing on it offers work, quotes
+a scope, or announces availability.
 
 ## Run it
 

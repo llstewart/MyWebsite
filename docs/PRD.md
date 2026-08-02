@@ -1,7 +1,7 @@
 # Product requirements: llstewart.github.io
 
 **Owner:** Lincoln Stewart
-**Version:** 2.0, 2 August 2026
+**Version:** 2.1, 2 August 2026
 **Status:** Implemented
 **Related:** [BUSINESS-PLAN.md](./BUSINESS-PLAN.md), [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)
 
@@ -24,8 +24,9 @@ matrix rain, and neural network decoration. Three problems, in order of cost:
 
 ## 2. Goals
 
-**G1.** A recruiter can determine role, seniority band, location, work
-authorization, and get the résumé within twenty seconds of landing.
+**G1.** A recruiter can match a requisition against Lincoln's languages and
+stack, and determine role, seniority band, location, work authorization, and
+get the résumé, within a minute of landing.
 
 **G2.** A hiring engineer can read one system entry and understand the problem,
 the architecture, and the outcome without asking a question.
@@ -52,8 +53,9 @@ and on paper.
 
 **J1. Recruiter, 20 to 40 seconds.** "Is this person the right shape for the role
 I am filling, and can I get their résumé into the system?"
-Served by: the landing sentence, the contents table, the results line on every
-system and role, and the contact block.
+Served by: the landing sentence, the contents table, the skills section
+immediately below it, the results line on every project and role, and the
+contact block.
 
 **J2. Hiring engineer, 3 to 8 minutes.** "Has this person actually built and
 operated something, or have they just been near it?"
@@ -129,7 +131,16 @@ Deliberately one page. Every extra route is another chance for a reviewer to sto
 | D3 | Jumping to an entry from the palette expands it, or the jump lands on a closed row and looks like nothing happened. |
 | D4 | Print forces every disclosure open. |
 
-### 6.4 Content
+### 6.4 Skills
+
+| ID | Requirement |
+|---|---|
+| S1 | The seven owned languages appear first, each with its recorded years, before any other capability. |
+| S2 | Capabilities are grouped into eight named sets, ordered from what a general software role screens on to what only an industrial role does. |
+| S3 | Beginner level skills appear under "Familiar with" and are never listed alongside shipped ones. |
+| S4 | The boundary statement closes the section. It is the point of the section. |
+
+### 6.5 Content
 
 | ID | Requirement |
 |---|---|
@@ -140,7 +151,8 @@ Deliberately one page. Every extra route is another chance for a reviewer to sto
 | C5 | No em dashes anywhere in copy. |
 | C6 | No emoji anywhere. |
 | C7 | The `data_latency` 15% figure is excluded, because it conflicts with the 4s to 800ms figure and has not been resolved. |
-| C8 | Agency clients are described by sector, not named. |
+| C8 | Client work is described by sector, never named, and framed as engineering rather than as a service on offer. |
+| C9 | Language years come from `skills.owned.languages[].years` in the master profile. They are never rounded up. |
 
 ## 7. States
 

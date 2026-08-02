@@ -1,6 +1,6 @@
 # Design system
 
-**Version:** 2.0, 2 August 2026
+**Version:** 2.1, 2 August 2026
 **Source of truth:** `assets/css/tokens.css`. If a value is not in that file, it
 should not exist anywhere else.
 
@@ -156,8 +156,9 @@ frame, reveals are off, and view transitions are disabled.
 | **Rail** | Fixed left gauge. One tick per section, the current one lit, scroll depth at the bottom. Navigation and a position readout at once. Hidden below 900px |
 | **Nav** | Glass bar aligned to the content column, not bled to the window. Collapses to the palette below 1000px |
 | **Hub** | The landing's contents table. Five rows, each a name, a note, and its reading order. This is the whole navigation on arrival |
-| **Feature** | One system, given the weight it earns. Two columns: lede with the result rule, and the detail |
-| **Index** | Five systems, one scannable line each, opening in place. Name, claim, and the metric that matters, in three columns |
+| **Languages** | Seven cards, name over years, on a rule. The heaviest thing in the skills section because it is the first thing matched against |
+| **Feature** | One project, given the weight it earns. Two columns: lede with the result rule, and the detail |
+| **Index** | Five projects, one scannable line each, opening in place. Name, claim, and the metric that matters, in three columns |
 | **Role** | Date column, then title, org, a results line, and tick-marked points |
 | **Palette** | Centered dialog on desktop, bottom sheet capped at 72dvh on a phone. Never full screen |
 | **Toast** | Ink on paper, one line, for actions with no visible result |

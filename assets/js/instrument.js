@@ -95,7 +95,8 @@
 
     var COMMANDS = [
       { kind: "Go",     label: "Top",                     run: function () { jump("#top"); } },
-      { kind: "Go",     label: "Work",                    run: function () { jump("#systems"); } },
+      { kind: "Go",     label: "Skills",                  run: function () { jump("#skills"); } },
+      { kind: "Go",     label: "Projects",                run: function () { jump("#projects"); } },
       { kind: "Go",     label: "Packleads",               run: function () { jump("#sys-packleads"); } },
       { kind: "Go",     label: "Sellorie",                run: function () { jump("#sys-sellorie"); } },
       { kind: "Go",     label: "Global Report Builder",   run: function () { jump("#sys-grb"); } },
@@ -103,7 +104,6 @@
       { kind: "Go",     label: "PulseHue",                run: function () { jump("#sys-pulsehue"); } },
       { kind: "Go",     label: "Client web practice",     run: function () { jump("#sys-agency"); } },
       { kind: "Go",     label: "Experience",              run: function () { jump("#experience"); } },
-      { kind: "Go",     label: "Stack",                   run: function () { jump("#stack"); } },
       { kind: "Go",     label: "Approach",                run: function () { jump("#approach"); } },
       { kind: "Go",     label: "Contact",                 run: function () { jump("#contact"); } },
       { kind: "Copy",   label: "Copy email address",      run: function () { copy("lincolnstewart4@gmail.com", "Email address copied"); } },

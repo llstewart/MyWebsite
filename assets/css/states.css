@@ -299,7 +299,7 @@ a[data-state="missing"] { color: var(--c-live); }
   .role__points { display: grid !important; }
   .feature__more-head { display: none !important; }
   .label, .num, .eyebrow { color: #555 !important; }
-  .prose, .lead, .stack__val, .role__points li, .entry__col p, .feature__col p,
+  .prose, .lead, .skills__val, .role__points li, .entry__col p, .feature__col p,
   .feature__claim, .entry__claim, .entry__col p, .feature__col p { color: #222 !important; }
   .section { padding-block: 1.2rem; page-break-inside: avoid; }
   .feature, .entry, .role { page-break-inside: avoid; }

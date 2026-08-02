@@ -1,7 +1,7 @@
 # Business plan: llstewart.github.io
 
 **Owner:** Lincoln Stewart
-**Version:** 2.0, 2 August 2026
+**Version:** 2.1, 2 August 2026
 **Status:** Live
 
 ---
@@ -109,7 +109,12 @@ work sections are trying to demonstrate.
 
 ### 6.2 What earns its place
 
-- **Problem, build, result on every system.** Not a feature list. The order is the
+- **Skills before anything else.** This is a resume companion, not a shop
+  window. Nothing on the page offers a service, quotes a scope, or asks for
+  work. The first section after the landing is seven languages with the years
+  behind each one, because that is the comparison a recruiter is actually
+  running.
+- **Problem, build, result on every project.** Not a feature list. The order is the
   order a hiring engineer thinks in.
 - **Every number carries its source.** "800ms, Oshkosh, REST and SQL rebuild."
   A metric a reviewer cannot attribute is a metric they discount.
@@ -130,8 +135,9 @@ work sections are trying to demonstrate.
 - Skills he has not shipped with, however much a job posting asks for them.
 - A blog. An empty or stale blog is worse than none.
 - Testimonials. Nobody believes them on a personal site.
-- Client names for the agency work, which stay described by sector until Lincoln
-  decides otherwise.
+- Client names for the independent work, which stays described by sector. That
+  work is presented as engineering evidence, front end and design system depth,
+  rather than as a practice taking clients.
 
 ## 7. Distribution
 

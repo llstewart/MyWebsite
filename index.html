@@ -90,9 +90,9 @@
 <nav class="rail" id="rail" aria-label="Section position">
   <span class="rail__mark">LS</span>
   <a class="rail__tick" href="#top"        data-rail="top"><span class="rail__tip">Top</span></a>
-  <a class="rail__tick" href="#systems"    data-rail="systems"><span class="rail__tip">Systems</span></a>
+  <a class="rail__tick" href="#skills"     data-rail="skills"><span class="rail__tip">Skills</span></a>
+  <a class="rail__tick" href="#projects"   data-rail="projects"><span class="rail__tip">Projects</span></a>
   <a class="rail__tick" href="#experience" data-rail="experience"><span class="rail__tip">Experience</span></a>
-  <a class="rail__tick" href="#stack"      data-rail="stack"><span class="rail__tip">Stack</span></a>
   <a class="rail__tick" href="#approach"   data-rail="approach"><span class="rail__tip">Approach</span></a>
   <a class="rail__tick" href="#contact"    data-rail="contact"><span class="rail__tip">Contact</span></a>
   <span class="rail__pct" id="rail-pct">00</span>
@@ -101,9 +101,9 @@
 <header class="nav glass" id="nav" data-glass="nav">
   <span class="nav__id"><b>Lincoln Stewart</b> <span>Software Engineer</span></span>
   <nav class="nav__links" aria-label="Sections">
-    <a class="nav__link" href="#systems"    data-nav="systems">Systems</a>
+    <a class="nav__link" href="#skills"     data-nav="skills">Skills</a>
+    <a class="nav__link" href="#projects"   data-nav="projects">Projects</a>
     <a class="nav__link" href="#experience" data-nav="experience">Experience</a>
-    <a class="nav__link" href="#stack"      data-nav="stack">Stack</a>
     <a class="nav__link" href="#approach"   data-nav="approach">Approach</a>
     <a class="nav__link" href="#contact"    data-nav="contact">Contact</a>
   </nav>
@@ -134,19 +134,19 @@
     </p>
 
     <nav class="hub" aria-label="Contents">
-      <a class="hub__row" href="#systems">
-        <span class="hub__name">Work</span>
-        <span class="hub__note">Six systems in production, from a platform I launched to the dashboards a plant floor opens every morning</span>
+      <a class="hub__row" href="#skills">
+        <span class="hub__name">Skills</span>
+        <span class="hub__note">Seven languages, and the frameworks, platforms, and tooling I have shipped with</span>
         <span class="hub__meta label">01</span>
+      </a>
+      <a class="hub__row" href="#projects">
+        <span class="hub__name">Projects</span>
+        <span class="hub__note">Six in production, from a platform I launched to the dashboards a plant floor opens every morning</span>
+        <span class="hub__meta label">02</span>
       </a>
       <a class="hub__row" href="#experience">
         <span class="hub__name">Experience</span>
         <span class="hub__note">Four years at Oshkosh Corporation. One employer, steadily larger scope</span>
-        <span class="hub__meta label">02</span>
-      </a>
-      <a class="hub__row" href="#stack">
-        <span class="hub__name">Stack</span>
-        <span class="hub__note">What I have shipped with, and where the edge of it is</span>
         <span class="hub__meta label">03</span>
       </a>
       <a class="hub__row" href="#approach">
@@ -164,27 +164,127 @@
 </section>
 
 <!-- ==================================================================
-     SYSTEMS
+     SKILLS
+
+     First section after the landing, because it is the first thing a
+     recruiter matches against. Languages carry years, which is the only
+     honest way to say how deep something goes.
+     ================================================================== -->
+<section class="section" id="skills">
+  <div class="shell">
+    <header class="section__head">
+      <div class="eyebrow" data-reveal>
+        <span class="eyebrow__mark">&#9679;</span> Skills
+        <span class="eyebrow__rule"></span>
+        <span>Shipped with, not read about</span>
+      </div>
+      <h2 class="h1 section__title" data-reveal>Languages first, <em>then everything around them.</em></h2>
+    </header>
+
+    <div class="langs-wrap" data-reveal>
+      <p class="label langs__label">Languages</p>
+      <ul class="langs">
+        <li class="lang">
+          <span class="lang__name">Python</span>
+          <span class="lang__yrs num">4 yrs</span>
+        </li>
+        <li class="lang">
+          <span class="lang__name">JavaScript</span>
+          <span class="lang__yrs num">4 yrs</span>
+        </li>
+        <li class="lang">
+          <span class="lang__name">TypeScript</span>
+          <span class="lang__yrs num">3 yrs</span>
+        </li>
+        <li class="lang">
+          <span class="lang__name">SQL</span>
+          <span class="lang__yrs num">4 yrs</span>
+        </li>
+        <li class="lang">
+          <span class="lang__name">HTML</span>
+          <span class="lang__yrs num">5 yrs</span>
+        </li>
+        <li class="lang">
+          <span class="lang__name">CSS</span>
+          <span class="lang__yrs num">5 yrs</span>
+        </li>
+        <li class="lang">
+          <span class="lang__name">Bash</span>
+          <span class="lang__yrs num">3 yrs</span>
+        </li>
+      </ul>
+    </div>
+
+    <dl class="skills">
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Frontend</dt>
+        <dd class="skills__val">React, Next.js, Vue.js, Tailwind CSS, responsive build, design systems</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Backend and APIs</dt>
+        <dd class="skills__val">Node.js, Express, REST APIs, Python services, event driven architecture, OAuth 2.0, multi-tenant architecture</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Data</dt>
+        <dd class="skills__val">PostgreSQL, Redis, MySQL, Supabase, ETL, JSON, database migrations</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Platform and DevOps</dt>
+        <dd class="skills__val">Docker, GitHub Actions, CI/CD, Terraform, Terraform Enterprise, Ansible, Git, Vercel, Google Cloud, Azure, Linux</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Industrial and IoT</dt>
+        <dd class="skills__val">Ignition SCADA, Perspective, Vision, Tag Historian, Ignition Edge, MQTT, MQTT Engine and Transmission, OPC-UA, HighByte Intelligence Hub</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Operations</dt>
+        <dd class="skills__val">Grafana Cloud, monitoring and alerting, incident response, root cause analysis, runbooks, release management, fault tolerance, OT patching</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">AI and vision</dt>
+        <dd class="skills__val">TensorFlow, OpenCV, OCR, computer vision, OpenAI, LLM orchestration, retrieval augmented generation</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Testing and process</dt>
+        <dd class="skills__val">Playwright, unit testing, code review, Agile and Scrum, technical documentation</dd>
+      </div>
+      <div class="skills__row skills__row--learning" data-reveal>
+        <dt class="skills__key label label--brand">Learning now</dt>
+        <dd class="skills__val">Kubernetes, on top of the Docker work I already do daily</dd>
+      </div>
+      <div class="skills__row" data-reveal>
+        <dt class="skills__key label">Familiar with</dt>
+        <dd class="skills__val">PyTorch, Prometheus, Cypress. Used, not shipped at depth</dd>
+      </div>
+    </dl>
+
+    <p class="section__note skills__note" data-reveal>
+      This is what I have used in production. If a tool you need is not on this list, I have not
+      shipped with it, and I will tell you that in the first conversation rather than the third.
+    </p>
+  </div>
+</section>
+
+<!-- ==================================================================
+     PROJECTS
 
      A feature and an index, not six identical slabs. The flagship gets the
      weight it earns, and the rest are one scannable line each that opens in
      place. It is also what keeps this section from being four screens of
      scrolling on a phone.
      ================================================================== -->
-<section class="section" id="systems">
+<section class="section" id="projects">
   <div class="shell">
     <header class="section__head">
       <div class="eyebrow" data-reveal>
-        <span class="eyebrow__mark">&#9679;</span> Systems
+        <span class="eyebrow__mark">&#9679;</span> Projects
         <span class="eyebrow__rule"></span>
         <span>Six shipped &middot; 2022 to now</span>
       </div>
-      <h2 class="h1 section__title" data-reveal>
-        Things that run, <em>and who they run for.</em>
-      </h2>
+      <h2 class="h1 section__title" data-reveal>Things that run, <em>and who they run for.</em></h2>
       <p class="section__note" data-reveal>
-        Every entry is in production or was delivered to real users. Problem, build, result, in that
-        order, because that is the order that matters.
+        Six projects, every one in production or delivered to real users. Problem, build, result, in
+        that order, because that is the order that matters.
       </p>
     </header>
 
@@ -348,8 +448,8 @@
       <li class="entry" id="sys-agency">
         <details class="entry__d">
           <summary class="entry__head">
-            <span class="entry__name">Client web practice</span>
-            <span class="entry__claim">Client websites taken from design through deploy, built on a system rather than page by page.</span>
+            <span class="entry__name">Client web builds</span>
+            <span class="entry__claim">Production websites built against a defined system rather than page by page.</span>
             <span class="entry__meta label">Independent &middot; 2024 to present</span>
             <span class="entry__toggle" aria-hidden="true"></span>
           </summary>
@@ -473,65 +573,6 @@
 </section>
 
 <!-- ==================================================================
-     STACK
-     ================================================================== -->
-<section class="section" id="stack">
-  <div class="shell">
-    <header class="section__head">
-      <div class="eyebrow" data-reveal>
-        <span class="eyebrow__mark">&#9679;</span> Stack
-        <span class="eyebrow__rule"></span>
-        <span>Shipped with, not read about</span>
-      </div>
-      <h2 class="h1 section__title" data-reveal>What I <em>actually</em> build with.</h2>
-      <p class="section__note" data-reveal>
-        This is what I have used in production. If a tool you need is not on this list, I have not
-        shipped with it, and I will tell you that in the first conversation rather than the third.
-      </p>
-    </header>
-
-    <dl class="stack">
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">Languages</dt>
-        <dd class="stack__val">Python, TypeScript, JavaScript, SQL, HTML, CSS, Bash</dd>
-      </div>
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">Interface</dt>
-        <dd class="stack__val">React, Next.js, Vue.js, Tailwind CSS, design systems, responsive build</dd>
-      </div>
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">Services and data</dt>
-        <dd class="stack__val">Node.js, Express, REST APIs, PostgreSQL, Redis, Supabase, MySQL, ETL, event driven architecture</dd>
-      </div>
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">Platform</dt>
-        <dd class="stack__val">Docker, GitHub Actions, CI/CD, Terraform, Terraform Enterprise, Ansible, Git, Vercel, Google Cloud, Azure, Linux</dd>
-      </div>
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">Industrial</dt>
-        <dd class="stack__val">Ignition SCADA, Perspective, Vision, Tag Historian, MQTT Engine and Transmission, Ignition Edge, OPC-UA, HighByte Intelligence Hub</dd>
-      </div>
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">Operations</dt>
-        <dd class="stack__val">Grafana Cloud, Prometheus, monitoring and alerting, incident response, root cause analysis, runbooks, release management, database migrations, OT patching</dd>
-      </div>
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">AI and vision</dt>
-        <dd class="stack__val">TensorFlow, OpenCV, computer vision, OCR, OpenAI, LLM orchestration, retrieval augmented generation</dd>
-      </div>
-      <div class="stack__row" data-reveal>
-        <dt class="stack__key label">Testing</dt>
-        <dd class="stack__val">Playwright, Cypress, unit testing, code review</dd>
-      </div>
-      <div class="stack__row stack__row--learning" data-reveal>
-        <dt class="stack__key label label--brand">Learning now</dt>
-        <dd class="stack__val">Kubernetes, on top of the Docker work I already do daily</dd>
-      </div>
-    </dl>
-  </div>
-</section>
-
-<!-- ==================================================================
      APPROACH
      ================================================================== -->
 <section class="section approach" id="approach">
@@ -594,10 +635,11 @@
     <article class="contact glass" data-glass="contact" data-reveal>
       <div class="contact__lead">
         <p class="label">Contact</p>
-        <h2 class="h1 contact__title">Tell me <em>what you need built.</em></h2>
+        <h2 class="h1 contact__title">Ask me anything <em>about the work.</em></h2>
         <p class="lead">
-          Backend, full stack, platform, or anywhere real time data has to reach a person who is
-          about to make a decision with it. Remote, or in the DC and Baltimore corridor.
+          I work on backend, full stack, and platform, and anywhere real time data has to reach a
+          person who is about to make a decision with it. Maryland, four years of it remote, and
+          the DC and Baltimore corridor.
         </p>
       </div>
 
