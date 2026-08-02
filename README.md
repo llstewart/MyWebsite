@@ -1,134 +1,133 @@
-# Lincoln Stewart - Software Engineer Portfolio
+# llstewart.github.io
 
-A modern, minimalist ePortfolio website with terminal aesthetics, designed for Lincoln Stewart, Software Engineer specializing in Intelligent Automation & Systems Integration.
+Lincoln Stewart's engineering portfolio. One page, no framework, no build step,
+no dependencies.
 
-## Features
+**Live:** https://llstewart.github.io/MyWebsite/
 
-- **Terminal-inspired Design**: Dark theme with monospace fonts and terminal window aesthetics
-- **Animated Boot Sequence**: System initialization simulation with typewriter effects
-- **Matrix Rain Background**: Subtle animated background inspired by The Matrix
-- **Interactive Elements**: Hover effects, glitch animations, and terminal command simulations
-- **Neural Network Visualizations**: Animated nodes and connections representing AI/ML expertise
-- **Responsive Design**: Optimized for mobile devices with touch interactions
-- **Smooth Animations**: CSS animations and JavaScript interactions for engaging UX
-- **GitHub Pages Ready**: Static website optimized for deployment
+---
 
-## Technologies Used
+## What it is
 
-- HTML5 (Semantic structure)
-- CSS3 (Custom animations, Grid/Flexbox, CSS Variables)
-- Vanilla JavaScript (ES6+, Intersection Observer, Canvas API)
-- No external dependencies for maximum performance
+A single static page whose job is to convert a recruiter or hiring engineer into
+an interview loop. Design direction, audience, and success measures are in
+[`docs/BUSINESS-PLAN.md`](docs/BUSINESS-PLAN.md). Requirements and acceptance
+criteria are in [`docs/PRD.md`](docs/PRD.md). Colour, type, material, and motion
+are in [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md).
 
-## Local Development
+The short version: near white paper, a drawn contour field behind it, glass used
+as chrome rather than as decoration, and content organised as a landing hub, one
+featured system, and an index of the rest.
 
-1. Clone the repository:
+## Run it
+
+There is nothing to install.
+
 ```bash
-git clone https://github.com/llstewart/MyWebsite.git
-cd MyWebsite
-```
-
-2. Open `index.html` in your browser or use a local server:
-```bash
-# Using Python
 python -m http.server 8000
-
-# Using Node.js
-npx serve .
-
-# Using PHP
-php -S localhost:8000
+# then open http://localhost:8000
 ```
 
-3. Navigate to `http://localhost:8000`
+Editing is editing. Change the HTML, change a token, reload.
 
-## GitHub Pages Deployment
-
-1. Push your code to a GitHub repository
-2. Go to repository Settings > Pages
-3. Select source: Deploy from branch
-4. Choose `main` branch and `/ (root)` folder
-5. Save and wait for deployment (usually 1-2 minutes)
-
-Your site will be available at: `https://yourusername.github.io/MyWebsite/`
-
-## Performance Features
-
-- **Lazy Loading**: Heavy animations load only when visible
-- **Optimized Canvas**: Matrix effect with efficient rendering
-- **Responsive Images**: Scaled appropriately for different screen sizes
-- **Debounced Events**: Scroll and resize events optimized for performance
-- **Progressive Enhancement**: Works without JavaScript (degraded experience)
-- **Mobile Optimizations**: Touch-friendly interactions and reduced animations
-
-## Browser Support
-
-- Chrome/Edge 90+
-- Firefox 90+
-- Safari 14+
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## Accessibility Features
-
-- Semantic HTML structure
-- Keyboard navigation support (arrow keys, number keys)
-- High contrast mode support
-- Reduced motion support for users with vestibular disorders
-- Screen reader friendly content structure
-
-## Customization
-
-### Colors
-Modify CSS variables in `:root` selector in `assets/css/style.css`:
-
-```css
-:root {
-    --bg-primary: #0a0a0a;
-    --text-primary: #00ff00;
-    --accent-blue: #00aaff;
-    /* ... other colors */
-}
-```
-
-### Content
-Update the following sections in `index.html`:
-- Personal information in hero section
-- Work experience details
-- Project descriptions
-- Skills and technologies
-- Contact information
-
-### Animations
-Modify animation speeds and effects in `assets/js/main.js` and CSS animation keyframes.
-
-## File Structure
+## Structure
 
 ```
-MyWebsite/
-├── index.html              # Main HTML file
-├── assets/
-│   ├── css/
-│   │   └── style.css      # All styles and animations
-│   └── js/
-│       └── main.js        # JavaScript functionality
-├── README.md              # This file
-└── LICENSE                # License file
+index.html              the page
+404.html                same system, one panel, three ways back
+sw.js                   offline copy, network first
+manifest.json           installable
+robots.txt sitemap.xml
+
+assets/
+  css/
+    tokens.css          the entire system: colour, type, space, form, motion
+    base.css            reset, typography, page frame, field, rail, hub, links
+    glass.css           the material, nav, command palette
+    sections.css        one block per region, in document order
+    states.css          arrival, departure, offline, pointer, preferences, print
+  js/
+    liquid-glass.js     vendored, unmodified, MIT
+    field.js            the contour field canvas
+    instrument.js       reveal, position gauge, disclosures, command palette
+    main.js             lifecycle, glass tier decision, resilience
+  icon.svg
+  Lincoln_Stewart_Resume.pdf
+
+docs/
+  BUSINESS-PLAN.md  PRD.md  DESIGN-SYSTEM.md
 ```
 
-## License
+Load order matters: `tokens` then `base` then `glass` then `sections` then
+`states`. `states.css` is last because it wins.
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Editing the content
 
-## Contact
+All content is in `index.html`. It is authored by hand rather than generated,
+and it must stay consistent with the master profile in
+`resume-pipeline/knowledge-base/`. Two rules that are not negotiable:
 
-Lincoln Stewart
-- Email: lincolnstewart4@gmail.com
-- LinkedIn: [linkedin.com/in/lincoln-stewart01](https://www.linkedin.com/in/lincoln-stewart01)
-- Phone: 443-460-8224
+1. **Every number traces to a fact.** Either `metrics_registry` in
+   `master-profile.json`, or the `facts` of an evidence bullet in
+   `evidence-bank.json`. A number a reader cannot attribute is worth less than
+   no number.
+2. **Nothing appears that Lincoln has not shipped with.** The excluded list is
+   C, C++, C#, .NET, ASP.NET, Java, PHP, Bootstrap, Active Directory.
 
-## Credits
+Also: no em dashes, no emoji, no pills, and the résumé pipeline is never
+mentioned.
 
-- Matrix digital rain effect inspired by The Matrix (1999)
-- Terminal aesthetics inspired by various Unix/Linux terminals
-- Neural network visualizations representing AI/ML expertise
-- Responsive design following modern web standards
+## Replacing the résumé
+
+Drop the new PDF at `assets/Lincoln_Stewart_Resume.pdf`, keeping the filename.
+The page checks the file exists on load, retries a transient failure three times
+with backoff, and degrades the control to "Request résumé by email" if it is
+genuinely missing, so a stale link never silently 404s a recruiter.
+
+**The file currently shipped is the July 2026 general software engineering
+résumé and predates several profile corrections. It should be replaced.**
+
+## The glass
+
+Refraction is real: an SVG displacement map applied through `backdrop-filter`,
+using the technique published by
+[deepika-builds/liquid-glass](https://github.com/deepika-builds/liquid-glass)
+(MIT). `assets/js/liquid-glass.js` is vendored unmodified so upstream fixes can
+be dropped in.
+
+Three tiers, chosen per device by `main.js`:
+
+- **refractive** on a desktop with a fast link, enough cores and memory
+- **frosted** on phones, tablets, save-data, Safari, Firefox, and anything a live
+  frame rate watchdog demotes after four seconds under 20fps
+- **opaque** under `prefers-reduced-transparency: reduce`
+
+Only the nav, the contact panel, and the command palette ever get a displacement
+map. Map generation is O(w x h) and the filtered backdrop recomposites over a
+moving field, so large content panels use frost by design.
+
+`--r-glass: 28px` is load bearing. The module reads `border-radius` to build the
+map's neutral inset.
+
+## Deploying
+
+Push to `main`. `.github/workflows/deploy.yml` publishes the repository root to
+GitHub Pages.
+
+The service worker is network first for everything same origin, so a deploy is
+never served stale. Bump `VERSION` in `sw.js` when you want old caches evicted.
+
+## Browser support
+
+Chromium, Safari, and Firefox, current and one back. Refraction is Chromium
+only; everywhere else gets frost, which is a different finish rather than a
+missing feature.
+
+The page renders complete with JavaScript disabled: every disclosure ships open,
+reveal animations are scoped to `.js`, and an inline timeout in `<head>` reveals
+the body after four seconds even if `main.js` never loads.
+
+## Licence
+
+MIT for the code. The content, the résumé, and the likeness are Lincoln
+Stewart's.

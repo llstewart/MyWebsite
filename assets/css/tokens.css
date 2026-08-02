@@ -1,0 +1,116 @@
+/* ===========================================================================
+   tokens.css — the whole visual system in one file.
+   Nothing below this file hardcodes a color, a size, or a duration.
+   =========================================================================== */
+
+:root {
+  /* --- Paper --------------------------------------------------------------
+     Near white, one degree warm. Not a tinted background asking to be
+     noticed: a surface. The colour in this page lives in the field behind
+     the glass, at an alpha you have to look for.                            */
+  --c-paper:   #FBFBF9;
+  --c-paper-2: #F4F4F1;
+  --c-paper-3: #EAEAE6;
+
+  /* --- Ink ----------------------------------------------------------------
+     Never pure black. Every step clears 4.5:1 on paper and on glass.        */
+  --c-ink:    #101A17;
+  --c-ink-2:  #3A4642;
+  --c-ink-3:  #58635E;
+  --c-ink-4:  #6E7973;
+
+  --c-line:        rgba(16, 26, 23, 0.11);
+  --c-line-strong: rgba(16, 26, 23, 0.20);
+
+  /* --- Signal -------------------------------------------------------------
+     Green is the brand: links, active state, structure. Amber means live and
+     nothing else, which is why there is exactly one amber thing on screen at
+     a time. If you are reaching for a third colour, the layout is wrong.    */
+  --c-brand:      #0E6B52;
+  --c-brand-lit:  #12876A;
+  --c-brand-dim:  rgba(14, 107, 82, 0.10);
+  --c-brand-edge: rgba(14, 107, 82, 0.30);
+  --c-live:       #B4732A;
+
+  /* Field hues. These exist only behind glass, never in the interface. */
+  --c-field-sage: 118, 168, 140;
+  --c-field-sky:  124, 160, 200;
+  --c-field-sand: 224, 190, 136;
+
+  /* --- Glass --------------------------------------------------------------
+     Dressing only. The refraction itself is an SVG displacement filter
+     applied by assets/js/liquid-glass.js.                                   */
+  --glass-tint-top:    rgba(255, 255, 255, 0.52);
+  --glass-tint-bottom: rgba(255, 255, 255, 0.30);
+  --glass-specular:    rgba(255, 255, 255, 0.95);
+  --glass-border:      rgba(16, 26, 23, 0.10);
+  --glass-shadow:
+      0 1px 2px 0 rgba(16, 26, 23, 0.04),
+      0 14px 30px -14px rgba(16, 26, 23, 0.16),
+      0 40px 80px -50px rgba(16, 26, 23, 0.30);
+
+  /* --- Type ---------------------------------------------------------------
+     Satoshi carries the voice. IBM Plex Mono carries the data. There is no
+     third family, and the mono is never used for prose.                     */
+  --f-display: "Satoshi", "Satoshi-Variable", system-ui, sans-serif;
+  --f-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --t-name:    clamp(2.9rem, 8.6vw, 6.6rem);
+  --t-h1:      clamp(1.95rem, 4.4vw, 3.3rem);
+  --t-h2:      clamp(1.4rem, 2.5vw, 1.95rem);
+  --t-h3:      clamp(1.05rem, 1.5vw, 1.25rem);
+  --t-lead:    clamp(1rem, 1.3vw, 1.18rem);
+  --t-body:    1rem;
+  --t-small:   0.9rem;
+  --t-label:   0.688rem;                  /* mono, uppercase, tracked out  */
+  --t-readout: clamp(1.55rem, 3.2vw, 2.4rem);
+
+  --lh-tight:  0.94;
+  --lh-snug:   1.16;
+  --lh-body:   1.62;
+  --tr-name:   -0.04em;
+  --tr-head:   -0.02em;
+  --tr-label:  0.15em;
+
+  /* --- Space (4pt base) --------------------------------------------------- */
+  --s-1:  0.25rem;  --s-2:  0.5rem;   --s-3: 0.75rem;  --s-4: 1rem;
+  --s-5:  1.5rem;   --s-6:  2rem;     --s-7: 3rem;     --s-8: 4rem;
+  --s-9:  5.5rem;   --s-10: 7rem;     --s-11: 9rem;
+
+  --gutter:     clamp(1.15rem, 4.5vw, 4rem);
+  --measure:    68ch;
+  --page-max:   1240px;
+  --rail-width: 4.5rem;
+
+  /* --- Form ---------------------------------------------------------------
+     28px on glass is load-bearing: liquid-glass.js reads border-radius to
+     build the displacement map's neutral inset.                             */
+  --r-glass: 28px;
+  --r-panel: 18px;
+  --r-tight: 10px;
+  --hairline: 1px;
+
+  /* --- Motion -------------------------------------------------------------
+     One curve for entrances, one for interface response. Nothing bounces.   */
+  --e-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --e-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --d-fast:  140ms;
+  --d-base:  320ms;
+  --d-slow:  680ms;
+  --d-enter: 980ms;
+
+  --z-field: 0;
+  --z-body:  10;
+  --z-rail:  40;
+  --z-nav:   50;
+  --z-modal: 90;
+
+  color-scheme: light;
+}
+
+/* Motion is a preference, not a default. Everything below respects it. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --d-fast: 1ms; --d-base: 1ms; --d-slow: 1ms; --d-enter: 1ms;
+  }
+}

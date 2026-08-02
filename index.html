@@ -1,418 +1,670 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lincoln Stewart - Software Engineer</title>
-    <meta name="description" content="Lincoln Stewart - Software Engineer specializing in Intelligent Automation & Systems Integration">
-    
-    <!-- Preload critical assets -->
-    <link rel="preload" href="./assets/css/style.css" as="style">
-    <link rel="preload" href="./assets/js/main.js" as="script">
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="./assets/css/style.css">
-    
-    <!-- Favicon and PWA -->
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <link rel="manifest" href="./manifest.json">
-    
-    <!-- Meta tags for social sharing -->
-    <meta property="og:title" content="Lincoln Stewart - Software Engineer">
-    <meta property="og:description" content="Software Engineer specializing in Intelligent Automation & Systems Integration">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
+<meta charset="UTF-8">
+<!-- Set before first paint. Without JS neither class lands, and the page
+     renders complete and static instead of waiting for a sequence that
+     will never run. The timeout is a dead man's switch: if main.js never
+     arrives, the page still reveals itself rather than staying blank. -->
+<script>
+  document.documentElement.className += " js is-loading";
+  setTimeout(function () {
+    var r = document.documentElement;
+    if (r.className.indexOf("is-ready") === -1) {
+      r.className = r.className.replace(" is-loading", "") + " is-ready";
+    }
+  }, 4000);
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lincoln Stewart · Software Engineer</title>
+
+<meta name="description" content="Lincoln Stewart is a software engineer building telemetry pipelines, real-time dashboards, and the APIs underneath them. Four years at Oshkosh Corporation, plus Packleads, a business intelligence platform he designed, built, and launched.">
+<meta name="author" content="Lincoln Stewart">
+<meta name="theme-color" content="#F4F5F1">
+<link rel="canonical" href="https://llstewart.github.io/MyWebsite/">
+
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Lincoln Stewart · Software Engineer">
+<meta property="og:description" content="I build the systems people depend on while their shift is running. Telemetry pipelines, real-time dashboards, and the APIs underneath them.">
+<meta property="og:url" content="https://llstewart.github.io/MyWebsite/">
+<meta property="og:site_name" content="Lincoln Stewart">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lincoln Stewart · Software Engineer">
+<meta name="twitter:description" content="I build the systems people depend on while their shift is running.">
+
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="./manifest.json">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f%5B%5D=satoshi@300,400,500,700,900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<link rel="stylesheet" href="./assets/css/tokens.css">
+<link rel="stylesheet" href="./assets/css/base.css">
+<link rel="stylesheet" href="./assets/css/glass.css">
+<link rel="stylesheet" href="./assets/css/sections.css">
+<link rel="stylesheet" href="./assets/css/states.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Lincoln Stewart",
+  "jobTitle": "Software Engineer",
+  "email": "mailto:lincolnstewart4@gmail.com",
+  "telephone": "+1-443-460-8224",
+  "url": "https://llstewart.github.io/MyWebsite/",
+  "worksFor": { "@type": "Organization", "name": "Oshkosh Corporation" },
+  "alumniOf": { "@type": "CollegeOrUniversity", "name": "University of Maryland, College Park" },
+  "address": { "@type": "PostalAddress", "addressRegion": "MD", "addressCountry": "US" },
+  "sameAs": [
+    "https://www.linkedin.com/in/lincoln-stewart01/",
+    "https://github.com/llstewart",
+    "https://packleads.io"
+  ],
+  "knowsAbout": ["Python","TypeScript","React","Next.js","Node.js","PostgreSQL","MQTT","OPC-UA","Ignition SCADA","Terraform","Docker","CI/CD","Computer Vision","Telemetry","Observability"]
+}
+</script>
 </head>
+
 <body>
-    <!-- Terminal Boot Screen -->
-    <div id="boot-screen" class="boot-screen">
-        <div class="terminal-container">
-            <div class="terminal-header">
-                <span class="terminal-title">SYSTEM INITIALIZATION</span>
-                <div class="terminal-controls">
-                    <span class="control minimize"></span>
-                    <span class="control maximize"></span>
-                    <span class="control close"></span>
-                </div>
-            </div>
-            <div class="terminal-content">
-                <div id="boot-text" class="boot-text">
-                    <div class="line">Starting Lincoln Stewart System...</div>
-                    <div class="line">Loading automation modules...</div>
-                    <div class="line">Initializing neural networks...</div>
-                    <div class="line">Connecting to portfolio interface...</div>
-                    <div class="line">System ready.</div>
-                </div>
-                <div class="loading-bar">
-                    <div class="loading-fill"></div>
-                </div>
-            </div>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- Arrival indicator. A hairline that fills while type loads, then leaves. -->
+<div class="loader" aria-hidden="true"><span class="loader__bar"></span></div>
+
+<!-- Connection state. Empty and silent unless the network drops. -->
+<p class="net" id="net-state" role="status" aria-live="polite"></p>
+
+<!-- The living field. Everything with a glass surface refracts this. -->
+<div class="grain" aria-hidden="true"></div>
+<div class="field" aria-hidden="true">
+  <canvas id="field" class="field__canvas"></canvas>
+</div>
+
+<!-- Position gauge. Ticks are sections, the lit tick is where you are. -->
+<nav class="rail" id="rail" aria-label="Section position">
+  <span class="rail__mark">LS</span>
+  <a class="rail__tick" href="#top"        data-rail="top"><span class="rail__tip">Top</span></a>
+  <a class="rail__tick" href="#systems"    data-rail="systems"><span class="rail__tip">Systems</span></a>
+  <a class="rail__tick" href="#experience" data-rail="experience"><span class="rail__tip">Experience</span></a>
+  <a class="rail__tick" href="#stack"      data-rail="stack"><span class="rail__tip">Stack</span></a>
+  <a class="rail__tick" href="#approach"   data-rail="approach"><span class="rail__tip">Approach</span></a>
+  <a class="rail__tick" href="#contact"    data-rail="contact"><span class="rail__tip">Contact</span></a>
+  <span class="rail__pct" id="rail-pct">00</span>
+</nav>
+
+<header class="nav glass" id="nav" data-glass="nav">
+  <span class="nav__id"><b>Lincoln Stewart</b> <span>Software Engineer</span></span>
+  <nav class="nav__links" aria-label="Sections">
+    <a class="nav__link" href="#systems"    data-nav="systems">Systems</a>
+    <a class="nav__link" href="#experience" data-nav="experience">Experience</a>
+    <a class="nav__link" href="#stack"      data-nav="stack">Stack</a>
+    <a class="nav__link" href="#approach"   data-nav="approach">Approach</a>
+    <a class="nav__link" href="#contact"    data-nav="contact">Contact</a>
+  </nav>
+  <button class="nav__cmd" id="cmd-open" type="button" aria-haspopup="dialog" aria-controls="palette"><span class="is-wide">Search</span><span class="is-narrow">Menu</span> <kbd>K</kbd></button>
+</header>
+
+<div class="page">
+<main id="main">
+
+<!-- ==================================================================
+     THE LANDING
+
+     Type on paper. No panel, no status badge, no counters. The glass is
+     chrome further down, the way a material should be. What a visitor gets
+     here is a name, one sentence, and five quiet doors.
+     ================================================================== -->
+<section class="hero" id="top">
+  <div class="shell hero__shell">
+    <p class="hero__eyebrow label">Software Engineer</p>
+
+    <h1 class="hero__name" aria-label="Lincoln Stewart">
+      <span class="hero__line"><span class="hero__word">Lincoln</span></span>
+      <span class="hero__line"><span class="hero__word">Stewart</span></span>
+    </h1>
+
+    <p class="hero__claim">
+      I build the systems people depend on while their shift is running.
+    </p>
+
+    <nav class="hub" aria-label="Contents">
+      <a class="hub__row" href="#systems">
+        <span class="hub__name">Work</span>
+        <span class="hub__note">Six systems in production, from a platform I launched to the dashboards a plant floor opens every morning</span>
+        <span class="hub__meta label">01</span>
+      </a>
+      <a class="hub__row" href="#experience">
+        <span class="hub__name">Experience</span>
+        <span class="hub__note">Four years at Oshkosh Corporation. One employer, steadily larger scope</span>
+        <span class="hub__meta label">02</span>
+      </a>
+      <a class="hub__row" href="#stack">
+        <span class="hub__name">Stack</span>
+        <span class="hub__note">What I have shipped with, and where the edge of it is</span>
+        <span class="hub__meta label">03</span>
+      </a>
+      <a class="hub__row" href="#approach">
+        <span class="hub__name">Approach</span>
+        <span class="hub__note">Where it starts, who it is for, and what I hold to</span>
+        <span class="hub__meta label">04</span>
+      </a>
+      <a class="hub__row" href="#contact">
+        <span class="hub__name">Contact</span>
+        <span class="hub__note">Maryland and the DC corridor, or remote. Resume, email, and the rest</span>
+        <span class="hub__meta label">05</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ==================================================================
+     SYSTEMS
+
+     A feature and an index, not six identical slabs. The flagship gets the
+     weight it earns, and the rest are one scannable line each that opens in
+     place. It is also what keeps this section from being four screens of
+     scrolling on a phone.
+     ================================================================== -->
+<section class="section" id="systems">
+  <div class="shell">
+    <header class="section__head">
+      <div class="eyebrow" data-reveal>
+        <span class="eyebrow__mark">&#9679;</span> Systems
+        <span class="eyebrow__rule"></span>
+        <span>Six shipped &middot; 2022 to now</span>
+      </div>
+      <h2 class="h1 section__title" data-reveal>
+        Things that run, <em>and who they run for.</em>
+      </h2>
+      <p class="section__note" data-reveal>
+        Every entry is in production or was delivered to real users. Problem, build, result, in that
+        order, because that is the order that matters.
+      </p>
+    </header>
+
+    <article class="feature glass--flat" id="sys-packleads" data-reveal>
+      <div class="feature__lede">
+        <p class="label label--brand">Flagship &middot; launched April 2026</p>
+        <h3 class="feature__name">Packleads</h3>
+        <p class="feature__claim">
+          A local business intelligence platform that measures how visible a business really is,
+          then turns the gaps into a report you can hand a client.
+        </p>
+        <p class="feature__result label">
+          1,200 leads in 12 weeks &middot; 4,478 businesses &middot; 18,792 US cities &middot; 7,197 review snapshots
+        </p>
+        <p><a class="link" href="https://packleads.io" target="_blank" rel="noopener">packleads.io</a></p>
+      </div>
+
+      <details class="feature__more" data-open-wide open>
+        <summary class="feature__more-head">
+          <span class="label">Problem, build, result</span>
+          <span class="entry__toggle" aria-hidden="true"></span>
+        </summary>
+      <div class="feature__detail">
+        <div class="feature__col">
+          <h4 class="label">Problem</h4>
+          <p>
+            Before engineering I was a web designer, and finding clients was the hardest part of the
+            job. I spent nights scrolling Google Maps guessing which local businesses had weak
+            websites and which were worth pitching. I was the customer before I was the founder.
+          </p>
         </div>
+        <div class="feature__col">
+          <h4 class="label">Build</h4>
+          <p>
+            Next.js 14 and TypeScript on Supabase with row level security, Redis on Upstash for
+            caching and rate limiting, Stripe for credit based billing. Natural language search runs
+            a plain English brief through an OpenAI query planner, which compiles it into a
+            structured query against live business data. A registry of 19 analyzers runs over a
+            single crawl and produces a 0 to 100 visibility score. Adding a signal is one registry
+            entry, not another pass over the data.
+          </p>
+        </div>
+        <div class="feature__col">
+          <h4 class="label">Result</h4>
+          <p>
+            1,200 leads processed in the first twelve weeks. 4,478 businesses measured across 18,792
+            US cities, with 7,197 review snapshots collected over time, which is data you can only
+            build by watching rather than looking up.
+          </p>
+        </div>
+      </div>
+
+      </details>
+
+      <p class="feature__stack label">
+        Next.js &middot; TypeScript &middot; React &middot; Tailwind &middot; Supabase &middot; PostgreSQL &middot; Redis &middot; Stripe &middot; OpenAI &middot; Leaflet &middot; Playwright &middot; Vercel
+      </p>
+    </article>
+
+    <ol class="index" data-reveal>
+      <li class="entry" id="sys-sellorie">
+        <details class="entry__d">
+          <summary class="entry__head">
+            <span class="entry__name">Sellorie</span>
+            <span class="entry__claim">AI voice automation that answers the restaurant phone when nobody on the floor can.</span>
+            <span class="entry__meta label">Product &middot; 2025</span>
+            <span class="entry__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="entry__body">
+            <div class="entry__col">
+              <h4 class="label">Problem</h4>
+              <p>I was a regular at the restaurant, so I interviewed the floor staff about what actually blocked them before I ever spoke to management. By the time I sat down with the manager I already knew the answer. During peak hours nobody could pick up the phone, call in orders were being lost, and hiring someone to answer it was not affordable.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Build</h4>
+              <p>Next.js and TypeScript front end over distributed middleware that routes transactions between the voice engine, n8n automation, Clover POS, and Stripe, with webhook handling and monitoring across all three. The voice layer is a custom interaction engine on ElevenLabs, tuned for multi turn calls that hold context the way a person does.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Result</h4>
+              <p>Ran in real restaurants taking real orders, not a demo. The first customer led to introductions across other sectors. I owned it from architecture through delivery.</p>
+            </div>
+            <p class="entry__stack label">Next.js &middot; TypeScript &middot; ElevenLabs &middot; Clover POS &middot; Stripe &middot; n8n &middot; Webhooks &middot; REST</p>
+          </div>
+        </details>
+      </li>
+      <li class="entry" id="sys-grb">
+        <details class="entry__d">
+          <summary class="entry__head">
+            <span class="entry__name">Global Report Builder</span>
+            <span class="entry__claim">One reporting surface across every plant, so sites stopped reporting in their own private dialect.</span>
+            <span class="entry__meta label">Oshkosh &middot; 2024 &middot; 100+ users</span>
+            <span class="entry__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="entry__body">
+            <div class="entry__col">
+              <h4 class="label">Problem</h4>
+              <p>Every facility built its own reports its own way, so nothing rolled up and no two sites could be compared without someone rebuilding the numbers by hand.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Build</h4>
+              <p>A Vue.js front end over Python services running on Ignition Perspective and WebDev, pulling live data across factory floors through MQTT and OPC-UA. Authentication, data filtering, and scheduled exports are configured in the gateway so operations owns them rather than filing a ticket.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Result</h4>
+              <p>Delivered to more than 100 people across global operations, and site reporting became one format instead of a dozen.</p>
+            </div>
+            <p class="entry__stack label">Vue.js &middot; Python &middot; Ignition Perspective &middot; Ignition WebDev &middot; MQTT &middot; OPC-UA &middot; SQL</p>
+          </div>
+        </details>
+      </li>
+      <li class="entry" id="sys-vision">
+        <details class="entry__d">
+          <summary class="entry__head">
+            <span class="entry__name">Serial number recognition</span>
+            <span class="entry__claim">Cameras that read stamped, etched, and handwritten serial numbers off equipment while the line keeps moving.</span>
+            <span class="entry__meta label">Oshkosh &middot; 2022 to 2024 &middot; 98% accuracy</span>
+            <span class="entry__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="entry__body">
+            <div class="entry__col">
+              <h4 class="label">Problem</h4>
+              <p>Serial capture was manual. Someone read a number off a part and typed it in, which is slow at best and quietly wrong at worst.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Build</h4>
+              <p>A TensorFlow model trained and deployed on Azure ML, using CNNs and OCR with OpenCV to handle low contrast, glare, and stamped metal. It surfaces inside an Ignition Perspective workstation, so operators use it where they already work instead of learning a second tool.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Result</h4>
+              <p>98% accuracy across three production lines, and the pipeline scaled to multiple sites.</p>
+            </div>
+            <p class="entry__stack label">Python &middot; TensorFlow &middot; Azure ML &middot; Azure AI &middot; OpenCV &middot; OCR &middot; Ignition Perspective</p>
+          </div>
+        </details>
+      </li>
+      <li class="entry" id="sys-pulsehue">
+        <details class="entry__d">
+          <summary class="entry__head">
+            <span class="entry__name">PulseHue</span>
+            <span class="entry__claim">Room lighting that follows what is playing, without a round trip through a vendor cloud.</span>
+            <span class="entry__meta label">Personal &middot; 2025 &middot; 700ms end to end</span>
+            <span class="entry__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="entry__body">
+            <div class="entry__col">
+              <h4 class="label">Problem</h4>
+              <p>Every ambient lighting integration I could find sent commands through a vendor cloud, which meant the lights were always a beat behind the music.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Build</h4>
+              <p>A Node.js and Express service reading live Spotify playback over OAuth 2.0 and driving Govee lights directly over the LAN. Dominant color extraction from album art with HSL to RGB mapping picks the scene. Lights that are powered off or drop off the network are retried rather than allowed to wedge the loop.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Result</h4>
+              <p>About 700ms from a track change to a light change, and the remaining latency is Spotify polling rather than anything on the device path.</p>
+            </div>
+            <p class="entry__stack label">Node.js &middot; Express &middot; Spotify Web API &middot; OAuth 2.0 &middot; Govee LAN API &middot; REST</p>
+          </div>
+        </details>
+      </li>
+      <li class="entry" id="sys-agency">
+        <details class="entry__d">
+          <summary class="entry__head">
+            <span class="entry__name">Client web practice</span>
+            <span class="entry__claim">Client websites taken from design through deploy, built on a system rather than page by page.</span>
+            <span class="entry__meta label">Independent &middot; 2024 to present</span>
+            <span class="entry__toggle" aria-hidden="true"></span>
+          </summary>
+          <div class="entry__body">
+            <div class="entry__col">
+              <h4 class="label">Problem</h4>
+              <p>Small teams end up with sites that look designed on page one and improvised by page five, because nobody wrote down the rules.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Build</h4>
+              <p>Every build starts from a system: a typography scale, color tokens, spacing, and reusable section components, so a new page gets assembled instead of designed again. Webflow or hand written HTML, CSS, and JavaScript, chosen by who has to maintain it after I hand it over.</p>
+            </div>
+            <div class="entry__col">
+              <h4 class="label">Result</h4>
+              <p>Shipped for clients including a commercial real estate firm with a $1.2B acquisition track record and an editorial publishing platform. The same discipline runs Packleads, and it is why this page exists.</p>
+            </div>
+            <p class="entry__stack label">Webflow &middot; HTML &middot; CSS &middot; JavaScript &middot; Design systems &middot; Responsive build</p>
+          </div>
+        </details>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================================================================
+     EXPERIENCE
+     ================================================================== -->
+<section class="section" id="experience">
+  <div class="shell">
+    <header class="section__head">
+      <div class="eyebrow" data-reveal>
+        <span class="eyebrow__mark">&#9679;</span> Experience
+        <span class="eyebrow__rule"></span>
+        <span>4 years 2 months &middot; one company</span>
+      </div>
+      <h2 class="h1 section__title" data-reveal>
+        Same employer since June 2022. The scope kept getting larger.
+      </h2>
+    </header>
+
+    <div class="roles">
+
+      <article class="role" data-reveal>
+        <div class="role__when">
+          <span class="label">Jan 2024 to present</span>
+          <span class="label">Remote</span>
+        </div>
+        <div class="role__what">
+          <h3 class="h2 role__title">Software Engineer</h3>
+          <p class="role__org">Oshkosh Corporation, JLG Industries</p>
+          <p class="role__results label">4s to 800ms dashboard load &middot; 40% faster releases &middot; 25% better uptime and response</p>
+          <ul class="role__points">
+            <li>Own the front end for three internal dashboards in React and Vue.js, used daily by operations managers across manufacturing plants to track production throughput, equipment status, and alarm history.</li>
+            <li>Write Python services that pull sensor telemetry over MQTT from edge gateways, transform it, and land it in time series stores backing Grafana dashboards. Uptime and response times improved 25%.</li>
+            <li>Rebuilt REST endpoints in Node.js and reworked the SQL and indexes behind them, bringing average dashboard load from roughly four seconds to under 800ms.</li>
+            <li>Stood up the team's CI/CD on GitHub Actions and Docker, moving releases from a manual two day process to same day automated deploys with rollback. Playwright suites gate every merge. 40% faster release cycles, zero downtime.</li>
+            <li>Provision cloud environments as code with Terraform, GitHub Actions, and Ansible, running Terraform Enterprise for centralized state across connected vehicle, IoT, and ERP platforms.</li>
+            <li>Integrated Ignition SCADA across multiple sites: gateway networks, redundancy, tag provider design, Perspective, Vision, Tag Historian, and alarm notification.</li>
+            <li>Review roughly four teammate pull requests a week, and write the runbooks, deployment procedures, and architecture docs for the systems I ship.</li>
+          </ul>
+
+          <details class="incident" data-reveal>
+            <summary class="incident__head">
+              <span class="label label--brand">One incident, if you only read one thing</span>
+            </summary>
+            <p class="incident__body">
+              Two sensors on the autonomous guided vehicle fleet stopped reporting telemetry, and the
+              loss was silent. The vehicles kept running. What broke was station control no longer
+              registering when a vehicle arrived, so it surfaced as station logic misbehaving rather
+              than as missing data. Root cause was a tag rename shipped in a firmware and
+              configuration change, which left the subscriber bound to a path that no longer existed,
+              so two feeds went quiet without ever raising an error. I re-pointed the subscription,
+              added staleness alerting so a feed that stops publishing pages someone instead of going
+              unnoticed, and wrote the postmortem.
+            </p>
+          </details>
+        </div>
+      </article>
+
+      <article class="role" data-reveal>
+        <div class="role__when">
+          <span class="label">Jun 2022 to Dec 2023</span>
+          <span class="label">Hagerstown, MD</span>
+        </div>
+        <div class="role__what">
+          <h3 class="h2 role__title">Systems Engineer Intern</h3>
+          <p class="role__org">Oshkosh Corporation, JLG Industries</p>
+          <p class="role__results label">98% recognition accuracy &middot; 45min to 20min troubleshooting &middot; 25% less downtime</p>
+          <details class="role__more" data-open-wide open>
+          <summary class="feature__more-head">
+            <span class="label">What I did there</span>
+            <span class="entry__toggle" aria-hidden="true"></span>
+          </summary>
+          <ul class="role__points">
+            <li>Trained and deployed a TensorFlow computer vision model on Azure ML for automated text recognition on welding labels, reaching 98% accuracy across three production lines.</li>
+            <li>Built React dashboards backed by Python and PostgreSQL that consolidated alarm data, cutting average troubleshooting for maintenance technicians from about 45 minutes to under 20 and reducing equipment downtime 25%.</li>
+            <li>Refactored control logic for robotic welding cells, improving cycle consistency and welding precision 30%, validated live on the floor with controls engineers and technicians.</li>
+            <li>Configured Linux servers to support 24/7 diagnostics, improving uptime roughly 20%.</li>
+          </ul>
+          </details>
+        </div>
+      </article>
+
+      <article class="role role--edu" data-reveal>
+        <div class="role__when">
+          <span class="label">2021 to Dec 2023</span>
+          <span class="label">College Park, MD</span>
+        </div>
+        <div class="role__what">
+          <h3 class="h2 role__title">B.S. Information Science</h3>
+          <p class="role__org">University of Maryland, College Park</p>
+          <p class="role__note">
+            A STEM designated degree. I was already working at Oshkosh for the last three semesters
+            of it.
+          </p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================
+     STACK
+     ================================================================== -->
+<section class="section" id="stack">
+  <div class="shell">
+    <header class="section__head">
+      <div class="eyebrow" data-reveal>
+        <span class="eyebrow__mark">&#9679;</span> Stack
+        <span class="eyebrow__rule"></span>
+        <span>Shipped with, not read about</span>
+      </div>
+      <h2 class="h1 section__title" data-reveal>What I <em>actually</em> build with.</h2>
+      <p class="section__note" data-reveal>
+        This is what I have used in production. If a tool you need is not on this list, I have not
+        shipped with it, and I will tell you that in the first conversation rather than the third.
+      </p>
+    </header>
+
+    <dl class="stack">
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">Languages</dt>
+        <dd class="stack__val">Python, TypeScript, JavaScript, SQL, HTML, CSS, Bash</dd>
+      </div>
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">Interface</dt>
+        <dd class="stack__val">React, Next.js, Vue.js, Tailwind CSS, design systems, responsive build</dd>
+      </div>
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">Services and data</dt>
+        <dd class="stack__val">Node.js, Express, REST APIs, PostgreSQL, Redis, Supabase, MySQL, ETL, event driven architecture</dd>
+      </div>
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">Platform</dt>
+        <dd class="stack__val">Docker, GitHub Actions, CI/CD, Terraform, Terraform Enterprise, Ansible, Git, Vercel, Google Cloud, Azure, Linux</dd>
+      </div>
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">Industrial</dt>
+        <dd class="stack__val">Ignition SCADA, Perspective, Vision, Tag Historian, MQTT Engine and Transmission, Ignition Edge, OPC-UA, HighByte Intelligence Hub</dd>
+      </div>
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">Operations</dt>
+        <dd class="stack__val">Grafana Cloud, Prometheus, monitoring and alerting, incident response, root cause analysis, runbooks, release management, database migrations, OT patching</dd>
+      </div>
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">AI and vision</dt>
+        <dd class="stack__val">TensorFlow, OpenCV, computer vision, OCR, OpenAI, LLM orchestration, retrieval augmented generation</dd>
+      </div>
+      <div class="stack__row" data-reveal>
+        <dt class="stack__key label">Testing</dt>
+        <dd class="stack__val">Playwright, Cypress, unit testing, code review</dd>
+      </div>
+      <div class="stack__row stack__row--learning" data-reveal>
+        <dt class="stack__key label label--brand">Learning now</dt>
+        <dd class="stack__val">Kubernetes, on top of the Docker work I already do daily</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<!-- ==================================================================
+     APPROACH
+     ================================================================== -->
+<section class="section approach" id="approach">
+  <div class="shell">
+    <div class="eyebrow" data-reveal>
+      <span class="eyebrow__mark">&#9679;</span> Approach
+      <span class="eyebrow__rule"></span>
+      <span>Why I build the way I do</span>
     </div>
 
-    <!-- Main Portfolio Content -->
-    <main id="main-content" class="main-content hidden">
-        <!-- Navigation Terminal -->
-        <nav class="nav-terminal">
-            <div class="terminal-window">
-                <div class="terminal-header">
-                    <span class="terminal-title">portfolio.exe</span>
-                    <div class="terminal-controls">
-                        <span class="control minimize"></span>
-                        <span class="control maximize"></span>
-                        <span class="control close"></span>
-                    </div>
-                </div>
-                <div class="nav-content">
-                    <span class="prompt">user@lincoln:~$</span>
-                    <span class="nav-commands">
-                        <a href="#home" class="nav-command">./home</a>
-                        <a href="#about" class="nav-command">./about</a>
-                        <a href="#experience" class="nav-command">./experience</a>
-                        <a href="#projects" class="nav-command">./projects</a>
-                        <a href="#skills" class="nav-command">./skills</a>
-                        <a href="#contact" class="nav-command">./contact</a>
-                    </span>
-                </div>
-            </div>
-        </nav>
+    <blockquote class="statement" data-reveal>
+      Software that matters is software somebody is depending on right now.
+    </blockquote>
 
-        <!-- Hero Section -->
-        <section id="home" class="section hero-section">
-            <div class="container">
-                <div class="hero-terminal">
-                    <div class="terminal-header">
-                        <span class="terminal-title">~/lincoln-stewart</span>
-                        <div class="terminal-controls">
-                            <span class="control minimize"></span>
-                            <span class="control maximize"></span>
-                            <span class="control close"></span>
-                        </div>
-                    </div>
-                    <div class="hero-content">
-                        <div class="command-line">
-                            <span class="prompt">user@system:~$</span>
-                            <span class="command typing-animation">cat introduction.txt</span>
-                        </div>
-                        <div class="output">
-                            <h1 class="glitch-text">Lincoln Stewart</h1>
-                            <h2 class="role-title">Software Engineer — Intelligent Automation & Systems Integration</h2>
-                            <div class="neural-network-visual">
-                                <div class="node"></div>
-                                <div class="node"></div>
-                                <div class="node"></div>
-                                <div class="connection"></div>
-                                <div class="connection"></div>
-                            </div>
-                            <div class="status-indicators">
-                                <div class="indicator">
-                                    <span class="dot green"></span>
-                                    <span>Systems Online</span>
-                                </div>
-                                <div class="indicator">
-                                    <span class="dot blue"></span>
-                                    <span>Available for Collaboration</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <div class="approach__grid">
+      <div class="approach__col" data-reveal>
+        <h3 class="label">Where it starts</h3>
+        <p class="prose">
+          I grew up in the Democratic Republic of the Congo until I was seven, without much access to
+          technology. Getting to it late is why building for the web has never stopped feeling like
+          something worth being careful about. I do not take a working system for granted, because I
+          remember not having one.
+        </p>
+      </div>
+      <div class="approach__col" data-reveal style="--reveal-delay:80ms">
+        <h3 class="label">Who it is for</h3>
+        <p class="prose">
+          The people using what I build at work are plant operators and maintenance technicians,
+          reading a screen mid shift with a line waiting on them. Watching someone depend on your
+          interface under pressure permanently changes how you think about a loading state, an error
+          message, and where the important number goes.
+        </p>
+      </div>
+      <div class="approach__col" data-reveal style="--reveal-delay:160ms">
+        <h3 class="label">How I find problems</h3>
+        <p class="prose">
+          By being in them. Packleads exists because I was the web designer scrolling maps for leads.
+          Sellorie exists because I asked the floor staff what was breaking before I asked the
+          manager. The constraint is rarely headcount, it is the money to hire the headcount, and you
+          only learn that by talking to the people doing the work.
+        </p>
+      </div>
+      <div class="approach__col" data-reveal style="--reveal-delay:240ms">
+        <h3 class="label">What I hold to</h3>
+        <p class="prose">
+          If I built it, I stand behind it. That means writing the runbook as well as the service,
+          adding the alert after the incident, and telling you plainly what I have not done yet.
+          Overselling gets found out in week two, and I would rather be the person you keep calling.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <!-- About Section -->
-        <section id="about" class="section">
-            <div class="container">
-                <div class="section-terminal">
-                    <div class="terminal-header">
-                        <span class="terminal-title">about.sh</span>
-                        <div class="terminal-controls">
-                            <span class="control minimize"></span>
-                            <span class="control maximize"></span>
-                            <span class="control close"></span>
-                        </div>
-                    </div>
-                    <div class="section-content">
-                        <div class="command-line">
-                            <span class="prompt">user@about:~$</span>
-                            <span class="command">./display_profile.sh</span>
-                        </div>
-                        <div class="output">
-                            <h2>Profile Information</h2>
-                            <div class="about-grid">
-                                <div class="about-item">
-                                    <h3>Current Role</h3>
-                                    <p>Software Engineer at Oshkosh Corporation / JLG</p>
-                                    <p>Specializing in enterprise-grade applications and automation systems</p>
-                                </div>
-                                <div class="about-item">
-                                    <h3>Education</h3>
-                                    <p>B.S Information Science</p>
-                                    <p>University of Maryland College Park (2021-2023)</p>
-                                </div>
-                                <div class="about-item">
-                                    <h3>Location</h3>
-                                    <p>Hyattsville, MD, United States</p>
-                                    <p>Available for remote opportunities</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- ==================================================================
+     CONTACT
+     ================================================================== -->
+<section class="section" id="contact">
+  <div class="shell">
+    <article class="contact glass" data-glass="contact" data-reveal>
+      <div class="contact__lead">
+        <p class="label">Contact</p>
+        <h2 class="h1 contact__title">Tell me <em>what you need built.</em></h2>
+        <p class="lead">
+          Backend, full stack, platform, or anywhere real time data has to reach a person who is
+          about to make a decision with it. Remote, or in the DC and Baltimore corridor.
+        </p>
+      </div>
 
-        <!-- Experience Section -->
-        <section id="experience" class="section">
-            <div class="container">
-                <div class="section-terminal">
-                    <div class="terminal-header">
-                        <span class="terminal-title">work_experience.log</span>
-                        <div class="terminal-controls">
-                            <span class="control minimize"></span>
-                            <span class="control maximize"></span>
-                            <span class="control close"></span>
-                        </div>
-                    </div>
-                    <div class="section-content">
-                        <div class="command-line">
-                            <span class="prompt">user@experience:~$</span>
-                            <span class="command">tail -f career.log</span>
-                        </div>
-                        <div class="output">
-                            <h2>Work Experience</h2>
-                            
-                            <div class="experience-item">
-                                <div class="job-header">
-                                    <h3>Software Engineer</h3>
-                                    <span class="company">Oshkosh Corporation / JLG</span>
-                                    <span class="location">Remote</span>
-                                    <span class="duration">Jan 2024 - Present</span>
-                                </div>
-                                <ul class="achievements">
-                                    <li>Design, develop, test, and deploy enterprise-grade applications using Python, React.js, ASP.NET, Vue.js, and Ignition SCADA - Streamlining operations and boosting system efficiency by 25%</li>
-                                    <li>Fulfill DevOps efforts by implementing CI/CD pipelines with GitHub Actions, achieving 40% faster deployments with zero downtime</li>
-                                    <li>Develop real-time monitoring dashboards as part of a broader system architecture, integrating telemetry and anomaly detection</li>
-                                    <li>Build secure REST APIs to enable cross-system communication, reducing data retrieval latency by 15%</li>
-                                </ul>
-                            </div>
+      <dl class="contact__list">
+        <div class="contact__row">
+          <dt class="label">Email</dt>
+          <dd><a class="link" href="mailto:lincolnstewart4@gmail.com">lincolnstewart4@gmail.com</a></dd>
+        </div>
+        <div class="contact__row">
+          <dt class="label">Phone</dt>
+          <dd><a class="link" href="tel:+14434608224">(443) 460-8224</a></dd>
+        </div>
+        <div class="contact__row">
+          <dt class="label">LinkedIn</dt>
+          <dd><a class="link" href="https://www.linkedin.com/in/lincoln-stewart01/" target="_blank" rel="noopener">lincoln-stewart01</a></dd>
+        </div>
+        <div class="contact__row">
+          <dt class="label">GitHub</dt>
+          <dd><a class="link" href="https://github.com/llstewart" target="_blank" rel="noopener">llstewart</a></dd>
+        </div>
+        <div class="contact__row">
+          <dt class="label">Resume</dt>
+          <dd><a class="link" href="./assets/Lincoln_Stewart_Resume.pdf" download>Lincoln_Stewart_Resume.pdf</a></dd>
+        </div>
+        <div class="contact__row">
+          <dt class="label">Authorization</dt>
+          <dd>U.S. citizen. No sponsorship required.</dd>
+        </div>
+      </dl>
+    </article>
+  </div>
+</section>
 
-                            <div class="experience-item">
-                                <div class="job-header">
-                                    <h3>System Engineer Intern</h3>
-                                    <span class="company">Oshkosh Corporation / JLG</span>
-                                    <span class="location">Hagerstown, MD</span>
-                                    <span class="duration">Jun 2022 - Dec 2023</span>
-                                </div>
-                                <ul class="achievements">
-                                    <li>Built and deployed deep learning models using Azure ML and TensorFlow for real-time text recognition, achieving 98% accuracy and scaling to multiple sites</li>
-                                    <li>Created real-time alarm dashboards with React, JavaScript, Python, and SQL, reducing operational downtime by 25%</li>
-                                    <li>Reconfigured robotic system operations in C++ to improve welding precision by 30%, while configuring Linux servers to support 24/7 diagnostics, enhancing uptime by 20%</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+</main>
 
-        <!-- Projects Section -->
-        <section id="projects" class="section">
-            <div class="container">
-                <div class="section-terminal">
-                    <div class="terminal-header">
-                        <span class="terminal-title">projects/</span>
-                        <div class="terminal-controls">
-                            <span class="control minimize"></span>
-                            <span class="control maximize"></span>
-                            <span class="control close"></span>
-                        </div>
-                    </div>
-                    <div class="section-content">
-                        <div class="command-line">
-                            <span class="prompt">user@projects:~$</span>
-                            <span class="command">ls -la projects/</span>
-                        </div>
-                        <div class="output">
-                            <h2>Featured Projects</h2>
-                            
-                            <div class="project-item">
-                                <div class="project-header">
-                                    <h3>Sellorie</h3>
-                                    <span class="duration">Jul 2025 - Present</span>
-                                </div>
-                                <p class="project-description">AI-powered SaaS that automates restaurant phone orders and reservations using voice interfaces and third-party APIs.</p>
-                                <ul class="project-features">
-                                    <li>Engineered backend middleware for real-time transaction handling, webhook reliability, and monitoring across Clover, Stripe, and n8n integrations</li>
-                                    <li>Integrated and fine-tuned custom AI voice using ElevenLabs API, trained for natural, human-like phone interactions</li>
-                                    <li>Built front-end using Next.js, TypeScript, and React hooks, emphasizing modularity and high performance</li>
-                                    <li>Engineered middleware orchestration between voice engine, n8n automation, and Sellorie's backend</li>
-                                    <li>Designed voice workflow to handle real-time conversational logic, mapping speech recognition to structured actions</li>
-                                </ul>
-                                <div class="tech-stack">
-                                    <span class="tech">Next.js</span>
-                                    <span class="tech">TypeScript</span>
-                                    <span class="tech">ElevenLabs API</span>
-                                    <span class="tech">n8n</span>
-                                    <span class="tech">Stripe</span>
-                                </div>
-                            </div>
+<footer class="footer">
+  <div class="shell footer__inner">
+    <p class="label">&copy; <span id="year">2026</span> Lincoln Stewart</p>
+    <p class="footer__note">
+      Built by hand in HTML, CSS, and JavaScript. No framework, no build step, no dependencies. The
+      background is a drawn contour field with carriers travelling along it, and the glass bends it
+      through an SVG displacement map applied with backdrop-filter, after the technique published by
+      <a class="link" href="https://github.com/deepika-builds/liquid-glass" target="_blank" rel="noopener">deepika-builds/liquid-glass</a>.
+      Type is Satoshi and IBM Plex Mono.
+    </p>
+  </div>
+</footer>
+</div>
 
-                            <div class="project-item">
-                                <div class="project-header">
-                                    <h3>PulseHue — Spotify × Govee Ambient Lighting Sync</h3>
-                                    <span class="duration">Jan 2025 - Jun 2025</span>
-                                </div>
-                                <p class="project-description">App that connects Spotify and Govee APIs to sync ambient lighting with album artwork colors, using local middleware for real-time transitions.</p>
-                                <ul class="project-features">
-                                    <li>Integrated Spotify Web API (OAuth 2.0, REST endpoints) with Govee Local LAN API for direct light control without cloud latency</li>
-                                    <li>Developed Node.js/Express middleware service for real-time event streaming, JSON payload parsing, and asynchronous lighting commands</li>
-                                    <li>Implemented HSL-to-RGB color mapping and dominant color extraction using image analysis for dynamic scene rendering</li>
-                                </ul>
-                                <div class="tech-stack">
-                                    <span class="tech">Node.js</span>
-                                    <span class="tech">Express</span>
-                                    <span class="tech">Spotify API</span>
-                                    <span class="tech">Govee API</span>
-                                    <span class="tech">OAuth 2.0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- Command palette -->
+<div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Search this site" hidden>
+  <div class="palette__panel glass" data-glass="palette">
+    <div class="palette__field">
+      <span class="label">Go</span>
+      <input class="palette__input" id="palette-input" type="text" placeholder="Search this site" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Search this site">
+      <button class="palette__close" id="palette-close" type="button">Close</button>
+    </div>
+    <ul class="palette__list" id="palette-list" role="listbox" aria-label="Results"></ul>
+    <div class="palette__foot">
+      <span>Enter to run</span><span>Arrows to move</span><span>Esc to close</span>
+    </div>
+  </div>
+</div>
 
-        <!-- Skills Section -->
-        <section id="skills" class="section">
-            <div class="container">
-                <div class="section-terminal">
-                    <div class="terminal-header">
-                        <span class="terminal-title">skills.json</span>
-                        <div class="terminal-controls">
-                            <span class="control minimize"></span>
-                            <span class="control maximize"></span>
-                            <span class="control close"></span>
-                        </div>
-                    </div>
-                    <div class="section-content">
-                        <div class="command-line">
-                            <span class="prompt">user@skills:~$</span>
-                            <span class="command">cat skills.json | jq .</span>
-                        </div>
-                        <div class="output">
-                            <h2>Core Skills</h2>
-                            <div class="skills-grid">
-                                <div class="skill-category">
-                                    <h3>Programming Languages</h3>
-                                    <div class="skill-tags">
-                                        <span class="skill-tag">Python</span>
-                                        <span class="skill-tag">TypeScript</span>
-                                        <span class="skill-tag">JavaScript</span>
-                                        <span class="skill-tag">C++</span>
-                                        <span class="skill-tag">SQL</span>
-                                    </div>
-                                </div>
-                                <div class="skill-category">
-                                    <h3>Frameworks & Libraries</h3>
-                                    <div class="skill-tags">
-                                        <span class="skill-tag">React.js</span>
-                                        <span class="skill-tag">Vue.js</span>
-                                        <span class="skill-tag">Node.js</span>
-                                        <span class="skill-tag">.NET</span>
-                                        <span class="skill-tag">Django/Flask</span>
-                                        <span class="skill-tag">Bootstrap</span>
-                                    </div>
-                                </div>
-                                <div class="skill-category">
-                                    <h3>Cloud & DevOps</h3>
-                                    <div class="skill-tags">
-                                        <span class="skill-tag">Azure SDK</span>
-                                        <span class="skill-tag">Google Cloud</span>
-                                        <span class="skill-tag">Docker</span>
-                                        <span class="skill-tag">CI/CD</span>
-                                        <span class="skill-tag">GitHub Actions</span>
-                                    </div>
-                                </div>
-                                <div class="skill-category">
-                                    <h3>AI/ML & Data</h3>
-                                    <div class="skill-tags">
-                                        <span class="skill-tag">TensorFlow</span>
-                                        <span class="skill-tag">PyTorch</span>
-                                        <span class="skill-tag">OpenCV</span>
-                                        <span class="skill-tag">PostgreSQL</span>
-                                        <span class="skill-tag">SQL Server</span>
-                                    </div>
-                                </div>
-                                <div class="skill-category">
-                                    <h3>Automation & Systems</h3>
-                                    <div class="skill-tags">
-                                        <span class="skill-tag">Ignition SCADA</span>
-                                        <span class="skill-tag">OPC-UA</span>
-                                        <span class="skill-tag">MQTT</span>
-                                        <span class="skill-tag">Linux/Unix</span>
-                                        <span class="skill-tag">Bash/Shell</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="section">
-            <div class="container">
-                <div class="section-terminal">
-                    <div class="terminal-header">
-                        <span class="terminal-title">contact.sh</span>
-                        <div class="terminal-controls">
-                            <span class="control minimize"></span>
-                            <span class="control maximize"></span>
-                            <span class="control close"></span>
-                        </div>
-                    </div>
-                    <div class="section-content">
-                        <div class="command-line">
-                            <span class="prompt">user@contact:~$</span>
-                            <span class="command">./connect.sh</span>
-                        </div>
-                        <div class="output">
-                            <h2>Let's Connect</h2>
-                            <div class="contact-grid">
-                                <a href="mailto:lincolnstewart4@gmail.com" class="contact-item">
-                                    <span class="contact-icon">📧</span>
-                                    <span class="contact-label">Email</span>
-                                    <span class="contact-value">lincolnstewart4@gmail.com</span>
-                                </a>
-                                <a href="https://www.linkedin.com/in/lincoln-stewart01" class="contact-item" target="_blank" rel="noopener">
-                                    <span class="contact-icon">💼</span>
-                                    <span class="contact-label">LinkedIn</span>
-                                    <span class="contact-value">linkedin.com/in/lincoln-stewart01</span>
-                                </a>
-                                <a href="tel:4434608224" class="contact-item">
-                                    <span class="contact-icon">📱</span>
-                                    <span class="contact-label">Phone</span>
-                                    <span class="contact-value">443-460-8224</span>
-                                </a>
-                                <div class="contact-item">
-                                    <span class="contact-icon">📍</span>
-                                    <span class="contact-label">Location</span>
-                                    <span class="contact-value">Hyattsville, MD</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Matrix Rain Background Effect -->
-    <canvas id="matrix-canvas" class="matrix-canvas"></canvas>
-
-    <!-- Scripts -->
-    <script src="./assets/js/main.js"></script>
+<script src="./assets/js/liquid-glass.js"></script>
+<script src="./assets/js/field.js"></script>
+<script src="./assets/js/instrument.js"></script>
+<script src="./assets/js/main.js"></script>
 </body>
 </html>

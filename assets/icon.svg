@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Lincoln Stewart">
+  <rect width="64" height="64" rx="15" fill="#F4F5F1"/>
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="14.25" fill="none" stroke="#101A17" stroke-opacity="0.12"/>
+  <path d="M7 41 C15 41 15 27 23 27 C31 27 31 41 39 41 C47 41 47 27 57 27"
+        fill="none" stroke="#0E6B52" stroke-width="3.4" stroke-linecap="round"/>
+  <circle cx="39" cy="41" r="3.4" fill="#D98324"/>
+</svg>

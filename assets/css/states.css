@@ -1,0 +1,308 @@
+/* ===========================================================================
+   states.css — every state the page can be in, and every input it can take.
+
+   Arrival, departure, offline, pressed, hovered, focused, checking, missing,
+   reduced motion, reduced transparency, high contrast, touch, print.
+   Loaded last so it wins where it needs to.
+   =========================================================================== */
+
+/* =========================================================================
+   Arrival
+   ========================================================================= */
+
+.loader {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px;
+  z-index: var(--z-modal);
+  background: var(--c-line);
+  opacity: 0;
+  transition: opacity var(--d-base) linear;
+  pointer-events: none;
+}
+.is-loading .loader { opacity: 1; }
+
+.loader__bar {
+  display: block; height: 100%; width: 0;
+  background: var(--c-brand);
+  transition: width var(--d-base) var(--e-out);
+}
+/* Creeps toward 88% on its own, then main.js finishes it by removing
+   .is-loading. An honest progress bar for work whose length is unknown. */
+.is-loading .loader__bar { width: 88%; transition: width 2.4s var(--e-out); }
+.is-ready .loader__bar   { width: 100%; }
+
+/* The page itself arrives with it. */
+.is-loading body { opacity: 0; }
+body { opacity: 1; transition: opacity var(--d-base) linear; }
+
+/* =========================================================================
+   Departure. Cross document transitions where supported, a plain fade
+   where not. Both are opt out under reduced motion.
+   ========================================================================= */
+
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: vt-out var(--d-base) var(--e-inout) both; }
+::view-transition-new(root) { animation: vt-in  var(--d-slow) var(--e-out) both; }
+@keyframes vt-out { to   { opacity: 0; transform: translateY(-8px); } }
+@keyframes vt-in  { from { opacity: 0; transform: translateY(10px); } }
+
+.is-leaving body {
+  opacity: 0; transform: translateY(-6px);
+  transition: opacity var(--d-base) var(--e-inout), transform var(--d-base) var(--e-inout);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .is-leaving body { opacity: 1; transform: none; }
+}
+
+/* =========================================================================
+   Connection
+   ========================================================================= */
+
+.net {
+  position: fixed;
+  top: 0; left: 50%;
+  z-index: var(--z-modal);
+  padding: var(--s-3) var(--s-5);
+  border-radius: 0 0 var(--r-tight) var(--r-tight);
+  background: var(--c-ink);
+  font-family: var(--f-mono); font-size: var(--t-label);
+  letter-spacing: var(--tr-label); text-transform: uppercase;
+  color: var(--c-paper);
+  transform: translate(-50%, -110%);
+  transition: transform var(--d-base) var(--e-out);
+  max-width: calc(100vw - var(--s-6));
+  text-align: center;
+}
+.net.is-up { transform: translate(-50%, 0); }
+
+/* =========================================================================
+   Toast. One line of feedback for actions with no visible result, such as
+   copying an address to the clipboard.
+   ========================================================================= */
+
+.toast {
+  position: fixed;
+  left: 50%; bottom: var(--s-6);
+  z-index: var(--z-modal);
+  padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-tight);
+  background: var(--c-ink);
+  color: var(--c-paper);
+  box-shadow: 0 12px 30px -14px rgba(16, 26, 23, 0.5);
+  transform: translate(-50%, calc(100% + var(--s-6)));
+  opacity: 0;
+  transition: transform var(--d-base) var(--e-out), opacity var(--d-fast) linear;
+  pointer-events: none;
+  max-width: calc(100vw - var(--s-6));
+}
+.toast.is-up { transform: translate(-50%, 0); opacity: 1; }
+
+/* =========================================================================
+   Pointer states.
+
+   Hover is only offered where a pointer can actually hover. Everything
+   interactive also has a press state, because that is the only feedback a
+   touch device gets between tap and result.
+   ========================================================================= */
+
+.action, .nav__link, .nav__cmd, .palette__item, .palette__close,
+.rail__tick, .link, .skip, .entry__head, .incident__head, .hub__row {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.is-pressed { transition-duration: 60ms; }
+.action.is-pressed          { transform: scale(0.985); background: var(--c-brand-dim); }
+.action--primary.is-pressed { background: var(--c-brand); border-color: var(--c-brand); }
+.nav__link.is-pressed,
+.palette__item.is-pressed   { background: rgba(16, 26, 23, 0.10); color: var(--c-ink); }
+.nav__cmd.is-pressed,
+.palette__close.is-pressed  { border-color: var(--c-brand); color: var(--c-brand); }
+.rail__tick.is-pressed::before { width: 28px; background: var(--c-brand); }
+.link.is-pressed            { background-size: 100% var(--hairline); }
+.entry__head.is-pressed,
+.hub__row.is-pressed,
+.incident__head.is-pressed  { background: rgba(16, 26, 23, 0.06); }
+
+/* No hover on touch. Without this the last tapped card keeps its lift. */
+@media (hover: none) {
+  .glass--lift:hover { transform: none; }
+  .action:hover {
+    transform: none; color: var(--c-ink);
+    background: rgba(255, 255, 255, 0.5); border-color: var(--c-line-strong);
+  }
+  .action--primary:hover { background: var(--c-ink); color: var(--c-paper); border-color: var(--c-ink); }
+  .link:hover { background-size: 0% var(--hairline); }
+  .rail__tick:hover::before { width: 14px; background: var(--c-line-strong); }
+}
+
+/* Touch targets. 44px is the floor on a coarse pointer. */
+@media (pointer: coarse) {
+  .action { min-height: 46px; padding-inline: var(--s-5); }
+  .nav__link, .nav__cmd, .palette__close { min-height: 44px; display: inline-flex; align-items: center; }
+  .palette__item { min-height: 52px; }
+  .entry__toggle { width: 34px; height: 34px; }
+}
+
+/* =========================================================================
+   Asset states. The resume link reports what it knows.
+   ========================================================================= */
+
+a[data-state="checking"] { opacity: 0.72; }
+a[data-state="checking"]::after {
+  content: "";
+  width: 5px; height: 5px; margin-left: var(--s-2);
+  border-radius: 50%;
+  background: var(--c-ink-3);
+  display: inline-block;
+  animation: blink 1.1s var(--e-inout) infinite;
+}
+a[data-state="missing"] { color: var(--c-live); }
+@keyframes blink { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  a[data-state="checking"]::after { animation: none; }
+}
+
+/* =========================================================================
+   Reduced transparency. A stated accessibility preference, so the glass
+   becomes a solid panel and every backdrop filter is dropped. The layout
+   does not change, only the material.
+   ========================================================================= */
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass--flat, .nav, .palette__panel, .rail, .incident {
+    background: #FBFCFA !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .glass::before, .glass--flat::before { display: none; }
+  .palette { background: rgba(16, 26, 23, 0.45); backdrop-filter: none; }
+  .field { opacity: 0.4; }
+}
+:root[data-glass-mode="opaque"] .glass,
+:root[data-glass-mode="opaque"] .glass--flat {
+  background: #FBFCFA;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* =========================================================================
+   High contrast
+   ========================================================================= */
+
+@media (prefers-contrast: more) {
+  :root {
+    --c-ink-2: #24302C;
+    --c-ink-3: #35423D;
+    --c-ink-4: #43504A;
+    --c-line: rgba(16, 26, 23, 0.28);
+    --c-line-strong: rgba(16, 26, 23, 0.5);
+    --glass-tint-top: rgba(255, 255, 255, 0.86);
+    --glass-tint-bottom: rgba(255, 255, 255, 0.78);
+  }
+  .field { opacity: 0.45; }
+}
+
+/* Isolate the glass onto its own compositor layer. Without this a filtered
+   backdrop over a moving field can drop a phone under 30fps. */
+.glass, .glass--flat, .nav { will-change: transform; }
+
+/* =========================================================================
+   Small screens.
+
+   The rail and the telemetry panel are desktop instruments and are already
+   hidden. What remains has to work with one thumb, so the command palette
+   becomes the navigation and every row grows.
+   ========================================================================= */
+
+@media (max-width: 1000px) {
+  .nav { padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4); }
+  .nav__cmd { margin-left: auto; }
+}
+
+/* The palette becomes a bottom sheet: reachable by thumb, never taller than
+   it needs to be, and it never swallows the whole screen. */
+@media (max-width: 760px) {
+  .nav__cmd kbd { display: none; }
+  .nav__id span { display: none; }
+
+  .palette {
+    padding-top: 0;
+    place-items: end stretch;
+  }
+  .palette__panel {
+    width: 100%;
+    max-height: 72dvh;
+    display: flex; flex-direction: column;
+    border-radius: var(--r-glass) var(--r-glass) 0 0;
+    padding: var(--s-3) var(--s-3) max(var(--s-3), env(safe-area-inset-bottom));
+    transform: translateY(14px);
+  }
+  .palette__list { flex: 1; max-height: none; }
+  /* Keyboard hints are noise on a device with no keyboard. */
+  .palette__foot { display: none; }
+}
+
+.nav__cmd .is-wide { display: inline; }
+.nav__cmd .is-narrow { display: none; }
+@media (max-width: 1000px) {
+  .nav__cmd .is-wide { display: none; }
+  .nav__cmd .is-narrow { display: inline; }
+}
+
+@media (max-width: 560px) {
+  :root { --t-label: 0.66rem; --tr-label: 0.13em; }
+  .hero { min-height: auto; padding-block: calc(var(--s-8) + var(--s-4)) var(--s-7); }
+  .contact { padding: var(--s-5) var(--s-4); }
+  .section { padding-block: var(--s-7); }
+  .section--tight { padding-block: var(--s-6); }
+}
+
+/* Respect the notch and the home indicator. */
+@supports (padding: env(safe-area-inset-left)) {
+  .shell {
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+  }
+  .footer { padding-bottom: max(var(--s-7), env(safe-area-inset-bottom)); }
+}
+
+/* Landscape phones: the hero must not demand a full screen it does not have. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .hero { min-height: auto; padding-block: var(--s-8) var(--s-6); }
+  .hero__name { font-size: clamp(2.2rem, 7vw, 3.4rem); }
+  .hero { min-height: auto; }
+  .palette__panel { max-height: 86dvh; }
+}
+
+/* =========================================================================
+   Print. A recruiter who prints this should get a document, not a screenshot
+   of an interface. Every disclosure is forced open.
+   ========================================================================= */
+
+@media print {
+  .field, .grain, .rail, .nav, .palette, .loader, .net, .toast,
+  .hub, .entry__toggle { display: none !important; }
+
+  html, body { background: #fff !important; color: #111 !important; }
+  .page { padding-left: 0; }
+  .glass, .glass--flat, .incident {
+    background: none !important; box-shadow: none !important;
+    border: 1px solid #ccc; backdrop-filter: none !important;
+  }
+  .glass::before, .glass--flat::before { display: none; }
+  details > summary { list-style: none; }
+  .entry__body, .incident__body, .feature__detail { display: grid !important; }
+  .role__points { display: grid !important; }
+  .feature__more-head { display: none !important; }
+  .label, .num, .eyebrow { color: #555 !important; }
+  .prose, .lead, .stack__val, .role__points li, .entry__col p, .feature__col p,
+  .feature__claim, .entry__claim, .entry__col p, .feature__col p { color: #222 !important; }
+  .section { padding-block: 1.2rem; page-break-inside: avoid; }
+  .feature, .entry, .role { page-break-inside: avoid; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.7em; color: #666; }
+  .hero { min-height: auto; }
+}

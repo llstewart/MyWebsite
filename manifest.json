@@ -1,19 +1,26 @@
 {
-  "name": "Lincoln Stewart - Software Engineer Portfolio",
-  "short_name": "Lincoln Stewart",
-  "description": "Software Engineer specializing in Intelligent Automation & Systems Integration",
-  "start_url": "/",
+  "name": "Lincoln Stewart, Software Engineer",
+  "short_name": "L. Stewart",
+  "description": "Telemetry pipelines, real-time dashboards, and the APIs underneath them.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#00ff00",
-  "orientation": "portrait-primary",
+  "background_color": "#F4F5F1",
+  "theme_color": "#F4F5F1",
+  "orientation": "any",
+  "lang": "en-US",
+  "categories": ["portfolio", "engineering"],
   "icons": [
     {
-      "src": "/assets/favicon.ico",
-      "sizes": "16x16",
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./favicon.ico",
+      "sizes": "48x48",
       "type": "image/x-icon"
     }
-  ],
-  "categories": ["portfolio", "software", "engineering", "automation"],
-  "lang": "en-US"
+  ]
 }

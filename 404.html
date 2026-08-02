@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>document.documentElement.className += " js";</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Not here &middot; Lincoln Stewart</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F4F5F1">
+
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f%5B%5D=satoshi@300,400,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<link rel="stylesheet" href="./assets/css/tokens.css">
+<link rel="stylesheet" href="./assets/css/base.css">
+<link rel="stylesheet" href="./assets/css/glass.css">
+<link rel="stylesheet" href="./assets/css/sections.css">
+<link rel="stylesheet" href="./assets/css/states.css">
+
+<style>
+  .lost { min-height: 100svh; display: grid; place-items: center; padding-block: var(--s-8); }
+  .lost__panel { max-width: 44rem; padding: clamp(1.5rem, 3.4vw, 3rem); }
+  .lost__code { display: block; margin-bottom: var(--s-5); }
+  .lost__title { margin-bottom: var(--s-4); }
+  .lost__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+</style>
+</head>
+
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="field" aria-hidden="true"><canvas id="field" class="field__canvas"></canvas></div>
+
+<div class="page" style="padding-left:0">
+  <main class="lost shell" id="main">
+    <article class="lost__panel glass" data-glass="contact">
+      <span class="lost__code label label--brand">404 &middot; No such path</span>
+      <h1 class="h1 lost__title">That page is not on this server.</h1>
+      <p class="lead">
+        Either the link is wrong or I moved something and did not redirect it, which is my fault
+        rather than yours. Everything worth reading is on one page.
+      </p>
+      <div class="lost__actions">
+        <a class="action action--primary" href="./">Back to the start</a>
+        <a class="action" href="./#systems">Go to the systems</a>
+        <a class="action" href="mailto:lincolnstewart4@gmail.com">Tell me what broke</a>
+      </div>
+    </article>
+  </main>
+</div>
+
+<script src="./assets/js/liquid-glass.js"></script>
+<script src="./assets/js/field.js"></script>
+<script src="./assets/js/main.js"></script>
+</body>
+</html>

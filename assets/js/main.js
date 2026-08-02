@@ -1,614 +1,369 @@
-// Terminal Portfolio JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all systems
-    initMatrixEffect();
-    initBootSequence();
-    initNavigationSystem();
-    initScrollEffects();
-    initTypingAnimation();
-    initInteractiveElements();
-    initMobileOptimizations();
-});
+/* ===========================================================================
+   main.js — page lifecycle and the glass tier decision.
 
-// Matrix Rain Effect
-function initMatrixEffect() {
-    const canvas = document.getElementById('matrix-canvas');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+   Responsibilities:
+     1. Arrival. Hold the hero until type is ready, then run the load
+        sequence once. Never hold longer than the budget, whatever happens.
+     2. Glass. Decide per device whether this page can afford real
+        refraction, apply it, and downgrade live if it turns out it cannot.
+     3. Departure. Fade out on outbound navigation, and undo that cleanly
+        when the browser restores the page from the back/forward cache.
+     4. Resilience. Retry what can be retried, degrade honestly when it
+        cannot, and never leave a control that silently does nothing.
+   =========================================================================== */
+
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var lowTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)").matches;
+  // "pointer: coarse" is the wrong test: a Windows laptop with a touchscreen
+  // reports coarse as its primary pointer while still having a mouse and a
+  // discrete GPU. What actually matters is whether any fine, hovering pointer
+  // exists at all, which is false exactly on the phones and tablets that
+  // cannot afford this effect.
+  var precise = window.matchMedia("(any-pointer: fine)").matches
+             && window.matchMedia("(any-hover: hover)").matches;
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  var saveData = !!(conn && conn.saveData);
+  var slowLink = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ""));
+
+  /* ------------------------------------------------------------------
+     A promise that always settles. Used everywhere a third party could
+     hang: fonts, network probes, anything not ours.
+     ------------------------------------------------------------------ */
+  function within(promise, ms, fallback) {
+    return new Promise(function (resolve) {
+      var done = false;
+      var timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        resolve(fallback);
+      }, ms);
+      Promise.resolve(promise).then(function (v) {
+        if (done) return;
+        done = true; clearTimeout(timer); resolve(v);
+      }, function () {
+        if (done) return;
+        done = true; clearTimeout(timer); resolve(fallback);
+      });
+    });
+  }
+
+  /* Retry with backoff. Resolves with the value, or null once spent. */
+  function retry(task, attempts, baseDelay) {
+    attempts = attempts || 3;
+    baseDelay = baseDelay || 400;
+    return new Promise(function (resolve) {
+      var n = 0;
+      (function attempt() {
+        n++;
+        Promise.resolve()
+          .then(task)
+          .then(resolve, function () {
+            if (n >= attempts) return resolve(null);
+            setTimeout(attempt, baseDelay * Math.pow(2, n - 1));
+          });
+      })();
+    });
+  }
+
+  /* ==================================================================
+     1. Arrival
+     ------------------------------------------------------------------
+     The name is split into individual glyphs so each one can be given its
+     own delay. The markup ships as plain words, the h1 carries an
+     aria-label, and the split spans are hidden from assistive tech, so a
+     screen reader hears "Lincoln Stewart" and never a column of letters.
+     Under reduced motion the split is skipped entirely.
+     ================================================================== */
+  function splitName() {
+    if (reduced) return;
+    var lines = document.querySelectorAll(".hero__name .hero__word");
+    if (!lines.length) return;
+    var offset = 0;
+    Array.prototype.forEach.call(lines, function (word, row) {
+      var text = word.textContent;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < text.length; i++) {
+        var ch = document.createElement("span");
+        ch.className = "hero__ch";
+        ch.textContent = text.charAt(i);
+        ch.style.setProperty("--i", offset + i);
+        ch.style.setProperty("--row", row);
+        frag.appendChild(ch);
+      }
+      word.textContent = "";
+      word.appendChild(frag);
+      word.setAttribute("aria-hidden", "true");
+      offset += Math.round(text.length * 0.55);   // lines overlap, not queue
+    });
+
+    // Once the last glyph has landed, unmask the lines so the resting
+    // shadow is not clipped at the baseline.
+    var name = document.querySelector(".hero__name");
+    setTimeout(function () { if (name) name.classList.add("is-settled"); }, 3200);
+  }
+
+  function arrive() {
+    splitName();
+    // Type is the whole design here, so the hero waits for it. Briefly.
+    var fonts = document.fonts ? document.fonts.ready : Promise.resolve();
+    within(fonts, 2200, null).then(function () {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(ready);
+      });
+    });
+
+    // Hard ceiling. If anything above misbehaves, the page still arrives.
+    setTimeout(ready, 3200);
+  }
+
+  function ready() {
+    if (root.classList.contains("is-ready")) return;
+    root.classList.remove("is-loading");
+    root.classList.add("is-ready");
+  }
+
+  /* ==================================================================
+     2. Glass
+     ------------------------------------------------------------------
+     Refraction is a real cost: the displacement map is generated per
+     element at O(w x h), and the filtered backdrop is recomposited over a
+     moving field. It is worth it on a desktop pointer with a fast link,
+     and it is not worth it on a phone on a metered one. The page decides
+     rather than assuming, and it keeps checking after it decides.
+     ================================================================== */
+  var handles = [];
+
+  function glassBudget() {
+    if (lowTransparency) return "opaque";            // an explicit user request
+    if (typeof window.liquidGlass !== "function") return "frosted";
+    if (saveData || slowLink) return "frosted";
+    if (window.innerWidth < 900) return "frosted";
+    if ((navigator.hardwareConcurrency || 4) < 4) return "frosted";
+    if ((navigator.deviceMemory || 4) < 4) return "frosted";
+    // Touch only and not wide: a tablet, where the cost is not worth it.
+    // Pointer media alone is not trustworthy here, since a Windows laptop
+    // with a touchscreen reports no fine pointer at all, so it is only used
+    // to break the tie. The live frame rate watchdog below is the real
+    // safety net: measure, then decide, rather than guessing from a string.
+    if (!precise && window.innerWidth < 1200) return "frosted";
+    return "refractive";
+  }
+
+  /* Frost is the floor, not the absence of a floor. Anything that opted out
+     of refraction still needs a backdrop, or the panel reads as a flat card. */
+  function frost() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-glass]"), function (el) {
+      el.classList.add("lg-fallback");
+    });
+  }
+
+  var PROFILES = {
+    // The nav is the one glass surface that passes over body copy, and the
+    // name is 6.6rem. A strong displacement there reads as a smear rather
+    // than as glass, so it gets a gentle bend and a heavier blur instead.
+    nav:      { scale: -46,  chroma: 3, blur: 8, saturate: 1.35, border: 0.14, mapBlur: 11 },
+    contact:  { scale: -96,  chroma: 6, blur: 3, saturate: 1.5,  border: 0.07, mapBlur: 12 },
+    palette:  { scale: -74,  chroma: 4, blur: 6, saturate: 1.4,  border: 0.09, mapBlur: 10 }
+  };
+
+  function applyGlass() {
+    var mode = glassBudget();
+    window.__glassMode = mode;
+    root.setAttribute("data-glass-mode", mode);
+    if (mode !== "refractive") { if (mode !== "opaque") frost(); return; }
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-glass]"), function (el) {
+      var profile = PROFILES[el.getAttribute("data-glass")] || PROFILES.contact;
+      el.classList.remove("lg-fallback");     // may be re-upgrading after a resize
+      try {
+        var handle = window.liquidGlass(el, profile);
+        handles.push(handle);
+        if (!handle.supported) window.__glassMode = "frosted";
+      } catch (err) {
+        el.classList.add("lg-fallback");
+        if (window.console) console.warn("[glass] refraction unavailable, using frost", err);
+      }
+    });
+
+    if (window.__glassMode !== "refractive") {
+      root.setAttribute("data-glass-mode", window.__glassMode);
+    } else {
+      watchGlass();
     }
-    
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-    
-    // Matrix characters
-    const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-    const charArray = chars.split('');
-    
-    const fontSize = 14;
-    const columns = Math.floor(canvas.width / fontSize);
-    const drops = [];
-    
-    // Initialize drops
-    for (let i = 0; i < columns; i++) {
-        drops[i] = Math.random() * canvas.height;
+  }
+
+  /* If the device turns out to be slower than it claimed, take the glass
+     down rather than shipping a stuttering page. Checked over the first
+     eight seconds, which is where the cost shows up.
+
+     The threshold is deliberately low and the first two seconds are ignored.
+     A 30Hz panel, a throttled tab, a power saving mode, and the font and map
+     work of the load itself all report far under 60 while being perfectly
+     smooth, and punishing any of them would strip the effect from machines
+     that could carry it easily. Only a sustained sub-20 after the page has
+     settled counts, and only while the tab is actually in front. */
+  function watchGlass() {
+    if (reduced) return;
+    var frames = 0, start = performance.now(), strikes = 0, mark = start;
+
+    function tick(now) {
+      frames++;
+      if (now - mark >= 1000) {
+        var fps = (frames * 1000) / (now - mark);
+        frames = 0; mark = now;
+        var watching = !document.hidden && document.hasFocus() && now - start >= 2000;
+        if (!watching) strikes = 0;
+        else strikes = fps < 20 ? strikes + 1 : 0;
+        if (strikes >= 4) return downgrade();
+      }
+      if (now - start < 10000) requestAnimationFrame(tick);
     }
-    
-    function drawMatrix() {
-        // Semi-transparent black background for trailing effect
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Green text
-        ctx.fillStyle = '#00ff0030';
-        ctx.font = `${fontSize}px monospace`;
-        
-        for (let i = 0; i < drops.length; i++) {
-            const char = charArray[Math.floor(Math.random() * charArray.length)];
-            const x = i * fontSize;
-            const y = drops[i] * fontSize;
-            
-            ctx.fillText(char, x, y);
-            
-            // Reset drop randomly or when it reaches bottom
-            if (y > canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
-            }
-            
-            drops[i]++;
-        }
+    requestAnimationFrame(tick);
+  }
+
+  function downgrade() {
+    handles.forEach(function (h) { try { h.destroy(); } catch (_) {} });
+    handles = [];
+    frost();
+    window.__glassMode = "frosted (auto)";
+    root.setAttribute("data-glass-mode", "frosted");
+  }
+
+  var resizeTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      var wanted = glassBudget();
+      if (wanted === "refractive" && !handles.length) applyGlass();
+      else if (wanted !== "refractive" && handles.length) downgrade();
+    }, 260);
+  }, { passive: true });
+
+  /* ==================================================================
+     3. Departure and return
+     ================================================================== */
+  function initTransitions() {
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest ? e.target.closest("a[href]") : null;
+      if (!a) return;
+      if (a.target === "_blank" || a.hasAttribute("download")) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+      var href = a.getAttribute("href") || "";
+      if (href.charAt(0) === "#" || href.indexOf("mailto:") === 0 || href.indexOf("tel:") === 0) return;
+
+      var url;
+      try { url = new URL(a.href, location.href); } catch (_) { return; }
+      if (url.origin !== location.origin) return;      // another site, let the browser handle it
+
+      if (reduced) return;
+      root.classList.add("is-leaving");
+    });
+
+    // Never strand the page mid fade if the navigation is cancelled or the
+    // visitor comes back through history.
+    window.addEventListener("pageshow", function (e) {
+      root.classList.remove("is-leaving");
+      if (e.persisted) ready();
+    });
+    window.addEventListener("pagehide", function () {
+      root.classList.remove("is-leaving");
+    });
+  }
+
+  /* ==================================================================
+     4. Resilience
+     ================================================================== */
+
+  /* The resume is the single most important outbound asset on this page.
+     Verify it exists, retry a transient failure, and if it is genuinely
+     missing say so on the control instead of handing over a dead link. */
+  function verifyResume() {
+    var links = Array.prototype.slice.call(
+      document.querySelectorAll('a[href$="Lincoln_Stewart_Resume.pdf"]')
+    );
+    if (!links.length || location.protocol === "file:" || !window.fetch) return;
+
+    links.forEach(function (a) { a.setAttribute("data-state", "checking"); });
+
+    retry(function () {
+      return fetch(links[0].getAttribute("href"), { method: "HEAD", cache: "no-store" })
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return true;
+        });
+    }, 3, 500).then(function (ok) {
+      links.forEach(function (a) {
+        if (ok) { a.setAttribute("data-state", "ready"); return; }
+        a.setAttribute("data-state", "missing");
+        a.setAttribute("href", "mailto:lincolnstewart4@gmail.com?subject=Resume%20request");
+        a.removeAttribute("download");
+        a.textContent = "Request resume by email";
+      });
+    });
+  }
+
+  /* Offline is a state, not an error page. Say it once, quietly. */
+  function initConnection() {
+    var banner = document.getElementById("net-state");
+    if (!banner) return;
+    function update() {
+      var off = navigator.onLine === false;
+      banner.classList.toggle("is-up", off);
+      banner.textContent = off ? "You are offline. This page still works." : "";
     }
-    
-    // Animation loop
-    function animate() {
-        drawMatrix();
-        requestAnimationFrame(animate);
-    }
-    
-    animate();
-}
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    update();
+  }
 
-// Boot Sequence Animation
-function initBootSequence() {
-    const bootScreen = document.getElementById('boot-screen');
-    const mainContent = document.getElementById('main-content');
-    
-    if (!bootScreen || !mainContent) return;
-    
-    // Animate boot text lines
-    const lines = document.querySelectorAll('.boot-text .line');
-    lines.forEach((line, index) => {
-        setTimeout(() => {
-            typeText(line, line.textContent, 50);
-        }, index * 1000 + 500);
-    });
-    
-    // Hide boot screen and show main content
-    setTimeout(() => {
-        bootScreen.style.display = 'none';
-        mainContent.classList.remove('hidden');
-        
-        // Start hero animations
-        initHeroAnimations();
-    }, 5000);
-}
+  /* Touch has no hover, so every control gets a press state instead. */
+  function initPressFeedback() {
+    var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .rail__tick, .link, .hub__row, .entry__head";
 
-// Typewriter effect
-function typeText(element, text, speed = 100) {
-    element.textContent = '';
-    element.style.opacity = '1';
-    
-    let index = 0;
-    const timer = setInterval(() => {
-        if (index < text.length) {
-            element.textContent += text.charAt(index);
-            index++;
-        } else {
-            clearInterval(timer);
-        }
-    }, speed);
-}
+    document.addEventListener("pointerdown", function (e) {
+      var target = e.target.closest ? e.target.closest(SELECTOR) : null;
+      if (target) target.classList.add("is-pressed");
+    }, { passive: true });
 
-// Navigation System
-function initNavigationSystem() {
-    const navCommands = document.querySelectorAll('.nav-command');
-    
-    navCommands.forEach(command => {
-        command.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
-                // Add terminal command effect
-                simulateTerminalCommand(this.textContent);
-                
-                // Smooth scroll to section
-                targetSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-                
-                // Update active state
-                updateActiveNavigation(this);
-            }
+    ["pointerup", "pointercancel", "pointerleave", "scroll"].forEach(function (evt) {
+      window.addEventListener(evt, function () {
+        Array.prototype.forEach.call(document.querySelectorAll(".is-pressed"), function (el) {
+          el.classList.remove("is-pressed");
         });
+      }, { passive: true, capture: true });
     });
-}
+  }
 
-// Simulate terminal command execution
-function simulateTerminalCommand(command) {
-    const prompt = document.querySelector('.nav-content .prompt');
-    if (!prompt) return;
-    
-    const originalText = prompt.textContent;
-    prompt.textContent = `user@system:~$ ${command}`;
-    prompt.style.color = '#ffaa00';
-    
-    setTimeout(() => {
-        prompt.textContent = originalText;
-        prompt.style.color = '';
-    }, 1000);
-}
-
-// Update active navigation
-function updateActiveNavigation(activeElement) {
-    const navCommands = document.querySelectorAll('.nav-command');
-    navCommands.forEach(cmd => cmd.classList.remove('active'));
-    activeElement.classList.add('active');
-}
-
-// Scroll Effects
-function initScrollEffects() {
-    const sections = document.querySelectorAll('.section');
-    const navCommands = document.querySelectorAll('.nav-command');
-    
-    // Intersection Observer for section visibility
-    const observerOptions = {
-        threshold: 0.3,
-        rootMargin: '-80px 0px -20% 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const sectionId = entry.target.id;
-                
-                // Update active navigation
-                navCommands.forEach(cmd => {
-                    cmd.classList.remove('active');
-                    if (cmd.getAttribute('href') === `#${sectionId}`) {
-                        cmd.classList.add('active');
-                    }
-                });
-                
-                // Animate section content
-                animateSectionContent(entry.target);
-            }
-        });
-    }, observerOptions);
-    
-    sections.forEach(section => {
-        observer.observe(section);
+  /* Service worker: an offline copy of a page that is already tiny. Kept
+     network first for the document so a deploy is never stale. */
+  function initServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+    if (location.protocol === "file:") return;
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./sw.js").catch(function (err) {
+        if (window.console) console.info("[sw] not registered", err && err.message);
+      });
     });
-    
-    // Parallax effect for terminal windows
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const terminals = document.querySelectorAll('.section-terminal');
-        
-        terminals.forEach((terminal, index) => {
-            const speed = 0.5 + (index * 0.1);
-            const translateY = scrolled * speed * 0.1;
-            terminal.style.transform = `translateY(${translateY}px)`;
-        });
-    });
-}
+  }
 
-// Animate section content when it comes into view
-function animateSectionContent(section) {
-    const terminal = section.querySelector('.section-terminal');
-    if (!terminal || terminal.classList.contains('animated')) return;
-    
-    terminal.classList.add('animated');
-    
-    // Animate terminal window appearance
-    terminal.style.transform = 'translateY(50px) scale(0.95)';
-    terminal.style.opacity = '0';
-    
-    setTimeout(() => {
-        terminal.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        terminal.style.transform = 'translateY(0) scale(1)';
-        terminal.style.opacity = '1';
-        
-        // Animate command line
-        setTimeout(() => {
-            animateCommandLine(section);
-        }, 400);
-    }, 100);
-}
+  function boot() {
+    arrive();
+    applyGlass();
+    initTransitions();
+    initPressFeedback();
+    initConnection();
+    verifyResume();
+    initServiceWorker();
+  }
 
-// Animate command line typing
-function animateCommandLine(section) {
-    const commandElement = section.querySelector('.command');
-    if (!commandElement) return;
-    
-    const originalText = commandElement.textContent;
-    commandElement.textContent = '';
-    commandElement.style.borderRight = '2px solid #00ff00';
-    
-    typeText(commandElement, originalText, 80);
-    
-    setTimeout(() => {
-        commandElement.style.borderRight = 'none';
-        animateOutput(section);
-    }, originalText.length * 80 + 500);
-}
-
-// Animate output content
-function animateOutput(section) {
-    const outputElements = section.querySelectorAll('.output > *');
-    
-    outputElements.forEach((element, index) => {
-        setTimeout(() => {
-            element.style.opacity = '0';
-            element.style.transform = 'translateX(-20px)';
-            element.style.transition = 'all 0.5s ease';
-            
-            setTimeout(() => {
-                element.style.opacity = '1';
-                element.style.transform = 'translateX(0)';
-            }, 50);
-        }, index * 200);
-    });
-}
-
-// Typing Animation for Hero Section
-function initTypingAnimation() {
-    const typingElements = document.querySelectorAll('.typing-animation');
-    
-    typingElements.forEach(element => {
-        const text = element.textContent;
-        element.textContent = '';
-        
-        setTimeout(() => {
-            typeText(element, text, 100);
-        }, 6000); // Start after boot sequence
-    });
-}
-
-// Hero Section Animations
-function initHeroAnimations() {
-    // Animate neural network nodes
-    const nodes = document.querySelectorAll('.node');
-    nodes.forEach((node, index) => {
-        setTimeout(() => {
-            node.style.opacity = '0';
-            node.style.transform = 'scale(0)';
-            node.style.transition = 'all 0.5s ease';
-            
-            setTimeout(() => {
-                node.style.opacity = '1';
-                node.style.transform = 'scale(1)';
-            }, 50);
-        }, index * 300 + 1000);
-    });
-    
-    // Animate status indicators
-    const indicators = document.querySelectorAll('.indicator');
-    indicators.forEach((indicator, index) => {
-        setTimeout(() => {
-            indicator.style.opacity = '0';
-            indicator.style.transform = 'translateY(20px)';
-            indicator.style.transition = 'all 0.5s ease';
-            
-            setTimeout(() => {
-                indicator.style.opacity = '1';
-                indicator.style.transform = 'translateY(0)';
-            }, 50);
-        }, index * 500 + 2000);
-    });
-}
-
-// Interactive Elements
-function initInteractiveElements() {
-    // Glitch effect on hover for skill tags
-    const skillTags = document.querySelectorAll('.skill-tag');
-    skillTags.forEach(tag => {
-        tag.addEventListener('mouseenter', function() {
-            this.style.animation = 'glitch 0.5s ease';
-        });
-        
-        tag.addEventListener('animationend', function() {
-            this.style.animation = '';
-        });
-    });
-    
-    // Terminal control interactions
-    const terminalControls = document.querySelectorAll('.control');
-    terminalControls.forEach(control => {
-        control.addEventListener('click', function() {
-            const terminal = this.closest('.terminal-header').parentElement;
-            
-            if (this.classList.contains('minimize')) {
-                minimizeTerminal(terminal);
-            } else if (this.classList.contains('maximize')) {
-                maximizeTerminal(terminal);
-            } else if (this.classList.contains('close')) {
-                closeTerminal(terminal);
-            }
-        });
-    });
-    
-    // Project item hover effects
-    const projectItems = document.querySelectorAll('.project-item');
-    projectItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
-            this.style.boxShadow = '0 10px 30px rgba(0, 170, 255, 0.2)';
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = '';
-        });
-    });
-    
-    // Contact item click effects
-    const contactItems = document.querySelectorAll('.contact-item');
-    contactItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            // Create ripple effect
-            createRippleEffect(e, this);
-        });
-    });
-}
-
-// Terminal window interactions
-function minimizeTerminal(terminal) {
-    terminal.style.transform = 'scaleY(0.1)';
-    terminal.style.opacity = '0.5';
-    
-    setTimeout(() => {
-        terminal.style.transform = '';
-        terminal.style.opacity = '';
-    }, 1000);
-}
-
-function maximizeTerminal(terminal) {
-    const originalTransform = terminal.style.transform;
-    terminal.style.transform = 'scale(1.05)';
-    
-    setTimeout(() => {
-        terminal.style.transform = originalTransform;
-    }, 300);
-}
-
-function closeTerminal(terminal) {
-    terminal.style.transition = 'all 0.5s ease';
-    terminal.style.transform = 'scale(0)';
-    terminal.style.opacity = '0';
-    
-    setTimeout(() => {
-        terminal.style.transform = '';
-        terminal.style.opacity = '';
-        terminal.style.transition = '';
-    }, 2000);
-}
-
-// Create ripple effect
-function createRippleEffect(event, element) {
-    const ripple = document.createElement('div');
-    const rect = element.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
-    
-    ripple.style.position = 'absolute';
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = x + 'px';
-    ripple.style.top = y + 'px';
-    ripple.style.background = 'rgba(0, 255, 0, 0.3)';
-    ripple.style.borderRadius = '50%';
-    ripple.style.transform = 'scale(0)';
-    ripple.style.transition = 'transform 0.6s ease';
-    ripple.style.pointerEvents = 'none';
-    
-    element.style.position = 'relative';
-    element.style.overflow = 'hidden';
-    element.appendChild(ripple);
-    
-    setTimeout(() => {
-        ripple.style.transform = 'scale(1)';
-    }, 10);
-    
-    setTimeout(() => {
-        ripple.remove();
-    }, 600);
-}
-
-// Mobile Optimizations
-function initMobileOptimizations() {
-    // Touch interactions for mobile
-    if ('ontouchstart' in window) {
-        document.body.classList.add('touch-device');
-        
-        // Improve touch targets
-        const navCommands = document.querySelectorAll('.nav-command');
-        navCommands.forEach(command => {
-            command.style.minHeight = '44px';
-            command.style.display = 'flex';
-            command.style.alignItems = 'center';
-            command.style.justifyContent = 'center';
-        });
-        
-        // Add touch feedback
-        const interactiveElements = document.querySelectorAll('.nav-command, .contact-item, .skill-tag');
-        interactiveElements.forEach(element => {
-            element.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.95)';
-            });
-            
-            element.addEventListener('touchend', function() {
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            });
-        });
-    }
-    
-    // Responsive navigation
-    const nav = document.querySelector('.nav-terminal');
-    if (nav && window.innerWidth <= 768) {
-        // Make navigation sticky on mobile
-        nav.style.position = 'sticky';
-        nav.style.top = '0';
-        nav.style.zIndex = '1000';
-    }
-    
-    // Optimize animations for mobile
-    if (window.innerWidth <= 768) {
-        // Reduce complex animations on mobile
-        const style = document.createElement('style');
-        style.textContent = `
-            .glitch-text {
-                animation: none !important;
-            }
-            .neural-network-visual .connection {
-                animation: none !important;
-                opacity: 0.3 !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-}
-
-// Keyboard Navigation
-document.addEventListener('keydown', function(e) {
-    // Navigate with arrow keys
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        const navCommands = document.querySelectorAll('.nav-command');
-        const activeCommand = document.querySelector('.nav-command.active');
-        
-        let currentIndex = Array.from(navCommands).indexOf(activeCommand);
-        let nextIndex;
-        
-        if (e.key === 'ArrowDown') {
-            nextIndex = (currentIndex + 1) % navCommands.length;
-        } else {
-            nextIndex = (currentIndex - 1 + navCommands.length) % navCommands.length;
-        }
-        
-        navCommands[nextIndex].click();
-    }
-    
-    // Quick navigation with number keys
-    const numberKeys = ['1', '2', '3', '4', '5', '6'];
-    if (numberKeys.includes(e.key)) {
-        const index = parseInt(e.key) - 1;
-        const navCommands = document.querySelectorAll('.nav-command');
-        if (navCommands[index]) {
-            navCommands[index].click();
-        }
-    }
-});
-
-// Performance optimizations
-function optimizePerformance() {
-    // Lazy load heavy animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Start heavy animations only when visible
-                if (entry.target.classList.contains('neural-network-visual')) {
-                    initNeuralNetworkAnimation(entry.target);
-                }
-            }
-        });
-    });
-    
-    document.querySelectorAll('.neural-network-visual').forEach(element => {
-        observer.observe(element);
-    });
-    
-    // Debounce scroll events
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-        scrollTimeout = setTimeout(() => {
-            // Perform scroll-based updates
-            updateScrollProgress();
-        }, 16); // ~60fps
-    });
-}
-
-// Neural Network Animation
-function initNeuralNetworkAnimation(container) {
-    const nodes = container.querySelectorAll('.node');
-    const connections = container.querySelectorAll('.connection');
-    
-    // Create dynamic connections
-    setInterval(() => {
-        const randomConnection = connections[Math.floor(Math.random() * connections.length)];
-        randomConnection.style.animation = 'none';
-        setTimeout(() => {
-            randomConnection.style.animation = 'dataFlow 2s ease';
-        }, 100);
-    }, 3000);
-}
-
-// Update scroll progress
-function updateScrollProgress() {
-    const scrollProgress = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
-    
-    // Update any progress indicators if they exist
-    const progressIndicator = document.querySelector('.scroll-progress');
-    if (progressIndicator) {
-        progressIndicator.style.width = `${scrollProgress * 100}%`;
-    }
-}
-
-// Initialize performance optimizations
-setTimeout(optimizePerformance, 1000);
-
-// Console Easter Egg
-console.log(`
-╔══════════════════════════════════════════════════════════════╗
-║                     SYSTEM INITIALIZED                      ║
-║                                                              ║
-║  Welcome to Lincoln Stewart's Portfolio Terminal            ║
-║  Version: 2.0.1                                             ║
-║  Status: ONLINE                                              ║
-║                                                              ║
-║  Available Commands:                                         ║
-║  • Use arrow keys for navigation                             ║
-║  • Number keys (1-6) for quick section access               ║
-║  • Click terminal controls for interactions                  ║
-║                                                              ║
-║  Contact: lincolnstewart4@gmail.com                          ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-`);
-
-// Error handling
-window.addEventListener('error', function(e) {
-    console.warn('Portfolio Error:', e.message);
-    // Graceful degradation - ensure basic functionality works
-});
-
-// Service Worker registration for PWA capabilities (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        // Register service worker if available
-        // This would be for future PWA features
-    });
-}
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
