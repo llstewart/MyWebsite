@@ -87,8 +87,11 @@ The page checks the file exists on load, retries a transient failure three times
 with backoff, and degrades the control to "Request résumé by email" if it is
 genuinely missing, so a stale link never silently 404s a recruiter.
 
-**The file currently shipped is the July 2026 general software engineering
-résumé and predates several profile corrections. It should be replaced.**
+The shipped file was rebuilt on 2 August 2026 from the current knowledge base.
+Source of truth for it is
+`resume-pipeline/jobs/general-software-engineer-2026-08-02/`: the `resume.json`
+records every bullet's `evidence_id`, and `composition_notes` records what was
+trimmed to hold one page and why.
 
 ## The glass
 

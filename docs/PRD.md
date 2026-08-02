@@ -259,9 +259,10 @@ kept unmodified so fixes can be dropped in.
 Carried from the knowledge base. Each needs an answer from Lincoln before the
 relevant content changes.
 
-1. **Résumé PDF.** The shipped file is the July 2026 general software engineering
-   résumé. It predates several profile corrections. It should be replaced with a
-   current general purpose build.
+1. ~~**Résumé PDF.**~~ Resolved 2 August 2026. Rebuilt from the current
+   knowledge base as `resume-pipeline/jobs/general-software-engineer-2026-08-02/`.
+   One page, pdflatex, all 54 checked strings round-trip out of the PDF, no
+   excluded skills, no kerning splits.
 2. **Agency clients.** Named, or kept described by sector? Currently by sector.
 3. **Agency start date.** Recorded as an estimate of January 2024.
 4. **Packleads figures.** Confirmed accurate on 28 July 2026. They will need a
