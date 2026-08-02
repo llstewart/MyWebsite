@@ -117,8 +117,14 @@ map's neutral inset.
 
 ## Deploying
 
-Push to `main`. `.github/workflows/deploy.yml` publishes the repository root to
-GitHub Pages.
+Push to `main`. GitHub Pages is configured to deploy from the branch root
+(`build_type: legacy`), so its built-in `pages build and deployment` job
+publishes every push. There is no custom workflow: the repository used to carry
+one built on `actions/upload-pages-artifact@v2`, which failed permanently once
+`upload-artifact@v3` was retired, and it was redundant with the built-in job
+anyway. If you ever want the Actions based path instead, switch the Pages source
+to "GitHub Actions" in repository settings first, then add a workflow using
+`configure-pages@v5`, `upload-pages-artifact@v3`, and `deploy-pages@v4`.
 
 The service worker is network first for everything same origin, so a deploy is
 never served stale. Bump `VERSION` in `sw.js` when you want old caches evicted.
