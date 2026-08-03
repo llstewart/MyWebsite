@@ -229,8 +229,17 @@
 
   var DPR_CAP = 1.5;
   var FRAME_MS = 1000 / 30;
-  var TRAIL = 0.17;      // paper alpha per frame; lower = longer trails
-  var DOT_ALPHA = 0.38;
+
+  /* Definition. A dot has to survive as a dot.
+
+     At 0.38 alpha with a trail lasting a dozen frames, a mark spent most of
+     its life as a faint smear and only briefly looked like a point. Raising
+     the alpha and shortening the trail together is what makes it read as
+     spray: the head is clearly a dot, and the tail is short enough to say
+     which way it went without becoming the thing you see. */
+  var TRAIL = 0.24;      // paper alpha per frame; lower = longer trails
+  var DOT_ALPHA = 0.54;
+  var DOT_SIZE = 1.25;
   var LIFE = 460;        // frames before a particle is recycled
 
   /* Density ceiling. A flow field has sinks, and without a cap those cells
@@ -240,7 +249,43 @@
      Capping what is DRAWN rather than culling particles matters: culling
      would thin the current that caused the convergence, removing the
      evidence along with the cause. */
-  var OCC = 5, OCC_MAX = 4;
+  var OCC = 5, OCC_MAX = 5;
+
+  /* ------------------------------------------------------------------
+     THE MASK. Where the artwork is allowed to exist.
+
+     A half ellipse anchored to one edge, densest at the edge and thinning
+     to nothing by the time it reaches SPREAD_X across. Everything outside
+     it is clean paper.
+
+     Why one shape for every movement rather than only for the waves. The
+     mask decides WHERE the piece lives; a movement decides WHAT it does
+     inside. Confining some movements and not others would change the shape
+     of the page every fifteen seconds, and a composition that keeps
+     rearranging itself reads as indecision rather than as motion. Holding
+     the frame still and letting the behaviour change inside it is the
+     stronger idea, and it is what the reference does.
+
+     Anchored left, with the dense core against the edge, so it thins as it
+     approaches the content column instead of crowding it. On the landing
+     the name starts about a sixth of the way in, so the heavy part of the
+     mask sits outside the type and the light part passes behind it.
+
+     Flip SIDE to "right" to mirror it. Nothing else needs to change.
+     ------------------------------------------------------------------ */
+  var SIDE = "left";
+  var SPREAD_X = 0.66;   // fraction of the viewport width it reaches
+  var SPREAD_Y = 0.78;   // fraction of half the height, from the middle
+  var FALLOFF = 1.5;     // >1 concentrates toward the anchored edge
+
+  function mask(x, y) {
+    var nx = x / cw;
+    if (SIDE === "right") nx = 1 - nx;
+    var dx = nx / SPREAD_X;
+    var dy = (y / ch - 0.5) / SPREAD_Y;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    return d >= 1 ? 0 : Math.pow(1 - d, FALLOFF);
+  }
 
   var dpr = 1, cw = 0, ch = 0;
   var count = 0, px = null, py = null, pl = null, pv = null;
@@ -277,8 +322,18 @@
   }
 
   function spawn(i, initial) {
-    px[i] = Math.random() * cw;
-    py[i] = Math.random() * ch;
+    /* Rejection sampled against the mask, so particles are born where the
+       piece lives instead of being born everywhere and only drawn in part
+       of it. Gives up after six tries and takes what it has: a particle
+       still has to go somewhere, and an unbounded loop has no place in a
+       frame budget. */
+    var x, y, tries = 0;
+    do {
+      x = Math.random() * cw;
+      y = Math.random() * ch;
+    } while (++tries < 6 && Math.random() > mask(x, y));
+    px[i] = x;
+    py[i] = y;
     /* Staggered ages, or every particle recycles on the same frame and the
        whole page blinks at once. */
     pl[i] = initial ? Math.random() * LIFE : 0;
@@ -300,7 +355,6 @@
     occ.fill(0);
     ctx.globalAlpha = DOT_ALPHA;
     ctx.fillStyle = GRAIN;
-    var size = 1.15;
 
     for (var i = 0; i < count; i++) {
       var gx = (px[i] / CELL) | 0;
@@ -313,12 +367,17 @@
       px[i] += Math.cos(a) * v;
       py[i] += Math.sin(a) * v;
 
+      /* The per cell budget is the ceiling scaled by the mask, so the same
+         one mechanism does two jobs: it stops any area saturating, and it
+         shapes the piece. Outside the mask the budget rounds to zero and
+         nothing is drawn at all, while the particle carries on moving. */
       var ox = (px[i] / OCC) | 0, oy = (py[i] / OCC) | 0;
       if (ox >= 0 && oy >= 0 && ox < occCols && oy < occRows) {
         var oi = oy * occCols + ox;
-        if (occ[oi] < OCC_MAX) {
+        var budget = (OCC_MAX * mask(px[i], py[i]) + 0.35) | 0;
+        if (budget > 0 && occ[oi] < budget) {
           occ[oi]++;
-          ctx.fillRect(px[i], py[i], size, size);
+          ctx.fillRect(px[i], py[i], DOT_SIZE, DOT_SIZE);
         }
       }
 
@@ -391,6 +450,25 @@
         : MOVEMENTS[from].name;
     },
     movements: function () { return MOVEMENTS.map(function (m) { return m.name; }); },
+    /* Retune the shape live: SignalField.shape({ side: "right", x: 0.5 }) */
+    shape: function (o) {
+      if (o) {
+        if (o.side    !== undefined) SIDE = o.side;
+        if (o.x       !== undefined) SPREAD_X = o.x;
+        if (o.y       !== undefined) SPREAD_Y = o.y;
+        if (o.falloff !== undefined) FALLOFF = o.falloff;
+      }
+      return { side: SIDE, x: SPREAD_X, y: SPREAD_Y, falloff: FALLOFF };
+    },
+    /* And the weight: SignalField.ink({ alpha: 0.6, trail: 0.3 }) */
+    ink: function (o) {
+      if (o) {
+        if (o.alpha !== undefined) DOT_ALPHA = o.alpha;
+        if (o.trail !== undefined) TRAIL = o.trail;
+        if (o.size  !== undefined) DOT_SIZE = o.size;
+      }
+      return { alpha: DOT_ALPHA, trail: TRAIL, size: DOT_SIZE };
+    },
     /* Jump straight to a movement by name, for looking at one on its own. */
     go: function (name) {
       for (var i = 0; i < MOVEMENTS.length; i++) {
