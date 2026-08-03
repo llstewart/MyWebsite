@@ -181,7 +181,15 @@
        less than half the curve and left peak density near five percent,
        which is why the first stipple came out as scattered specks instead
        of a cloud. These edges put the real range across the full 0 to 1. */
-    "  float density = smoothstep(0.30, 0.47, pattern(vec2(nx, ny)));",
+        /* The lower edge sits below the field's median on purpose.
+
+       The field's absolute level drifts with time, not just its shape, and
+       a window tight around one measured median only looks right at the
+       moment it was measured. It was dense at forty seconds and nearly
+       empty at two, which is to say empty exactly when somebody arrives.
+       A lower floor costs a little contrast at the peak and buys a spray
+       that is present from the first frame. */
+    "  float density = smoothstep(0.22, 0.46, pattern(vec2(nx, ny)));",
 
     /* The region, and this is the part I had missed entirely.
 
@@ -202,7 +210,7 @@
 
     /* Internal variation, so the region is not an even fill. */
     "  float env = smoothstep(0.15, 0.80, pattern(vec2(nx * 0.4 + 11.3, ny * 0.4 - 5.7)));",
-    "  float amount = density * u_lift * mix(0.45, 1.0, env) * reg;",
+    "  float amount = density * u_lift * mix(0.62, 1.0, env) * reg;",
 
     /* Stochastic threshold. This is the whole effect.
 
