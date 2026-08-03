@@ -177,7 +177,8 @@
     // Small, and there are five of them. A gentle bend, a tight neutral
     // inset so the band stays inside the capsule, and no chroma: prism
     // fringe on a 40px control reads as a rendering fault, not as glass.
-    pill:     { scale: -34,  chroma: 0, blur: 5, saturate: 1.35, border: 0.30, mapBlur: 6 }
+    pill:     { scale: -34,  chroma: 0, blur: 5, saturate: 1.35, border: 0.30, mapBlur: 6 },
+    feature:  { scale: -88,  chroma: 5, blur: 4, saturate: 1.45, border: 0.06, mapBlur: 13 }
   };
 
   function applyGlass() {

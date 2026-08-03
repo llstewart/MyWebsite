@@ -243,6 +243,56 @@
   }
 
   /* ---------------------------------------------------------------------
+     Disclosure motion.
+
+     Everything after the <summary> is moved into a two element wrapper so
+     CSS can animate it: a grid that runs 0fr to 1fr for the height, and an
+     inner element that carries the fade. The markup stays plain <details>
+     in the file, so no JavaScript still means a working disclosure.
+
+     Closing is the part browsers get wrong. [open] is removed the moment
+     the summary is clicked, so the content vanishes before any transition
+     can run. Here the click is intercepted, the element is marked, the
+     reverse plays, and [open] comes off at the end.
+     --------------------------------------------------------------------- */
+  function initDisclosureMotion() {
+    var items = $$("details");
+    if (!items.length) return;
+
+    items.forEach(function (d) {
+      var summary = d.querySelector("summary");
+      if (!summary || d.querySelector(":scope > .dsc")) return;
+
+      var wrap = document.createElement("div");
+      wrap.className = "dsc";
+      var inner = document.createElement("div");
+      inner.className = "dsc__inner";
+      while (summary.nextSibling) inner.appendChild(summary.nextSibling);
+      wrap.appendChild(inner);
+      d.appendChild(wrap);
+
+      if (reduced) return;
+
+      var timer = null;
+      summary.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (timer) { clearTimeout(timer); timer = null; d.classList.remove("is-closing"); }
+
+        if (!d.open) { d.open = true; return; }
+
+        d.classList.add("is-closing");
+        var ms = parseFloat(getComputedStyle(document.documentElement)
+                   .getPropertyValue("--d-close")) || 340;
+        timer = setTimeout(function () {
+          d.open = false;
+          d.classList.remove("is-closing");
+          timer = null;
+        }, ms);
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------------------
      Width-aware disclosures.
 
      Marked elements ship open, so a reader without JavaScript, a printer,
@@ -278,7 +328,8 @@
   }
 
   function boot() {
-    [initReveal, initGauge, initPalette, initDisclosures, initYear]
+    [initReveal, initGauge, initPalette, initDisclosureMotion,
+     initDisclosures, initYear]
       .forEach(function (fn) {
         try { fn(); } catch (err) {
           if (window.console) console.warn("[instrument] " + fn.name + " failed", err);

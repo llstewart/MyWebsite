@@ -58,6 +58,81 @@ body { opacity: 1; transition: opacity var(--d-base) linear; }
 }
 
 /* =========================================================================
+   Disclosures, opening and closing.
+
+   A <details> element has no transition of its own: the browser shows and
+   hides its content in a single frame, and it removes [open] the instant
+   you click, which is why a naive CSS transition animates open and snaps
+   shut. Two things fix that.
+
+   The height comes from a one row grid going 0fr to 1fr. That is the only
+   technique that animates to a height nobody has measured, and it works
+   without JavaScript reading offsetHeight or a max-height guess that
+   truncates long content.
+
+   The close is held open by script: instrument.js intercepts the click,
+   marks the element .is-closing so the rules below run in reverse, and only
+   removes [open] once the transition has finished.
+   ========================================================================= */
+
+.dsc {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--d-close) var(--e-sheet);
+}
+.dsc__inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.995);
+  transform-origin: top center;
+  transition:
+    opacity calc(var(--d-close) * 0.6) linear,
+    transform var(--d-close) var(--e-sheet);
+}
+
+details[open] > .dsc {
+  grid-template-rows: 1fr;
+  transition-duration: var(--d-open);
+}
+details[open] > .dsc > .dsc__inner {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity calc(var(--d-open) * 0.7) linear calc(var(--d-open) * 0.15),
+    transform var(--d-open) var(--e-sheet);
+}
+
+/* Held open by script while it plays the reverse. */
+details[open].is-closing > .dsc { grid-template-rows: 0fr; }
+details[open].is-closing > .dsc > .dsc__inner {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.995);
+  transition:
+    opacity calc(var(--d-close) * 0.5) linear,
+    transform var(--d-close) var(--e-sheet);
+}
+
+/* The control turns with the panel rather than snapping. */
+.entry__toggle::after,
+.feature__more-head .entry__toggle::after {
+  transition: transform var(--d-open) var(--e-sheet), opacity var(--d-open) var(--e-sheet);
+}
+details[open].is-closing .entry__toggle::after { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dsc, .dsc__inner, details[open] > .dsc, details[open] > .dsc > .dsc__inner {
+    transition: none;
+  }
+}
+
+/* Print wants every disclosure open and unclipped. */
+@media print {
+  .dsc { grid-template-rows: 1fr !important; }
+  .dsc__inner { overflow: visible !important; opacity: 1 !important; transform: none !important; }
+}
+
+/* =========================================================================
    Connection
    ========================================================================= */
 

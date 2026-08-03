@@ -1,6 +1,6 @@
 # Design system
 
-**Version:** 3.1, 2 August 2026
+**Version:** 3.2, 2 August 2026
 **Source of truth:** `assets/css/tokens.css`. If a value is not in that file, it
 should not exist anywhere else.
 
@@ -134,9 +134,14 @@ So the page carries an aerial of the **Bat&eacute;k&eacute; Plateau in the
 Democratic Republic of the Congo**, which is where Lincoln is from and which is
 already the brand language of his own product. It is used at two strengths:
 
-- **Page wide**, under a `rgba(251,251,249,0.88)` paper wash. At that strength it
-  reads as texture rather than as a photograph, the detail survives for the
-  displacement map, and black type still clears contrast.
+- **Page wide**, under a `rgba(251,251,249,0.66)` paper wash. Measured, not
+  guessed: against the brightest pixel in the aerial that leaves `--c-ink` at
+  14.1:1, `--c-ink-2` at 7.8:1, and `--c-ink-3`, the quietest step on the page,
+  at 5.0:1. It started at 0.88, which washed the place out for no benefit.
+  Body copy does not sit on the photograph directly: it sits on a **sheet**, a
+  glass panel at 0.78 to 0.70 white, which is how iOS handles content over a
+  wallpaper. The material carries the legibility so the image does not have to
+  be destroyed to provide it.
 - **The approach section**, at full strength, full bleed, with the glass panel on
   top. This is the one surface on the site where the material does what it was
   designed for, and it is placed where the Congo is the subject rather than the
@@ -165,7 +170,21 @@ Two curves, and nothing bounces.
 --d-fast   140ms   --d-base 320ms   --d-slow 680ms   --d-enter 980ms
 ```
 
-There is exactly one orchestrated moment: the arrival.
+**Disclosures open and close.** A `<details>` has no transition of its own: it
+shows and hides in a single frame, and it drops `[open]` the instant you click,
+which is why a naive CSS transition animates open and snaps shut. Two things fix
+it. The height comes from a one row grid going `0fr` to `1fr`, which is the only
+technique that animates to a height nobody measured and works without a
+`max-height` guess that truncates. The close is held open by script:
+`instrument.js` intercepts the click, marks the element `.is-closing` so the
+rules run in reverse, and removes `[open]` when the transition finishes.
+
+The curve is `--e-sheet: cubic-bezier(0.32, 0.72, 0, 1)`, which is the shape
+Apple uses for sheets: most of the distance early, then a settle, no overshoot.
+Opening takes 460ms, closing 340ms, because a close that matches its open reads
+as slow.
+
+There is one other orchestrated moment: the arrival.
 
 The name is split into individual glyphs. Each one starts a full line height
 below its place, blurred and weightless, and settles into a soft two layer
@@ -190,6 +209,7 @@ frame, reveals are off, and view transitions are disabled.
 | Component | Notes |
 |---|---|
 | **Nav** | A floating glass capsule of section links and search. No name, no title. Collapses to the palette below 720px |
+| **Sheet** | A glass panel carrying a whole section's body copy over the photograph. Skills, the projects index, and experience each sit on one |
 | **Pills** | The landing's section row. Real refraction, not a blur: five small surfaces at `scale: -34`, `chroma: 0`, since a prism fringe on a 40px control reads as a rendering fault |
 | **Languages** | Seven cards, name over years, on a rule. The heaviest thing in the skills section because it is the first thing matched against |
 | **Feature** | One project, given the weight it earns. Two columns: lede with the result rule, and the detail |

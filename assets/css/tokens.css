@@ -93,6 +93,11 @@
   /* --- Motion -------------------------------------------------------------
      One curve for entrances, one for interface response. Nothing bounces.   */
   --e-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  /* The curve Apple uses for sheets and disclosures: almost all of the
+     distance is covered early, then it settles. Nothing overshoots. */
+  --e-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --d-open:  460ms;
+  --d-close: 340ms;
   --e-inout: cubic-bezier(0.65, 0, 0.35, 1);
   --d-fast:  140ms;
   --d-base:  320ms;

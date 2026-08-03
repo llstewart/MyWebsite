@@ -144,11 +144,7 @@
    density for a list nobody reads linearly.
    ========================================================================= */
 
-.langs-wrap {
-  padding-top: var(--s-5);
-  border-top: 2px solid var(--c-ink);
-  margin-bottom: var(--s-7);
-}
+.langs-wrap { margin-bottom: var(--s-7); }
 .langs__label { margin-bottom: var(--s-5); }
 
 .langs {
@@ -197,6 +193,286 @@
 .skills__row:last-child { border-bottom: var(--hairline) solid var(--c-line); }
 .skills__row--learning .skills__val { color: var(--c-ink); }
 .skills__note { margin-top: var(--s-5); }
+
+/* =========================================================================
+   Sheets.
+
+   Body copy does not sit directly on the photograph. It sits on a glass
+   sheet over it, which is how iOS handles content over a wallpaper: the
+   material carries the legibility so the image underneath does not have to
+   be washed out to nothing.
+   ========================================================================= */
+
+.sheet {
+  padding: clamp(1.5rem, 3vw, 2.75rem);
+  border-radius: var(--r-glass);
+  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.70));
+}
+.sheet.index { margin-top: var(--s-5); }
+.sheet.index .entry:first-child { border-top: 0; }
+.sheet.index .entry:last-child { border-bottom: 0; }
+.sheet .role:first-child { border-top: 0; padding-top: 0; }
+
+/* =========================================================================
+   PROJECTS
+
+   A feature and an index. Six identical panels stacked is a list of
+   documents; one piece with weight followed by five scannable lines is an
+   argument about what matters most.
+   ========================================================================= */
+
+.feature {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: var(--s-7);
+  padding: clamp(1.5rem, 3vw, 2.75rem);
+  border-radius: var(--r-glass);
+}
+@media (max-width: 1000px) { .feature { grid-template-columns: 1fr; gap: var(--s-6); } }
+
+.feature__name {
+  margin-top: var(--s-4);
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--c-ink);
+}
+.feature__claim {
+  margin-top: var(--s-4);
+  max-width: 34ch;
+  font-size: var(--t-lead);
+  line-height: 1.42;
+  color: var(--c-ink-2);
+  text-wrap: pretty;
+}
+.feature__result {
+  margin-top: var(--s-5);
+  padding-top: var(--s-4);
+  border-top: 2px solid var(--c-brand);
+  color: var(--c-brand);
+  letter-spacing: 0.07em;
+  text-transform: none;
+  line-height: 1.8;
+}
+.feature__lede p:last-child { margin-top: var(--s-4); }
+
+.feature__detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-5) var(--s-6);
+  align-content: start;
+}
+@media (max-width: 620px) { .feature__detail { grid-template-columns: 1fr; } }
+.feature__col h4 { margin-bottom: var(--s-3); }
+.feature__col p {
+  font-size: var(--t-small);
+  line-height: 1.65;
+  color: var(--c-ink-2);
+  text-wrap: pretty;
+}
+/* Build is the long column, so it takes the full height beside the others. */
+.feature__col:nth-child(2) { grid-row: span 2; }
+@media (max-width: 620px) { .feature__col:nth-child(2) { grid-row: auto; } }
+
+.feature__stack {
+  grid-column: 1 / -1;
+  padding-top: var(--s-4);
+  border-top: var(--hairline) solid var(--c-line);
+  color: var(--c-ink-3);
+  line-height: 1.9;
+  text-transform: none;
+  letter-spacing: 0.03em;
+}
+
+/* The detail collapses on a phone only. It ships open in the markup so no
+   JavaScript, print, and crawlers all get the full text, and the summary
+   only exists at the width where the disclosure does any work. */
+.feature__more, .role__more { display: contents; }
+.feature__more-head {
+  display: none;
+  align-items: center; gap: var(--s-4);
+  padding-block: var(--s-4);
+  border-top: var(--hairline) solid var(--c-line);
+  cursor: pointer;
+  list-style: none;
+}
+.feature__more-head::-webkit-details-marker { display: none; }
+.feature__more-head .entry__toggle { margin-left: auto; }
+
+@media (max-width: 900px) {
+  .feature__more, .role__more { display: block; }
+  .feature__more-head { display: flex; }
+  .feature__more[open] .feature__detail { padding-top: var(--s-4); }
+  .role__more[open] .role__points { margin-top: var(--s-4); }
+}
+
+/* --- The index ----------------------------------------------------------- */
+
+.index { margin-top: var(--s-6); }
+
+.entry { border-top: var(--hairline) solid var(--c-line-strong); }
+.entry:last-child { border-bottom: var(--hairline) solid var(--c-line-strong); }
+
+.entry__head {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) auto 30px;
+  gap: var(--s-5);
+  align-items: baseline;
+  padding-block: var(--s-5);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color var(--d-fast) linear;
+}
+.entry__head::-webkit-details-marker { display: none; }
+.entry__head:hover { background: rgba(16, 26, 23, 0.04); }
+
+.entry__name {
+  font-size: var(--t-h3);
+  font-weight: 500;
+  letter-spacing: -0.016em;
+  color: var(--c-ink);
+}
+.entry__claim {
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--c-ink-2);
+  text-wrap: pretty;
+}
+.entry__meta { color: var(--c-ink-3); white-space: nowrap; }
+
+.entry__toggle {
+  position: relative;
+  width: 30px; height: 30px;
+  border: var(--hairline) solid var(--c-line-strong);
+  border-radius: var(--r-tight);
+  align-self: center;
+  justify-self: end;
+  transition: border-color var(--d-fast) linear;
+}
+.entry__toggle::before,
+.entry__toggle::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  background: var(--c-ink-2);
+}
+.entry__toggle::before { width: 10px; height: var(--hairline); }
+.entry__toggle::after  { width: var(--hairline); height: 10px;
+  transition: transform var(--d-base) var(--e-out); }
+.entry__d[open] .entry__toggle::after { transform: scaleY(0); }
+.entry__head:hover .entry__toggle { border-color: var(--c-brand-edge); }
+
+.entry__body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-6);
+  padding: 0 0 var(--s-6);
+}
+@media (max-width: 900px) { .entry__body { grid-template-columns: 1fr; gap: var(--s-5); } }
+
+.entry__col h4 { margin-bottom: var(--s-3); }
+.entry__col p {
+  font-size: var(--t-small);
+  line-height: 1.65;
+  color: var(--c-ink-2);
+  text-wrap: pretty;
+}
+.entry__stack {
+  grid-column: 1 / -1;
+  padding-top: var(--s-4);
+  border-top: var(--hairline) solid var(--c-line);
+  color: var(--c-ink-3);
+  line-height: 1.9;
+  text-transform: none;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 900px) {
+  .entry__head {
+    grid-template-columns: minmax(0, 1fr) 30px;
+    gap: var(--s-3) var(--s-4);
+    align-items: start;
+  }
+  .entry__name { grid-column: 1; }
+  .entry__toggle { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
+  .entry__claim, .entry__meta { grid-column: 1; }
+  .entry__meta { white-space: normal; }
+}
+
+/* =========================================================================
+   EXPERIENCE
+   ========================================================================= */
+
+.roles { display: grid; gap: var(--s-7); }
+
+.role {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: var(--s-6);
+  padding-top: var(--s-5);
+  border-top: 2px solid var(--c-ink);
+}
+@media (max-width: 900px) { .role { grid-template-columns: 1fr; gap: var(--s-4); } }
+
+.role__when { display: flex; flex-direction: column; gap: var(--s-2); }
+@media (max-width: 900px) { .role__when { flex-direction: row; flex-wrap: wrap; gap: var(--s-4); } }
+
+.role__title { margin-bottom: var(--s-2); }
+.role__org { color: var(--c-ink-3); font-size: var(--t-small); }
+.role__results {
+  margin-top: var(--s-3);
+  color: var(--c-brand);
+  letter-spacing: 0.07em;
+  text-transform: none;
+  line-height: 1.7;
+  max-width: 60ch;
+}
+.role__note { margin-top: var(--s-4); max-width: 52ch; color: var(--c-ink-2); font-size: var(--t-small); }
+
+.role__points { margin-top: var(--s-5); display: grid; gap: var(--s-4); max-width: 68ch; }
+.role__points li {
+  position: relative;
+  padding-left: var(--s-5);
+  font-size: var(--t-small);
+  line-height: 1.65;
+  color: var(--c-ink-2);
+  text-wrap: pretty;
+}
+.role__points li::before {
+  content: "";
+  position: absolute; left: 0; top: 0.68em;
+  width: 10px; height: var(--hairline);
+  background: var(--c-brand);
+}
+.role--edu .role__title { font-weight: 400; }
+
+.incident {
+  margin-top: var(--s-5);
+  max-width: 68ch;
+  border: var(--hairline) solid var(--c-line-strong);
+  border-radius: var(--r-panel);
+  background: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+}
+.incident__head {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  cursor: pointer;
+  list-style: none;
+}
+.incident__head::-webkit-details-marker { display: none; }
+.incident__head::after {
+  content: "+";
+  margin-left: auto;
+  font-family: var(--f-mono); color: var(--c-ink-3);
+}
+.incident[open] .incident__head::after { content: "\2013"; }
+.incident__body {
+  padding: 0 var(--s-5) var(--s-5);
+  font-size: var(--t-small);
+  line-height: 1.68;
+  color: var(--c-ink-2);
+  text-wrap: pretty;
+}
 
 /* =========================================================================
    APPROACH

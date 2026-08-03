@@ -75,22 +75,10 @@ summary::-webkit-details-marker { display: none; }
 }
 .label--brand { color: var(--c-brand); }
 
-.eyebrow {
-  display: flex; align-items: baseline; gap: var(--s-3);
-  font-family: var(--f-mono);
-  font-size: var(--t-label);
-  font-weight: 500;
-  letter-spacing: var(--tr-label);
-  text-transform: uppercase;
-  color: var(--c-ink-3);
-}
-.eyebrow__mark { color: var(--c-brand); }
-.eyebrow__rule {
-  flex: 1 1 auto; height: var(--hairline);
-  background: linear-gradient(90deg, var(--c-line-strong), transparent);
-  transform: translateY(-0.25em);
-}
-@media (max-width: 620px) { .eyebrow__rule { display: none; } }
+/* The section label. A name, nothing else. An earlier version carried a
+   bullet, a rule, and a short phrase off to the right on every section; it
+   read as a tic rather than as structure. */
+.section__label { color: var(--c-ink-3); }
 
 .h1 {
   font-size: var(--t-h1); font-weight: 500;
@@ -167,9 +155,14 @@ summary::-webkit-details-marker { display: none; }
    every glass surface on this page would collapse to plain frost without it.
 
    Two layers, on purpose. The image sits at full opacity and a paper wash
-   sits on top at 0.88, which keeps the detail intact for the displacement
-   map while pulling the contrast down to where black type still reads.
-   Lightening the file itself would have thrown that detail away.
+   sits on top, which keeps the detail intact for the displacement map while
+   holding the contrast where type still reads. Lightening the file itself
+   would have thrown that detail away.
+
+   The wash is 0.66. That is measured, not guessed: against the brightest
+   pixel in the aerial it leaves --c-ink at 14.1:1, --c-ink-2 at 7.8:1, and
+   --c-ink-3, the quietest step on the page, at 5.0:1. It started at 0.88,
+   which was over cautious and washed the place out for no benefit.
    ========================================================================= */
 
 .field {
@@ -187,7 +180,7 @@ summary::-webkit-details-marker { display: none; }
 .field::after {
   content: ""; position: absolute; inset: 0;
   background:
-    linear-gradient(180deg, rgba(251,251,249,0.90) 0%, rgba(251,251,249,0.86) 45%, rgba(251,251,249,0.93) 100%);
+    linear-gradient(180deg, rgba(251,251,249,0.70) 0%, rgba(251,251,249,0.64) 45%, rgba(251,251,249,0.74) 100%);
 }
 
 /* =========================================================================
