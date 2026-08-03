@@ -1,8 +1,8 @@
 /* ===========================================================================
    field.js — the flow field.
 
-   Particles drifting along an invisible current, leaving short trails, with
-   the current itself cycling through six named movements.
+   Particles drifting along an invisible current, drawn as points with no
+   trails, with the current itself cycling through six named movements.
 
    ARCHITECTURE
 
@@ -141,7 +141,7 @@
          power keeps the crests and empties the space between them, which
          is what turns a gradient into bands with gaps. */
       density: function (x, y, t) {
-        return Math.pow(0.5 + 0.5 * Math.sin(wavePhase(x, y, t)), 2.2);
+        return Math.pow(0.5 + 0.5 * Math.sin(wavePhase(x, y, t)), 1.7);
       } },
 
     /* Two drifting vortices. Particles run tangentially, pulling the spray
@@ -184,7 +184,7 @@
       /* Rings, for the same reason the waves have bands: without a density
          term the rings exist in the maths and not on the screen. */
       density: function (x, y, t) {
-        return Math.pow(0.5 + 0.5 * Math.sin(rippleAt(x, y, t).phase), 2.0);
+        return Math.pow(0.5 + 0.5 * Math.sin(rippleAt(x, y, t).phase), 1.6);
       } },
 
     /* NEW. Turbulence: the noise current sampled at a much finer scale and
@@ -207,7 +207,7 @@
   var HOLD = 15;     // seconds on one movement
   var FADE = 4.5;    // seconds crossfading into the next
 
-  var cols = 0, rows = 0, angles = null;
+  var cols = 0, rows = 0, angles = null, weights = null;
   var from = 0, to = 1, blend = 0, phase = 0, speedMul = 1;
 
   function allocGrid(cw, ch) {
@@ -215,6 +215,7 @@
     rows = Math.ceil(ch / CELL) + 2;
     gridW = cols; gridH = rows;
     angles = new Float32Array(cols * rows);
+    weights = new Float32Array(cols * rows);
   }
 
   function advance(dt) {
@@ -254,10 +255,20 @@
     return a + (b - a) * blend;
   }
 
+  /* Both grids are filled in one pass, once per frame.
+
+     The weight used to be computed per particle, which meant a square root,
+     two powers and a sine for every one of them on every frame. There are
+     thousands of particles and about three thousand cells, and the answer
+     only varies per cell, so it was the same work done several times over
+     for no extra information. Per cell it is a fixed cost that does not
+     grow when the particle count does. */
   function buildGrid(t) {
     var A = MOVEMENTS[from].angle, B = MOVEMENTS[to].angle, k = blend;
+    var half = CELL * 0.5;
     for (var y = 0; y < rows; y++) {
       var base = y * cols;
+      var py_ = y * CELL + half;
       for (var x = 0; x < cols; x++) {
         var a = A(x, y, t);
         /* Rotate along the shortest arc rather than averaging vectors.
@@ -265,6 +276,7 @@
            and a zero length direction stalls every particle standing in
            that cell. */
         angles[base + x] = k <= 0 ? a : a + arc(a, B(x, y, t)) * k;
+        weights[base + x] = mask(x * CELL + half, py_) * bandAt(x, y, t);
       }
     }
   }
@@ -276,16 +288,20 @@
   var DPR_CAP = 1.5;
   var FRAME_MS = 1000 / 30;
 
-  /* Definition. A dot has to survive as a dot.
+  /* No trails. The canvas is cleared every frame.
 
-     At 0.38 alpha with a trail lasting a dozen frames, a mark spent most of
-     its life as a faint smear and only briefly looked like a point. Raising
-     the alpha and shortening the trail together is what makes it read as
-     spray: the head is clearly a dot, and the tail is short enough to say
-     which way it went without becoming the thing you see. */
-  var TRAIL = 0.24;      // paper alpha per frame; lower = longer trails
-  var DOT_ALPHA = 0.54;
-  var DOT_SIZE = 1.25;
+     Trails were an attempt to make motion legible and they cost more than
+     they bought. A tail is a smear, and a page of smears is a page of
+     smears however short you make them: at any given instant most of the
+     ink on screen was the history of a dot rather than the dot. The
+     reference has no streaks in it either, only points.
+
+     Clearing every frame means everything on screen is a particle at its
+     actual position right now, which is the whole point, and it lets each
+     one be drawn at full weight instead of being the brightest part of a
+     gradient. Motion reads from the dots moving, which is what motion is. */
+  var DOT_ALPHA = 0.66;
+  var DOT_SIZE = 1.3;
   var LIFE = 460;        // frames before a particle is recycled
 
   /* Density ceiling. A flow field has sinks, and without a cap those cells
@@ -327,7 +343,7 @@
      circle instead of part of an ellipse standing on end. */
   var SPREAD_X = 0.92;   // fraction of the viewport width it reaches
   var SPREAD_Y = 0.72;   // fraction of half the height, from the middle
-  var FALLOFF = 1.5;     // >1 concentrates toward the anchored edge
+  var FALLOFF = 1.15;    // >1 concentrates toward the anchored edge
 
   function mask(x, y) {
     var nx = x / cw;
@@ -339,7 +355,7 @@
   }
 
   var dpr = 1, cw = 0, ch = 0;
-  var count = 0, px = null, py = null, pl = null, pv = null;
+  var count = 0, px = null, py = null, pl = null, pv = null, pt = null;
   var occCols = 0, occRows = 0, occ = null;
   var raf = null, last = 0, frame = 0;
   var energy = 0, lastScroll = window.scrollY;
@@ -361,14 +377,24 @@
     occRows = Math.ceil(ch / OCC) + 2;
     occ = new Uint8Array(occCols * occRows);
 
-    /* Raised, because the band density now refuses a large share of draws
-       on the movements that have crests. Without more particles the wave
-       troughs and the whole page thin out together. */
-    count = Math.min(15000, Math.max(2200, Math.round(cw * ch / 165)));
+    /* The count is high and that is fine, because the cost is not here.
+
+       A particle only draws when its own threshold clears the local
+       weight, and that weight averages well under a half once the mask and
+       the band crests are multiplied together. Measured, about a tenth of
+       them were drawing, which is why the page looked bare at six thousand.
+
+       What matters for cost is how many fillRect calls happen, which is the
+       number DRAWN, not the number simulated. Simulation is a handful of
+       arithmetic per particle with the trigonometry now hoisted to the
+       grid, so carrying three times as many is cheap and buys the density
+       back. */
+    count = Math.min(26000, Math.max(4000, Math.round(cw * ch / 108)));
     px = new Float32Array(count);
     py = new Float32Array(count);
     pl = new Float32Array(count);
     pv = new Float32Array(count);
+    pt = new Float32Array(count);
     for (var i = 0; i < count; i++) spawn(i, true);
 
     ctx.fillStyle = PAPER;
@@ -392,6 +418,10 @@
        whole page blinks at once. */
     pl[i] = initial ? Math.random() * LIFE : 0;
     pv[i] = 0.6 + Math.random() * 0.85;
+    /* This particle's own threshold, fixed for its whole life. See the note
+       at the draw call: re-rolling it per frame is what made the dots
+       flicker and read as faint. */
+    pt[i] = Math.random();
   }
 
   function step(t) {
@@ -402,8 +432,7 @@
 
     buildGrid(t);
 
-    /* Painted over, not cleared, so each particle leaves a trail. */
-    ctx.fillStyle = "rgba(" + P[0] + "," + P[1] + "," + P[2] + "," + TRAIL + ")";
+    ctx.fillStyle = PAPER;
     ctx.fillRect(0, 0, cw, ch);
 
     occ.fill(0);
@@ -441,10 +470,24 @@
       if (ox >= 0 && oy >= 0 && ox < occCols && oy < occRows) {
         var oi = oy * occCols + ox;
         /* Where it may be drawn, times how much of a crest it is standing
-           in. Both are continuous and both are applied as a probability,
-           so neither can band. */
-        var chance = mask(px[i], py[i]) * bandAt(px[i] / CELL, py[i] / CELL, t);
-        if (Math.random() < chance && occ[oi] < OCC_MAX) {
+           in. Both are continuous, so neither can band.
+
+           Compared against the particle's OWN fixed threshold, not a fresh
+           random number. This is the whole reason the dots looked faint.
+
+           With Math.random() per frame, every particle was a new coin flip
+           every frame: one drawn at 40% density appeared in two frames out
+           of five, at a different moment from its neighbours. Trails hid
+           that by leaving something behind between appearances. Take the
+           trails away and it is plain flicker, and flicker at 30fps reads
+           as faint rather than as fast, because the eye averages it.
+
+           Holding the threshold still means a particle is either drawn or
+           not, steadily, and it fades in or out only when the field it is
+           standing in changes. The randomness is still there, in which
+           particles are visible where, but it stops being re-rolled at
+           thirty hertz. */
+        if (pt[i] < weights[gy * cols + gx] && occ[oi] < OCC_MAX) {
           occ[oi]++;
           ctx.fillRect(px[i], py[i], DOT_SIZE, DOT_SIZE);
         }
@@ -529,14 +572,13 @@
       }
       return { side: SIDE, x: SPREAD_X, y: SPREAD_Y, falloff: FALLOFF };
     },
-    /* And the weight: SignalField.ink({ alpha: 0.6, trail: 0.3 }) */
+    /* And the weight: SignalField.ink({ alpha: 0.75, size: 1.5 }) */
     ink: function (o) {
       if (o) {
         if (o.alpha !== undefined) DOT_ALPHA = o.alpha;
-        if (o.trail !== undefined) TRAIL = o.trail;
         if (o.size  !== undefined) DOT_SIZE = o.size;
       }
-      return { alpha: DOT_ALPHA, trail: TRAIL, size: DOT_SIZE };
+      return { alpha: DOT_ALPHA, size: DOT_SIZE, dots: count };
     },
     /* Jump straight to a movement by name, for looking at one on its own. */
     go: function (name) {
