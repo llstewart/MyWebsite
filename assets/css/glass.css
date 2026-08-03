@@ -25,11 +25,11 @@
      background: linear-gradient(180deg, rgba(14,14,22,0.18), rgba(14,14,22,0.32));
      box-shadow:
        0 24px 60px rgba(0,0,0,0.45),
-       inset 0 1px 1px rgba(255,255,255,0.5),
-       inset 0 -8px 20px rgba(255,255,255,0.06),
-       inset 0 0 0 1px rgba(255,255,255,0.13);
+       inset 0 1px 1px rgba(var(--c-up), calc(0.5 * var(--up-k))),
+       inset 0 -8px 20px rgba(var(--c-up), calc(0.06 * var(--up-k))),
+       inset 0 0 0 1px rgba(var(--c-up), calc(0.13 * var(--up-k)));
      ::after -> radial-gradient(160px circle at var(--gx) var(--gy),
-                 rgba(255,255,255,0.22), rgba(255,255,255,0.04) 45%, transparent 70%)
+                 rgba(var(--c-up), calc(0.22 * var(--up-k))), rgba(var(--c-up), calc(0.04 * var(--up-k))) 45%, transparent 70%)
 
    Every layer below is that same stack in the same order. The alphas on the
    tint and the drop shadow are the one departure: hers assume a dark photo
@@ -43,12 +43,12 @@
   position: relative;
   isolation: isolate;
   border-radius: var(--r-glass);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.20));
+  background: linear-gradient(180deg, rgba(var(--c-up), calc(0.34 * var(--up-k))), rgba(var(--c-up), calc(0.20 * var(--up-k))));
   box-shadow:
-    0 24px 60px rgba(16, 26, 23, 0.13),
-    inset 0 1px 1px rgba(255, 255, 255, 0.85),
-    inset 0 -8px 20px rgba(255, 255, 255, 0.30),
-    inset 0 0 0 1px rgba(16, 26, 23, 0.10);
+    0 24px 60px rgba(var(--c-dn), calc(0.13 * var(--dn-k))),
+    inset 0 1px 1px rgba(var(--c-up), calc(0.85 * var(--up-k))),
+    inset 0 -8px 20px rgba(var(--c-up), calc(0.30 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
 }
 
 /* Frosted tier and the Safari/Firefox fallback share one declaration. */
@@ -79,11 +79,11 @@
 .card {
   position: relative;
   border-radius: var(--r-glass);
-  background: rgba(255, 255, 255, 0.66);
+  background: rgba(var(--c-up), calc(0.66 * var(--up-k)));
   box-shadow:
-    inset 0 0 0 1px rgba(16, 26, 23, 0.07),
-    0 1px 2px rgba(16, 26, 23, 0.03),
-    0 18px 44px -22px rgba(16, 26, 23, 0.16);
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.07 * var(--dn-k))),
+    0 1px 2px rgba(var(--c-dn), calc(0.03 * var(--dn-k))),
+    0 18px 44px -22px rgba(var(--c-dn), calc(0.16 * var(--dn-k)));
   --r-inner: calc(var(--r-glass) - var(--card-pad, 2rem));
 }
 
@@ -94,10 +94,10 @@
 .glass--lift:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 30px 70px rgba(16, 26, 23, 0.17),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9),
-    inset 0 -8px 20px rgba(255, 255, 255, 0.34),
-    inset 0 0 0 1px rgba(16, 26, 23, 0.13);
+    0 30px 70px rgba(var(--c-dn), calc(0.17 * var(--dn-k))),
+    inset 0 1px 1px rgba(var(--c-up), calc(0.9 * var(--up-k))),
+    inset 0 -8px 20px rgba(var(--c-up), calc(0.34 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.13 * var(--dn-k)));
 }
 
 /* ---------------------------------------------------------------------------
@@ -123,10 +123,10 @@
 @media (hover: hover) {
   .pill:hover, .nav__cmd:hover {
     box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 1),
-      inset 0 -6px 14px rgba(255, 255, 255, 0.5),
-      inset 0 0 0 1px rgba(16, 26, 23, 0.16),
-      0 6px 18px -8px rgba(16, 26, 23, 0.22);
+      inset 0 1px 1px rgba(var(--c-up), calc(1 * var(--up-k))),
+      inset 0 -6px 14px rgba(var(--c-up), calc(0.5 * var(--up-k))),
+      inset 0 0 0 1px rgba(var(--c-dn), calc(0.16 * var(--dn-k))),
+      0 6px 18px -8px rgba(var(--c-dn), calc(0.22 * var(--dn-k)));
   }
 }
 
@@ -177,9 +177,9 @@
   transform: scale(0.968);
   transition-duration: var(--d-press);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.45),
-    inset 0 0 0 1px rgba(16, 26, 23, 0.16),
-    0 1px 2px rgba(16, 26, 23, 0.10);
+    inset 0 1px 1px rgba(var(--c-up), calc(0.45 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.16 * var(--dn-k))),
+    0 1px 2px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
 }
 .glass--lift:active, .glass--lift.is-pressed {
   transform: scale(0.995);
@@ -279,7 +279,7 @@
 .nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
 .nav__mark:hover, .nav__mark:focus-visible {
   color: var(--c-ink);
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(var(--c-up), calc(0.55 * var(--up-k)));
 }
 @media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
 
@@ -300,12 +300,12 @@
   transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
 }
 .nav__link:hover, .nav__link:focus-visible {
-  color: var(--c-ink); background: rgba(255, 255, 255, 0.5);
+  color: var(--c-ink); background: rgba(var(--c-up), calc(0.5 * var(--up-k)));
 }
 .nav__link[aria-current="true"] {
   color: var(--c-ink);
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: inset 0 0 0 1px rgba(16, 26, 23, 0.08);
+  background: rgba(var(--c-up), calc(0.62 * var(--up-k)));
+  box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.08 * var(--dn-k)));
 }
 
 .nav__cmd {
@@ -316,17 +316,17 @@
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-ink-2);
-  background: rgba(255, 255, 255, 0.42);
-  box-shadow: inset 0 0 0 1px rgba(16, 26, 23, 0.08);
+  background: rgba(var(--c-up), calc(0.42 * var(--up-k)));
+  box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.08 * var(--dn-k)));
   transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
 }
-.nav__cmd:hover, .nav__cmd:focus-visible { color: var(--c-ink); background: rgba(255, 255, 255, 0.7); }
+.nav__cmd:hover, .nav__cmd:focus-visible { color: var(--c-ink); background: rgba(var(--c-up), calc(0.7 * var(--up-k))); }
 .nav__cmd kbd {
   font-family: inherit; font-size: inherit;
   padding: 1px var(--s-2);
   border-radius: 5px;
   color: var(--c-ink-3);
-  box-shadow: inset 0 0 0 1px rgba(16, 26, 23, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.14 * var(--dn-k)));
 }
 
 /* =========================================================================
@@ -346,7 +346,7 @@
   z-index: var(--z-modal);
   display: grid; place-items: start center;
   padding-top: 13vh;
-  background: rgba(16, 26, 23, 0.22);
+  background: rgba(var(--c-dn), calc(0.22 * var(--dn-k)));
   backdrop-filter: blur(4px) saturate(1.1);
   -webkit-backdrop-filter: blur(4px) saturate(1.1);
   opacity: 0; pointer-events: none;
@@ -411,14 +411,14 @@
   padding: var(--s-2) var(--s-3);
   border: 0;
   border-radius: 999px;
-  background: rgba(16, 26, 23, 0.05);
+  background: rgba(var(--c-dn), calc(0.05 * var(--dn-k)));
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-ink-3);
   transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
 }
 .palette__close:hover, .palette__close:focus-visible {
-  color: var(--c-ink); background: rgba(16, 26, 23, 0.09);
+  color: var(--c-ink); background: rgba(var(--c-dn), calc(0.09 * var(--dn-k)));
 }
 
 .palette__list {
@@ -442,9 +442,9 @@
   transition: background-color var(--d-fast) linear, color var(--d-fast) linear;
 }
 .palette__item[aria-selected="true"] {
-  background: rgba(16, 26, 23, 0.06);
+  background: rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
   color: var(--c-ink);
-  box-shadow: inset 0 0 0 1px rgba(16, 26, 23, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
 }
 .palette__kind {
   font-family: var(--f-mono); font-size: var(--t-label);
@@ -476,3 +476,69 @@
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-ink-4);
 }
+
+
+/* ---------------------------------------------------------------------------
+   The theme control.
+
+   Top right, on its own, because the bar is centred and this is not a
+   section link. Frosted rather than refractive on purpose: a displacement
+   map is generated per element at O(w x h), and buying one for a 34px
+   control to bend eight pixels of background is the kind of cost that added
+   up to the Approach section stalling.
+
+   It shows what you will GET, not what you are in. A dark circle means
+   pressing it takes you to dark. Showing the current state is the more
+   common choice and it is the wrong one: a control that displays a
+   condition looks like a status light, and people do not press status
+   lights.
+   --------------------------------------------------------------------------- */
+.theme {
+  position: fixed;
+  top: var(--s-3);
+  right: var(--s-4);
+  z-index: var(--z-nav);
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  border-radius: 999px;
+  background: linear-gradient(180deg,
+    rgba(var(--c-up), calc(0.55 * var(--up-k))),
+    rgba(var(--c-up), calc(0.34 * var(--up-k))));
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow:
+    var(--e-2),
+    inset 0 1px 1px rgba(var(--c-up), calc(0.9 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
+  transition:
+    transform var(--d-base) var(--e-out),
+    box-shadow var(--d-base) var(--e-out),
+    opacity var(--d-slow) var(--e-out);
+}
+.is-loading .theme { opacity: 0; transform: translateY(-8px); }
+
+.theme__dot {
+  width: 15px; height: 15px;
+  border-radius: 999px;
+  background: var(--c-ink);
+  /* The crescent. One inset shadow in the paper colour, offset, which is
+     the whole moon. */
+  box-shadow: inset -4px -2px 0 0 var(--c-paper);
+  transition: background-color var(--d-base) linear,
+              box-shadow var(--d-base) var(--e-sheet),
+              transform var(--d-base) var(--e-sheet);
+}
+:root[data-theme="dark"] .theme__dot {
+  /* Full circle, no crescent: pressing it returns to light. */
+  box-shadow: inset 0 0 0 0 var(--c-paper);
+  transform: rotate(180deg);
+}
+
+@media (hover: hover) {
+  .theme:hover { box-shadow: var(--e-3),
+    inset 0 1px 1px rgba(var(--c-up), calc(0.95 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.14 * var(--dn-k))); }
+}
+.theme:active { transform: scale(0.94); }
+
+@media (max-width: 560px) { .theme { width: 34px; height: 34px; right: var(--s-3); } }

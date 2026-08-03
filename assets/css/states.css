@@ -166,7 +166,7 @@ details[open].is-closing .entry__toggle::after { transform: none; }
   border-radius: var(--r-tight);
   background: var(--c-ink);
   color: var(--c-paper);
-  box-shadow: 0 12px 30px -14px rgba(16, 26, 23, 0.5);
+  box-shadow: 0 12px 30px -14px rgba(var(--c-dn), calc(0.5 * var(--dn-k)));
   transform: translate(-50%, calc(100% + var(--s-6)));
   opacity: 0;
   transition: transform var(--d-base) var(--e-out), opacity var(--d-fast) linear;
@@ -193,12 +193,12 @@ details[open].is-closing .entry__toggle::after { transform: none; }
 .action.is-pressed          { transform: scale(0.985); background: var(--c-brand-dim); }
 .action--primary.is-pressed { background: var(--c-brand); border-color: var(--c-brand); }
 .nav__link.is-pressed,
-.palette__item.is-pressed   { background: rgba(16, 26, 23, 0.10); color: var(--c-ink); }
+.palette__item.is-pressed   { background: rgba(var(--c-dn), calc(0.10 * var(--dn-k))); color: var(--c-ink); }
 .nav__cmd.is-pressed,
 .palette__close.is-pressed  { border-color: var(--c-brand); color: var(--c-brand); }
 .link.is-pressed            { background-size: 100% var(--hairline); }
 .entry__head.is-pressed,
-.incident__head.is-pressed  { background: rgba(16, 26, 23, 0.06); }
+.incident__head.is-pressed  { background: rgba(var(--c-dn), calc(0.06 * var(--dn-k))); }
 .pill.is-pressed            { transform: scale(0.97); }
 
 /* No hover on touch. Without this the last tapped card keeps its lift. */
@@ -206,7 +206,7 @@ details[open].is-closing .entry__toggle::after { transform: none; }
   .glass--lift:hover { transform: none; }
   .action:hover {
     transform: none; color: var(--c-ink);
-    background: rgba(255, 255, 255, 0.5); border-color: var(--c-line-strong);
+    background: rgba(var(--c-up), calc(0.5 * var(--up-k))); border-color: var(--c-line-strong);
   }
   .action--primary:hover { background: var(--c-ink); color: var(--c-paper); border-color: var(--c-ink); }
   .link:hover { background-size: 0% var(--hairline); }
@@ -255,7 +255,7 @@ a[data-state="missing"] { color: var(--c-live); }
     -webkit-backdrop-filter: none !important;
   }
   .glass::before, .glass--flat::before { display: none; }
-  .palette { background: rgba(16, 26, 23, 0.45); backdrop-filter: none; }
+  .palette { background: rgba(var(--c-dn), calc(0.45 * var(--dn-k))); backdrop-filter: none; }
   .field { opacity: 0.4; }
 }
 :root[data-glass-mode="opaque"] .glass,
@@ -279,10 +279,10 @@ a[data-state="missing"] { color: var(--c-live); }
     --c-ink-2: #24302C;
     --c-ink-3: #35423D;
     --c-ink-4: #43504A;
-    --c-line: rgba(16, 26, 23, 0.28);
-    --c-line-strong: rgba(16, 26, 23, 0.5);
-    --glass-tint-top: rgba(255, 255, 255, 0.86);
-    --glass-tint-bottom: rgba(255, 255, 255, 0.78);
+    --c-line: rgba(var(--c-dn), calc(0.28 * var(--dn-k)));
+    --c-line-strong: rgba(var(--c-dn), calc(0.5 * var(--dn-k)));
+    --glass-tint-top: rgba(var(--c-up), calc(0.86 * var(--up-k)));
+    --glass-tint-bottom: rgba(var(--c-up), calc(0.78 * var(--up-k)));
   }
   .field { opacity: 0.45; }
 }

@@ -33,8 +33,29 @@
   --c-ink-3:  #58635E;
   --c-ink-4:  #6E7973;
 
-  --c-line:        rgba(16, 26, 23, 0.11);
-  --c-line-strong: rgba(16, 26, 23, 0.20);
+  --c-line:        rgba(var(--c-dn), calc(0.11 * var(--dn-k)));
+  --c-line-strong: rgba(var(--c-dn), calc(0.20 * var(--dn-k)));
+
+  /* --- The two channels ---------------------------------------------------
+     Every surface here is made from one of two colours. White for anything
+     raised: a highlight, a glass fill, a card. Ink for anything recessed: a
+     rule, a shadow, a border. Ninety literal rgba() values across six files
+     said so one at a time.
+
+     Routing them through a channel and a multiplier means the whole page
+     inverts from four numbers, and the ALPHA RELATIONSHIPS between surfaces
+     survive the flip instead of being re-guessed. A card at 0.66 and a rule
+     at 0.11 stay in the same proportion to each other in either theme,
+     which is what stops a dark mode looking like a different site.
+
+     On dark, raised surfaces are still white, just far fainter, because a
+     light wash is what "raised" means on a dark ground. Shadows go to true
+     black and get much stronger, because a shadow on a dark surface has
+     almost nothing to darken and needs the help.                          */
+  --c-up: 255, 255, 255;   /* raised   */
+  --up-k: 1;
+  --c-dn: 16, 26, 23;      /* recessed */
+  --dn-k: 1;
 
   /* --- Signal -------------------------------------------------------------
      There is no accent colour. That is the decision, not an omission.
@@ -51,8 +72,8 @@
      by a hue.                                                              */
   --c-brand:      #101A17;
   --c-brand-lit:  #3A4642;
-  --c-brand-dim:  rgba(16, 26, 23, 0.06);
-  --c-brand-edge: rgba(16, 26, 23, 0.28);
+  --c-brand-dim:  rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
+  --c-brand-edge: rgba(var(--c-dn), calc(0.28 * var(--dn-k)));
   --c-live:       #3A4642;
 
   /* Field hues. These exist only behind glass, never in the interface. */
@@ -60,13 +81,11 @@
      on the page, and the reference's are plainly a grey rather than a
      black. field.js reads this, so the palette still has one home.
 
-     The dark counterpart is here rather than in a media query on purpose.
-     The site is color-scheme: light and has no dark palette, so flipping
-     this alone under prefers-color-scheme would put white spray on white
-     paper. It is written down so that whoever builds dark mode has the
-     value, and it is not wired up until there is a dark mode to wire it to. */
+     The dark counterpart is wired up now: the dark block below points
+     --c-field-grain at it, and field.js reads the token every load, so the
+     spray inverts with the rest of the page. */
   --c-field-grain:      #4A5054;
-  --c-field-grain-dark: #F2F4F5;   /* unused until dark mode exists */
+  --c-field-grain-dark: #E8ECEB;
 
   --c-field-sage: 118, 168, 140;
   --c-field-sky:  124, 160, 200;
@@ -75,14 +94,14 @@
   /* --- Glass --------------------------------------------------------------
      Dressing only. The refraction itself is an SVG displacement filter
      applied by assets/js/liquid-glass.js.                                   */
-  --glass-tint-top:    rgba(255, 255, 255, 0.52);
-  --glass-tint-bottom: rgba(255, 255, 255, 0.30);
-  --glass-specular:    rgba(255, 255, 255, 0.95);
-  --glass-border:      rgba(16, 26, 23, 0.10);
+  --glass-tint-top:    rgba(var(--c-up), calc(0.52 * var(--up-k)));
+  --glass-tint-bottom: rgba(var(--c-up), calc(0.30 * var(--up-k)));
+  --glass-specular:    rgba(var(--c-up), calc(0.95 * var(--up-k)));
+  --glass-border:      rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
   --glass-shadow:
-      0 1px 2px 0 rgba(16, 26, 23, 0.04),
-      0 14px 30px -14px rgba(16, 26, 23, 0.16),
-      0 40px 80px -50px rgba(16, 26, 23, 0.30);
+      0 1px 2px 0 rgba(var(--c-dn), calc(0.04 * var(--dn-k))),
+      0 14px 30px -14px rgba(var(--c-dn), calc(0.16 * var(--dn-k))),
+      0 40px 80px -50px rgba(var(--c-dn), calc(0.30 * var(--dn-k)));
 
   /* --- Elevation ----------------------------------------------------------
      One room, one light, six heights.
@@ -112,39 +131,39 @@
   --sh: 16, 26, 23;
 
   --e-1:
-      0 1px 1px    rgba(var(--sh), 0.045),
-      0 2px 4px -2px rgba(var(--sh), 0.06);
+      0 1px 1px    rgba(var(--c-dn), calc(0.045 * var(--dn-k))),
+      0 2px 4px -2px rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
   --e-2:
-      0 1px 2px    rgba(var(--sh), 0.04),
-      0 4px 8px -3px rgba(var(--sh), 0.075),
-      0 10px 20px -12px rgba(var(--sh), 0.10);
+      0 1px 2px    rgba(var(--c-dn), calc(0.04 * var(--dn-k))),
+      0 4px 8px -3px rgba(var(--c-dn), calc(0.075 * var(--dn-k))),
+      0 10px 20px -12px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
   --e-3:
-      0 1px 2px    rgba(var(--sh), 0.04),
-      0 8px 16px -6px rgba(var(--sh), 0.085),
-      0 22px 38px -18px rgba(var(--sh), 0.14);
+      0 1px 2px    rgba(var(--c-dn), calc(0.04 * var(--dn-k))),
+      0 8px 16px -6px rgba(var(--c-dn), calc(0.085 * var(--dn-k))),
+      0 22px 38px -18px rgba(var(--c-dn), calc(0.14 * var(--dn-k)));
   --e-4:
-      0 1px 2px    rgba(var(--sh), 0.04),
-      0 14px 28px -10px rgba(var(--sh), 0.095),
-      0 36px 62px -28px rgba(var(--sh), 0.17);
+      0 1px 2px    rgba(var(--c-dn), calc(0.04 * var(--dn-k))),
+      0 14px 28px -10px rgba(var(--c-dn), calc(0.095 * var(--dn-k))),
+      0 36px 62px -28px rgba(var(--c-dn), calc(0.17 * var(--dn-k)));
   --e-5:
-      0 2px 4px    rgba(var(--sh), 0.05),
-      0 24px 48px -16px rgba(var(--sh), 0.12),
-      0 58px 98px -44px rgba(var(--sh), 0.22);
+      0 2px 4px    rgba(var(--c-dn), calc(0.05 * var(--dn-k))),
+      0 24px 48px -16px rgba(var(--c-dn), calc(0.12 * var(--dn-k))),
+      0 58px 98px -44px rgba(var(--c-dn), calc(0.22 * var(--dn-k)));
   --e-6:
-      0 2px 6px    rgba(var(--sh), 0.06),
-      0 40px 80px -24px rgba(var(--sh), 0.15),
-      0 92px 152px -60px rgba(var(--sh), 0.28);
+      0 2px 6px    rgba(var(--c-dn), calc(0.06 * var(--dn-k))),
+      0 40px 80px -24px rgba(var(--c-dn), calc(0.15 * var(--dn-k))),
+      0 92px 152px -60px rgba(var(--c-dn), calc(0.28 * var(--dn-k)));
 
   /* Edges. A raised surface catches the light on its top edge and is
      bounded by a hairline. Both are inset, so they compose after any
      elevation above without a second element. */
-  --edge-lit:  inset 0 1px 0 rgba(255, 255, 255, 0.92);
-  --edge-line: inset 0 0 0 1px rgba(var(--sh), 0.07);
+  --edge-lit:  inset 0 1px 0 rgba(var(--c-up), calc(0.92 * var(--up-k)));
+  --edge-line: inset 0 0 0 1px rgba(var(--c-dn), calc(0.07 * var(--dn-k)));
 
   /* Recession, the opposite direction. Used where content should read as
      coming from under the surface rather than sitting on it. */
-  --e-in-1: inset 0 1px 3px rgba(var(--sh), 0.06);
-  --e-in-2: inset 0 2px 8px rgba(var(--sh), 0.09);
+  --e-in-1: inset 0 1px 3px rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
+  --e-in-2: inset 0 2px 8px rgba(var(--c-dn), calc(0.09 * var(--dn-k)));
 
   /* --- Type ---------------------------------------------------------------
      Mona Sans carries the voice. IBM Plex Mono carries the data. There is no
@@ -254,6 +273,47 @@
   --z-modal: 90;
 
   color-scheme: light;
+}
+
+/* ===========================================================================
+   Dark.
+
+   Applied by a data-theme attribute rather than only by a media query, so
+   the toggle can override the system preference. main.js writes the
+   attribute; an inline script in the head writes it before first paint so
+   the page never flashes the wrong theme.
+
+   The paper is not black. #0E1211 carries the same green shifted neutral
+   the ink does, so the two themes read as the same object under different
+   light rather than as two different sites.
+   =========================================================================== */
+:root[data-theme="dark"] {
+  --c-paper:   #0E1211;
+  --c-paper-2: #161B1A;
+  --c-paper-3: #1E2423;
+
+  --c-ink:    #F1F4F3;
+  --c-ink-2:  #C0C7C4;
+  --c-ink-3:  #949D9A;
+  --c-ink-4:  #78827F;
+
+  --c-brand:      #F1F4F3;
+  --c-brand-lit:  #C0C7C4;
+  --c-brand-dim:  rgba(255, 255, 255, 0.07);
+  --c-brand-edge: rgba(255, 255, 255, 0.30);
+  --c-live:       #C0C7C4;
+
+  /* Raised surfaces stay white and go faint. Shadows go true black and get
+     much stronger: there is far less to darken on a dark ground. */
+  --c-up: 255, 255, 255;
+  --up-k: 0.26;
+  --c-dn: 0, 0, 0;
+  --dn-k: 2.6;
+
+  /* The spray inverts with everything else. */
+  --c-field-grain: var(--c-field-grain-dark);
+
+  color-scheme: dark;
 }
 
 /* Motion is a preference, not a default. Everything below respects it. */

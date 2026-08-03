@@ -540,8 +540,56 @@
     });
   }
 
+  /* The theme.
+
+     The attribute is already set by the inline script in the head, so this
+     only has to handle the press, remember it, and tell the two things that
+     read colour from JavaScript rather than from CSS: the browser chrome,
+     and the field, which samples its grain colour from a token at startup
+     and needs to be told to sample it again. */
+  function initTheme() {
+    var btn = document.getElementById("theme");
+    if (!btn) return;
+
+    function sync() {
+      var dark = root.getAttribute("data-theme") === "dark";
+      btn.setAttribute("aria-pressed", String(dark));
+      btn.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute("content",
+          getComputedStyle(root).getPropertyValue("--c-paper").trim() || "#FBFBF9");
+      }
+      if (window.SignalField && window.SignalField.recolor) window.SignalField.recolor();
+    }
+
+    btn.addEventListener("click", function () {
+      var dark = root.getAttribute("data-theme") === "dark";
+      if (dark) root.removeAttribute("data-theme");
+      else root.setAttribute("data-theme", "dark");
+      try { localStorage.setItem("theme", dark ? "light" : "dark"); } catch (e) {}
+      sync();
+    });
+
+    /* If the visitor has never chosen, follow the system when it changes. */
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    var onChange = function (e) {
+      var chosen = null;
+      try { chosen = localStorage.getItem("theme"); } catch (_) {}
+      if (chosen) return;
+      if (e.matches) root.setAttribute("data-theme", "dark");
+      else root.removeAttribute("data-theme");
+      sync();
+    };
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+
+    sync();
+  }
+
   function boot() {
     arrive();
+    initTheme();
     applyGlass();
     initTransitions();
     initGlare();

@@ -7,6 +7,18 @@
      will never run. The timeout is a dead man's switch: if main.js never
      arrives, the page still reveals itself rather than staying blank. -->
 <script>
+  /* Theme first, before anything paints.
+     Reading it here rather than in main.js is the whole point: a theme
+     applied after first paint shows the wrong one for a frame, and a white
+     flash on the way into a dark page is the most visible bug a dark mode
+     can have. localStorage wins if the visitor has chosen; otherwise the
+     system preference decides. */
+  try {
+    var saved = localStorage.getItem("theme");
+    var dark = saved ? saved === "dark"
+             : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (dark) document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {}
   document.documentElement.className += " js is-loading";
   setTimeout(function () {
     var r = document.documentElement;
@@ -85,6 +97,10 @@
      strength once, in the approach section, where it is the subject. -->
 <div class="field" aria-hidden="true"><canvas id="field-dots"></canvas></div>
 
+
+<button class="theme" id="theme" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+  <span class="theme__dot" aria-hidden="true"></span>
+</button>
 
 <header class="nav glass" id="nav" data-glass="nav">
   <nav class="nav__links" aria-label="Sections">
@@ -660,9 +676,10 @@
       <div class="contact__lead">
         <h2 class="h1 contact__title">Contact.</h2>
         <p class="lead">
-          I work on backend, full stack, and platform, and anywhere real time data has to reach a
-          person who is about to make a decision with it. I am in Maryland, four years of that
-          remote, and I am glad to be in the DC and Baltimore corridor.
+          Backend, full stack, and platform work, particularly anywhere real time data has to
+          reach a person who is about to make a decision with it. I am in Maryland and have worked
+          remotely for four years. If you are hiring, or you just want to talk through a problem,
+          please reach out. I answer everything.
         </p>
       </div>
 

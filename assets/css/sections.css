@@ -77,10 +77,10 @@
   width: max-content;
   padding: var(--s-3) var(--s-5);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--c-up), calc(0.5 * var(--up-k)));
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.9),
-    inset 0 0 0 1px rgba(16, 26, 23, 0.11);
+    inset 0 1px 1px rgba(var(--c-up), calc(0.9 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.11 * var(--dn-k)));
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-ink-2);
@@ -89,7 +89,7 @@
 }
 .pill:hover, .pill:focus-visible {
   color: var(--c-brand);
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(var(--c-up), calc(0.78 * var(--up-k)));
   transform: translateY(-1px);
 }
 .pill--solid {
@@ -116,7 +116,7 @@
   transform: translateY(112%);
   opacity: 0;
   filter: blur(10px);
-  text-shadow: 0 30px 40px rgba(16, 26, 23, 0.18);
+  text-shadow: 0 30px 40px rgba(var(--c-dn), calc(0.18 * var(--dn-k)));
   transition:
     transform 1250ms var(--e-out),
     opacity 820ms linear,
@@ -129,8 +129,8 @@
   opacity: 1;
   filter: blur(0);
   text-shadow:
-    0 1px 0 rgba(16, 26, 23, 0.06),
-    0 10px 26px rgba(16, 26, 23, 0.07);
+    0 1px 0 rgba(var(--c-dn), calc(0.06 * var(--dn-k))),
+    0 10px 26px rgba(var(--c-dn), calc(0.07 * var(--dn-k)));
 }
 
 .is-loading .hero__title,
@@ -442,7 +442,7 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
   transition: background-color var(--d-fast) linear;
 }
 .entry__head::-webkit-details-marker { display: none; }
-.entry__head:hover { background: rgba(16, 26, 23, 0.03); }
+.entry__head:hover { background: rgba(var(--c-dn), calc(0.03 * var(--dn-k))); }
 
 .entry__year {
   font-size: var(--t-small);
@@ -582,7 +582,7 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
   max-width: var(--measure);
   border: var(--hairline) solid var(--c-line-strong);
   border-radius: var(--r-panel);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--c-up), calc(0.5 * var(--up-k)));
   overflow: hidden;
 }
 .incident__head {
@@ -634,7 +634,7 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
 .approach__scene::after {
   content: ""; position: absolute; inset: 0;
   background:
-    linear-gradient(180deg, rgba(16,26,23,0.26), rgba(16,26,23,0.14) 40%, rgba(16,26,23,0.30));
+    linear-gradient(180deg, rgba(var(--c-dn), calc(0.26 * var(--dn-k))), rgba(var(--c-dn), calc(0.14 * var(--dn-k))) 40%, rgba(var(--c-dn), calc(0.30 * var(--dn-k))));
 }
 
 /* Not glass, and this is a performance decision as much as a design one.
@@ -657,7 +657,7 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
 .approach__panel {
   padding: clamp(1.75rem, 3.4vw, 3.25rem);
   border-radius: var(--r-glass);
-  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.82));
+  background: linear-gradient(180deg, rgba(var(--c-up), calc(0.88 * var(--up-k))), rgba(var(--c-up), calc(0.82 * var(--up-k))));
 }
 
 .approach__title { margin-bottom: 0; }

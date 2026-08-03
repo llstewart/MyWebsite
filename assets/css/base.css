@@ -262,7 +262,7 @@ summary::-webkit-details-marker { display: none; }
   box-shadow: none;
   transition: background-size var(--d-base) var(--e-out), opacity var(--d-fast) linear;
 }
-.link { background-image: linear-gradient(rgba(16,26,23,0.35), rgba(16,26,23,0.35)); }
+.link { background-image: linear-gradient(rgba(var(--c-dn), calc(0.35 * var(--dn-k))), rgba(var(--c-dn), calc(0.35 * var(--dn-k)))); }
 .link:hover, .link:focus-visible {
   background-image: linear-gradient(var(--c-ink), var(--c-ink));
 }
@@ -298,7 +298,7 @@ summary::-webkit-details-marker { display: none; }
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-ink);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(var(--c-up), calc(0.5 * var(--up-k)));
   transition: border-color var(--d-base) var(--e-out),
               background-color var(--d-base) var(--e-out),
               color var(--d-base) var(--e-out),

@@ -58,6 +58,17 @@
   var PAPER = token("--c-paper", "#FBFBF9");
   var GRAIN = token("--c-field-grain", "#4A5054");
 
+  /* Colours are sampled from CSS once at startup, so a theme change has to
+     say so. Everything else on the page inverts through the cascade; a
+     canvas cannot. */
+  function recolor() {
+    PAPER = token("--c-paper", "#FBFBF9");
+    GRAIN = token("--c-field-grain", "#4A5054");
+    P = rgbOf(PAPER);
+    ctx.fillStyle = PAPER;
+    ctx.fillRect(0, 0, cw, ch);
+  }
+
   function rgbOf(hex) {
     hex = hex.replace("#", "");
     return [parseInt(hex.slice(0, 2), 16),
@@ -527,9 +538,9 @@
      actual position right now, which is the whole point, and it lets each
      one be drawn at full weight instead of being the brightest part of a
      gradient. Motion reads from the dots moving, which is what motion is. */
-  var TRAIL = 0.55;      // paper alpha per frame. 1 clears outright.
-  var DOT_ALPHA = 0.66;
-  var DOT_SIZE = 1.45;
+  var TRAIL = 0.46;      // paper alpha per frame. 1 clears outright.
+  var DOT_ALPHA = 0.80;
+  var DOT_SIZE = 1.55;
   var LIFE = 460;        // frames before a particle is recycled
 
   /* Density ceiling. A flow field has sinks, and without a cap those cells
@@ -812,6 +823,7 @@
   start();
 
   window.SignalField = {
+    recolor: recolor,
     stop: stop,
     start: start,
     redraw: layout,
