@@ -174,12 +174,27 @@
 @media (max-width: 900px) { .langs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .langs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); } }
 
+/* A card, not a ruled row, and the padding is the part that was missed.
+
+   This was laid out as a list item sitting on a hairline: text on a rule
+   needs bottom padding and nothing else, so that is all it had. The
+   elevation pass later gave it a background, a radius and a shadow, which
+   turned it into a card without anyone revisiting its box model. The name
+   and the years were then pressed against the top, left and right edges of
+   a surface that had only ever been told about its bottom.
+
+   The rule went with it. A card with a shadow underneath does not also need
+   an underline: that hairline was the entire visual treatment before there
+   was a surface, and keeping both is two answers to the same question.
+
+   1rem against a 10px radius: enough that the corner curve finishes well
+   before the text starts, which is the actual test for whether a box feels
+   padded rather than merely spaced. */
 .lang {
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
-  padding-bottom: var(--s-3);
-  border-bottom: var(--hairline) solid var(--c-line);
+  padding: var(--s-4);
 }
 .lang__name {
   font-size: var(--t-lead);
@@ -211,7 +226,6 @@
 .skills__val { margin: 0; color: var(--c-ink-2); line-height: 1.7; text-wrap: pretty; }
 .skills__row:last-child { border-bottom: var(--hairline) solid var(--c-line); }
 .skills__row--learning .skills__val { color: var(--c-ink); }
-.skills__note { margin-top: var(--s-5); }
 
 /* =========================================================================
    The lede.
