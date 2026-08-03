@@ -116,7 +116,92 @@
     return { radial: Math.atan2(dy, dx), phase: d * 0.34 - t * RIPPLE_SPEED };
   }
 
+  /* ------------------------------------------------------------------
+     The keyboard.
+
+     Every other movement is a current: it says which way to go, and the
+     dots spread evenly because nothing tells them where to be. This one is
+     a formation. It leaves the angle almost alone and puts the whole idea
+     in the density, which the renderer already treats as "how likely is a
+     dot here". A density that is high on the keys and near zero between
+     them draws a keyboard out of dots.
+
+     The dots are still flowing the whole time. The shape is what persists;
+     the particles passing through it are not. That is the reason to do it
+     this way rather than by pinning particles to positions, which would
+     look like a diagram and would stop dead the moment the shape changed.
+
+     And it types. One key at a time is struck on a beat, brightening for a
+     moment, in a pseudo random order that avoids repeating the same key
+     twice running. It is a software engineer's landing page: the first
+     thing the background does should be the thing he does.
+     ------------------------------------------------------------------ */
+
+  var KB_ROWS = 4;
+  var KB_COLS = [10, 10, 9, 7];   // keys per row, narrowing like a real one
+  /* Placed low and left, in the quiet corner under the hero copy.
+
+     It sat at y 0.40 to 0.62 first, which is exactly where the title and
+     the claim are, so the keys drew straight through the sentences. A
+     background that has to compete with the one paragraph on the landing
+     has lost before it starts. Below the text and hard against the left is
+     empty on every section, which is where a formation like this belongs. */
+  var KB = { x0: 0.03, x1: 0.50, y0: 0.63, y1: 0.90 };   // fractions of the grid
+
+  /* Which key is being struck, and how hard. floor(t * rate) is the beat;
+     the hash scatters the order so it is not a march left to right. */
+  function struck(row, col, t) {
+    var beat = Math.floor(t * 5.5);
+    var h = (Math.sin(beat * 12.9898) * 43758.5453);
+    h = h - Math.floor(h);
+    var total = 36;
+    var pick = Math.floor(h * total);
+    var idx = row * 10 + col;
+    if (idx !== pick % total) return 0;
+    /* Decay across the beat, so a key lights and releases rather than
+       switching on for a whole tick. */
+    var within = t * 5.5 - beat;
+    return Math.pow(1 - within, 2.2);
+  }
+
+  function keyboard(x, y, t) {
+    var fx = x / gridW, fy = y / gridH;
+    if (fx < KB.x0 || fx > KB.x1 || fy < KB.y0 || fy > KB.y1) return 0;
+
+    var v = (fy - KB.y0) / (KB.y1 - KB.y0);
+    var row = Math.min(KB_ROWS - 1, Math.floor(v * KB_ROWS));
+    var rowV = v * KB_ROWS - row;
+    /* A gap between rows, so the keys read as separate. */
+    if (rowV < 0.16 || rowV > 0.88) return 0;
+
+    var cols = KB_COLS[row];
+    /* Each row is inset a little more than the one above, the way a
+       staggered keyboard is. */
+    var inset = row * 0.022;
+    var u = (fx - KB.x0 - inset) / (KB.x1 - KB.x0 - inset);
+    if (u < 0 || u > 1) return 0;
+
+    var col = Math.min(cols - 1, Math.floor(u * cols));
+    var colU = u * cols - col;
+    if (colU < 0.14 || colU > 0.86) return 0;
+
+    /* Dense, because a shape has to be legible where a current only has to
+       be present. The weight is multiplied by the mask and the tide before
+       it reaches the renderer, so a key asking for 0.42 was arriving at
+       nearer 0.15 and the keyboard dissolved. */
+    return 0.85 + 0.15 * struck(row, col, t);
+  }
+
   var MOVEMENTS = [
+    /* The landing state. See the note above. A very slow rightward drift so
+       the dots are still travelling through the shape rather than sitting
+       in it, but slow enough that the keyboard stays legible. */
+    { name: "keyboard", speed: 0.34,
+      angle: function (x, y, t) {
+        return Math.sin(y * 0.09 + t * 0.10) * 0.5;
+      },
+      density: keyboard },
+
     /* Open noise current. Broad and wandering, no nameable structure. Two
        octaves, because one alone sweeps the whole page one way. */
     { name: "drift", speed: 1.00, angle: function (x, y, t) {
@@ -134,14 +219,22 @@
         var rot = t * 0.052;
         return rot + Math.sin(wavePhase(x, y, t)) * 0.85;
       },
-      /* The bands. Steering alone never produced a visible wave: every
-         particle turned, but they stayed evenly spread, so there was
-         nothing to see travelling. A wave you can see is a density
-         variation, not a direction variation. Raising the sinusoid to a
-         power keeps the crests and empties the space between them, which
-         is what turns a gradient into bands with gaps. */
+      /* The bands, in packets.
+
+         Two envelopes multiplied. The fast one is the crests themselves.
+         The slow one, at about a seventh of the frequency, groups them into
+         sets of three or four with empty water between the sets.
+
+         Without the slow one every crest exists everywhere at once and the
+         whole field simply oscillates in place: correct as a wave, wrong as
+         a picture, because nothing ARRIVES. A wave you notice is a wave
+         that was not there a moment ago. Packets travel, so you watch a
+         group cross the page, then a gap, then the next group. */
       density: function (x, y, t) {
-        return Math.pow(0.5 + 0.5 * Math.sin(wavePhase(x, y, t)), 1.7);
+        var ph = wavePhase(x, y, t);
+        var crest = Math.pow(0.5 + 0.5 * Math.sin(ph), 1.7);
+        var packet = Math.pow(0.5 + 0.5 * Math.sin(ph * 0.14 - t * 0.22), 1.9);
+        return crest * (0.12 + 0.88 * packet);
       } },
 
     /* Two drifting vortices. Particles run tangentially, pulling the spray
@@ -266,6 +359,17 @@
   function buildGrid(t) {
     var A = MOVEMENTS[from].angle, B = MOVEMENTS[to].angle, k = blend;
     var half = CELL * 0.5;
+
+    /* The tide. Total coverage breathes between about seventy and a hundred
+       and thirty percent on a slow, uneven period.
+
+       A field at one density forever is a texture, and the eye stops seeing
+       a texture within about a minute. Letting the whole page gather and
+       thin means there are moments worth catching, which is the difference
+       between something running and something happening. Two sines with
+       unrelated periods, so it never repeats on a beat you could count. */
+    var tide = 0.70 + 0.30 * Math.sin(t * 0.041)
+                    + 0.30 * Math.sin(t * 0.017 + 1.7);
     for (var y = 0; y < rows; y++) {
       var base = y * cols;
       var py_ = y * CELL + half;
@@ -276,7 +380,7 @@
            and a zero length direction stalls every particle standing in
            that cell. */
         angles[base + x] = k <= 0 ? a : a + arc(a, B(x, y, t)) * k;
-        weights[base + x] = mask(x * CELL + half, py_) * bandAt(x, y, t);
+        weights[base + x] = mask(x * CELL + half, py_) * bandAt(x, y, t) * tide;
       }
     }
   }
@@ -300,6 +404,7 @@
      actual position right now, which is the whole point, and it lets each
      one be drawn at full weight instead of being the brightest part of a
      gradient. Motion reads from the dots moving, which is what motion is. */
+  var TRAIL = 0.55;      // paper alpha per frame. 1 clears outright.
   var DOT_ALPHA = 0.66;
   var DOT_SIZE = 1.3;
   var LIFE = 460;        // frames before a particle is recycled
@@ -432,7 +537,19 @@
 
     buildGrid(t);
 
-    ctx.fillStyle = PAPER;
+    /* A short trail, and this is a deliberate reversal.
+
+       Clearing outright was right about the fur and wrong about the
+       physics. A 1.3px dot travelling two to three pixels a frame lands
+       clear of where it was, so at thirty frames a second the eye gets a
+       sequence of separate positions rather than one thing moving, and it
+       reads as stepping.
+
+       At 0.55 a mark is gone in about two frames. That is long enough to
+       bridge the gap between one position and the next, and far too short
+       to accumulate into a stroke. The failure before was twelve frames,
+       which is a line. Two is a dot that is moving. */
+    ctx.fillStyle = "rgba(" + P[0] + "," + P[1] + "," + P[2] + "," + TRAIL + ")";
     ctx.fillRect(0, 0, cw, ch);
 
     occ.fill(0);
@@ -577,8 +694,9 @@
       if (o) {
         if (o.alpha !== undefined) DOT_ALPHA = o.alpha;
         if (o.size  !== undefined) DOT_SIZE = o.size;
+        if (o.trail !== undefined) TRAIL = o.trail;   // 1 = no trail at all
       }
-      return { alpha: DOT_ALPHA, size: DOT_SIZE, dots: count };
+      return { alpha: DOT_ALPHA, size: DOT_SIZE, trail: TRAIL, dots: count };
     },
     /* Jump straight to a movement by name, for looking at one on its own. */
     go: function (name) {
