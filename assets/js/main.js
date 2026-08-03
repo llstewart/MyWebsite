@@ -176,10 +176,15 @@
     // contact and feature were removed on 2026-08-03. Apple's guidance is
     // that Liquid Glass is for the navigation layer and never for content,
     // and on plain paper the refraction had nothing to bend regardless.
-    // Small, and there are five of them. A gentle bend, a tight neutral
-    // inset so the band stays inside the capsule, and no chroma: prism
-    // fringe on a 40px control reads as a rendering fault, not as glass.
-    pill:     { scale: -34,  chroma: 0, blur: 5, saturate: 1.35, border: 0.30, mapBlur: 6 },
+    // The landing row is the same material as the bar, because it is the
+    // same thing: floating chrome over content, in a capsule. It was on a
+    // much gentler profile on the theory that a prism fringe on a 40px
+    // control reads as a fault. Sitting a metre from the bar that does bend
+    // properly, what it actually read as was a different component that had
+    // not been finished. Same scale, same chroma, same blur. The inset stays
+    // tighter, because the band has to stay inside a capsule a third the
+    // height, and that is a geometry difference rather than a material one.
+    pill:     { scale: -96, chroma: 5, blur: 3, saturate: 1.5,  border: 0.22, mapBlur: 7 },
     feature:  { scale: -88,  chroma: 5, blur: 4, saturate: 1.45, border: 0.06, mapBlur: 13 }
   };
 

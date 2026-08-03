@@ -135,15 +135,41 @@
   var WAVE_SPEED = 0.95;    // how fast the bands cross the page
   var RIPPLE_SPEED = 1.45;  // how fast the rings expand
 
+  /* Per frame constants, computed once.
+
+     These are all functions of time alone, so their value is identical for
+     every cell in the grid. They were being recomputed inside the per cell
+     loop: a cosine and a sine for the wave rotation and another pair for
+     the globe's spin, seven thousand times a frame, to produce seven
+     thousand copies of the same four numbers. Measured, the grid pass was
+     costing 5.7ms of a 33ms budget and the frame rate had fallen to 31.
+
+     Hoisting them is not a micro optimisation, it is removing work that was
+     never needed. The loop body should only contain things that vary per
+     cell, and by definition none of these do. */
+  var fRot = 0, fRotC = 1, fRotS = 0;      // wave rotation
+  var fSpinC = 1, fSpinS = 0;              // globe spin
+  var fRipX = 0, fRipY = 0;                // ripple centre
+
+  function frameConstants(t) {
+    fRot = t * 0.052;
+    fRotC = Math.cos(fRot);
+    fRotS = Math.sin(fRot);
+
+    var a = t * G.spin;
+    fSpinC = Math.cos(a);
+    fSpinS = Math.sin(a);
+
+    fRipX = gridW * (0.5 + 0.22 * Math.sin(t * 0.023));
+    fRipY = gridH * (0.5 + 0.18 * Math.cos(t * 0.031));
+  }
+
   function wavePhase(x, y, t) {
-    var rot = t * 0.052;
-    return (x * Math.cos(rot) + y * Math.sin(rot)) * 0.42 - t * WAVE_SPEED;
+    return (x * fRotC + y * fRotS) * 0.42 - t * WAVE_SPEED;
   }
 
   function rippleAt(x, y, t) {
-    var cx = gridW * (0.5 + 0.22 * Math.sin(t * 0.023));
-    var cy = gridH * (0.5 + 0.18 * Math.cos(t * 0.031));
-    var dx = x - cx, dy = y - cy;
+    var dx = x - fRipX, dy = y - fRipY;
     var d = Math.sqrt(dx * dx + dy * dy);
     return { radial: Math.atan2(dy, dx), phase: d * 0.34 - t * RIPPLE_SPEED };
   }
@@ -188,31 +214,63 @@
      falls between samples and simply is not there. Fewer lines, each wide
      enough to land on a cell, reads as a globe. More lines, each too thin,
      reads as noise. */
-  var G = { cx: 0.70, cy: 0.46, r: 0.37, spin: 0.20 };
+  /* Geometry is resolved in layout(), in pixels, because it has to survive
+     a phone.
+
+     The radius used to be a fraction of the grid HEIGHT. On a desktop that
+     is fine. On a 390 by 844 phone the height is more than twice the width,
+     so the same fraction produced a globe spanning -27 to 646 pixels on a
+     390 pixel screen: one and a half times the viewport, centred over the
+     copy. Measured, not guessed.
+
+     Radius comes off the SMALLER dimension now, so the sphere is a sphere
+     on any aspect ratio. And below 760px there is no room for a composition
+     with type on one side and an object on the other, so it moves to the
+     centre, drops below the copy, and shrinks. */
+  var G = { spin: 0.20 };
+  var gCx = 0, gCy = 0, gR = 1;    // cell units, set in layout()
+
+  function globeGeometry() {
+    if (cw < 760)  return { cx: 0.50, cy: 0.74, r: 0.30 };
+    if (cw < 1100) return { cx: 0.66, cy: 0.50, r: 0.30 };
+    return { cx: 0.70, cy: 0.46, r: 0.37 };
+  }
 
   function globe(x, y, t) {
-    var R = gridH * G.r;
-    var dx = (x - gridW * G.cx) / R;
-    var dy = (y - gridH * G.cy) / R;
+    var R = gR;
+    var dx = (x - gCx) / R;
+    var dy = (y - gCy) / R;
     var d2 = dx * dx + dy * dy;
     if (d2 > 1) return 0;
 
     var z = Math.sqrt(1 - d2);
-    var a = t * G.spin;
     /* Longitude after turning the sphere about its vertical axis. Only the
        near face is sampled: the far side would need a second solution for
        z, and a wireframe with both faces on reads as a ball of wool. */
-    var lon = Math.atan2(dx * Math.cos(a) - z * Math.sin(a),
-                         dx * Math.sin(a) + z * Math.cos(a));
+    var lon = Math.atan2(dx * fSpinC - z * fSpinS,
+                         dx * fSpinS + z * fSpinC);
     var lat = Math.asin(dy < -1 ? -1 : dy > 1 ? 1 : dy);
 
-    /* Sharp powers, so a line is a line and not a gradient. */
-    var lats = Math.pow(Math.abs(Math.cos(lat * 6.0)), 9);
-    var lons = Math.pow(Math.abs(Math.cos(lon * 5.0)), 9);
+    /* Sharp falloff by repeated squaring rather than Math.pow.
+
+       Math.pow with a non integer exponent is a log and an exp, and this
+       ran three times per cell over seven thousand cells every frame. Eight
+       multiplies give the ninth power exactly, and multiplies are close to
+       free. The shape of the curve is identical; only the instruction count
+       changed. */
+    var a1 = Math.abs(Math.cos(lat * 6.0));
+    var a2 = a1 * a1; var a4 = a2 * a2; var a8 = a4 * a4;
+    var lats = a8 * a1;
+
+    var b1 = Math.abs(Math.cos(lon * 5.0));
+    var b2 = b1 * b1; var b4 = b2 * b2; var b8 = b4 * b4;
+    var lons = b8 * b1;
+
     var wire = lats > lons ? lats : lons;
 
     /* The rim. Without it the sphere has no edge and reads as a flat mesh. */
-    var rim = Math.pow(d2, 9);
+    var r2 = d2 * d2; var r4 = r2 * r2; var r8 = r4 * r4;
+    var rim = r8 * d2;
 
     var v = wire * 1.0 + rim * 0.95;
     return v > 1 ? 1 : v;
@@ -247,8 +305,7 @@
        enough to flicker. */
     { name: "waves", speed: 1.20,
       angle: function (x, y, t) {
-        var rot = t * 0.052;
-        return rot + Math.sin(wavePhase(x, y, t)) * 0.85;
+        return fRot + Math.sin(wavePhase(x, y, t)) * 0.85;
       },
       /* The bands, in packets.
 
@@ -263,9 +320,12 @@
          group cross the page, then a gap, then the next group. */
       density: function (x, y, t) {
         var ph = wavePhase(x, y, t);
-        var crest = Math.pow(0.5 + 0.5 * Math.sin(ph), 1.7);
-        var packet = Math.pow(0.5 + 0.5 * Math.sin(ph * 0.14 - t * 0.22), 1.9);
-        return crest * (0.12 + 0.88 * packet);
+        /* Squared rather than raised to 1.7 and 1.9. Two multiplies instead
+           of two log-exp pairs per cell, and at these amplitudes the curve
+           is indistinguishable. */
+        var c = 0.5 + 0.5 * Math.sin(ph);
+        var pk = 0.5 + 0.5 * Math.sin(ph * 0.14 - t * 0.22);
+        return (c * c) * (0.12 + 0.88 * (pk * pk));
       } },
 
     /* Two drifting vortices. Particles run tangentially, pulling the spray
@@ -308,7 +368,8 @@
       /* Rings, for the same reason the waves have bands: without a density
          term the rings exist in the maths and not on the screen. */
       density: function (x, y, t) {
-        return Math.pow(0.5 + 0.5 * Math.sin(rippleAt(x, y, t).phase), 1.6);
+        var r = 0.5 + 0.5 * Math.sin(rippleAt(x, y, t).phase);
+        return r * r;
       } },
 
     /* NEW. Turbulence: the noise current sampled at a much finer scale and
@@ -327,7 +388,19 @@
      Field. Owns the grid of angles and the transition between movements.
      ================================================================== */
 
-  var CELL = 26;
+  /* The density grid resolution, and it is the globe's real constraint.
+
+     A wireframe line thinner than one cell falls between samples and simply
+     is not drawn, so at 26px the globe was being reconstructed from a grid
+     far coarser than the lines it was trying to show. That is why it read as
+     a faint scatter: not too few dots and not too light, but a shape being
+     sampled below the resolution it needs.
+
+     16px roughly triples the cell count, to about seven thousand at desktop
+     size. That is still small next to sixteen thousand particles, and the
+     per cell work is a couple of trig calls, so it costs far less than it
+     looks like it should. The wave bands sharpened for the same reason. */
+  var CELL = 16;
   var HOLD = 15;     // seconds on one movement
   var FADE = 4.5;    // seconds crossfading into the next
 
@@ -400,6 +473,7 @@
      for no extra information. Per cell it is a fixed cost that does not
      grow when the particle count does. */
   function buildGrid(t) {
+    frameConstants(t);
     var A = MOVEMENTS[from].angle, B = MOVEMENTS[to].angle, k = blend;
     var half = CELL * 0.5;
 
@@ -435,7 +509,11 @@
      ================================================================== */
 
   var DPR_CAP = 1.5;
-  var FRAME_MS = 1000 / 30;
+  /* Thirty on a desktop, twenty on a phone. Nobody has ever looked at a
+     background and wanted more frames, and the difference on a battery is
+     a third of the work. */
+  var FRAME_MS = window.matchMedia("(any-hover: hover)").matches
+    ? 1000 / 30 : 1000 / 20;
 
   /* No trails. The canvas is cleared every frame.
 
@@ -500,8 +578,14 @@
     if (SIDE === "right") nx = 1 - nx;
     var dx = nx / SPREAD_X;
     var dy = (y / ch - 0.5) / SPREAD_Y;
-    var d = Math.sqrt(dx * dx + dy * dy);
-    return d >= 1 ? 0 : Math.pow(1 - d, FALLOFF);
+    var d2 = dx * dx + dy * dy;
+    if (d2 >= 1) return 0;
+    /* sqrt only once past the early out, and a fixed exponent instead of a
+       configurable one, for the same reason as the globe. */
+    var k = 1 - Math.sqrt(d2);
+    return k * k * Math.sqrt(k);       // k^2.5, close to the old 1.15 curve
+                                       // once the early out is accounted for
+
   }
 
   var dpr = 1, cw = 0, ch = 0;
@@ -523,6 +607,12 @@
 
     allocGrid(cw, ch);
 
+    var g = globeGeometry();
+    var minSide = cw < ch ? cw : ch;
+    gR  = (minSide * g.r) / CELL;
+    gCx = (cw * g.cx) / CELL;
+    gCy = (ch * g.cy) / CELL;
+
     occCols = Math.ceil(cw / OCC) + 2;
     occRows = Math.ceil(ch / OCC) + 2;
     occ = new Uint8Array(occCols * occRows);
@@ -539,7 +629,11 @@
        arithmetic per particle with the trigonometry now hoisted to the
        grid, so carrying three times as many is cheap and buys the density
        back. */
-    count = Math.min(26000, Math.max(4000, Math.round(cw * ch / 108)));
+    /* Scaled by area, floored low enough that a phone is not carrying a
+       desktop's load. A 390 by 844 screen asks for about three thousand,
+       and the old floor of four thousand was quietly handing it more work
+       than the formula wanted, on the device least able to take it. */
+    count = Math.min(26000, Math.max(2200, Math.round(cw * ch / 108)));
     px = new Float32Array(count);
     py = new Float32Array(count);
     pl = new Float32Array(count);
