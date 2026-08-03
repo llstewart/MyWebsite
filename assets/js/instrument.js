@@ -9,7 +9,7 @@
 (function () {
   "use strict";
 
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var reduced = LS.reduced;
   var $  = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
@@ -118,9 +118,9 @@
       { kind: "Go",     label: "Experience",              run: function () { jump("#experience"); } },
       { kind: "Go",     label: "Approach",                run: function () { jump("#approach"); } },
       { kind: "Go",     label: "Contact",                 run: function () { jump("#contact"); } },
-      { kind: "Copy",   label: "Copy email address",      run: function () { copy("lincolnstewart4@gmail.com", "Email address copied"); } },
-      { kind: "Copy",   label: "Copy phone number",       run: function () { copy("(443) 460-8224", "Phone number copied"); } },
-      { kind: "Open",   label: "Email Lincoln",           run: function () { location.href = "mailto:lincolnstewart4@gmail.com"; } },
+      { kind: "Copy",   label: "Copy email address",      run: function () { copy(LS.contact().email, "Email address copied"); } },
+      { kind: "Copy",   label: "Copy phone number",       run: function () { copy(LS.contact().phone, "Phone number copied"); } },
+      { kind: "Open",   label: "Email Lincoln",           run: function () { location.href = LS.contact().emailHref; } },
       { kind: "Open",   label: "LinkedIn",                mark: "linkedin", run: function () { open_("https://www.linkedin.com/in/lincoln-stewart01/"); } },
       { kind: "Open",   label: "GitHub",                  mark: "github",   run: function () { open_("https://github.com/llstewart"); } },
       { kind: "Open",   label: "Packleads, live",         run: function () { open_("https://packleads.io"); } },
@@ -370,9 +370,5 @@
       });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+  LS.ready(boot);
 })();

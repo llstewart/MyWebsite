@@ -170,16 +170,12 @@
 .glass--flat {
   box-shadow:
     var(--e-4),
-    inset 0 1px 1px rgba(var(--c-up), calc(0.85 * var(--up-k))),
-    inset 0 -8px 20px rgba(var(--c-up), calc(0.30 * var(--up-k))),
-    inset 0 0 0 1px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
+    var(--glass-inset);
 }
 .glass--lift:hover {
   box-shadow:
     var(--e-5),
-    inset 0 1px 1px rgba(var(--c-up), calc(0.9 * var(--up-k))),
-    inset 0 -8px 20px rgba(var(--c-up), calc(0.34 * var(--up-k))),
-    inset 0 0 0 1px rgba(var(--c-dn), calc(0.13 * var(--dn-k)));
+    var(--glass-inset-lift);
 }
 
 /* ---------------------------------------------------------------------------
@@ -220,9 +216,7 @@
 .nav {
   box-shadow:
     var(--e-4),
-    inset 0 1px 1px rgba(var(--c-up), calc(0.9 * var(--up-k))),
-    inset 0 -8px 20px rgba(var(--c-up), calc(0.32 * var(--up-k))),
-    inset 0 0 0 1px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
+    var(--glass-inset-lift);
 }
 
 .palette__panel { box-shadow: var(--e-6), var(--edge-lit); }

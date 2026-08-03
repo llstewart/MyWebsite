@@ -15,19 +15,16 @@
 (function () {
   "use strict";
 
+  /* Environment comes from env.js. These were being derived here, in
+     field.js and in instrument.js separately, which meant three answers to
+     the same question that could drift apart. Local aliases keep the rest
+     of this file reading the way it did. */
   var root = document.documentElement;
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var lowTransparency = window.matchMedia("(prefers-reduced-transparency: reduce)").matches;
-  // "pointer: coarse" is the wrong test: a Windows laptop with a touchscreen
-  // reports coarse as its primary pointer while still having a mouse and a
-  // discrete GPU. What actually matters is whether any fine, hovering pointer
-  // exists at all, which is false exactly on the phones and tablets that
-  // cannot afford this effect.
-  var precise = window.matchMedia("(any-pointer: fine)").matches
-             && window.matchMedia("(any-hover: hover)").matches;
-  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  var saveData = !!(conn && conn.saveData);
-  var slowLink = !!(conn && /(^|-)2g$/.test(conn.effectiveType || ""));
+  var reduced = LS.reduced;
+  var lowTransparency = LS.lowTransparency;
+  var precise = LS.precise;
+  var saveData = LS.saveData;
+  var slowLink = LS.slowLink;
 
   /* ------------------------------------------------------------------
      A promise that always settles. Used everywhere a third party could
@@ -156,7 +153,7 @@
   /* Frost is the floor, not the absence of a floor. Anything that opted out
      of refraction still needs a backdrop, or the panel reads as a flat card. */
   function frost() {
-    Array.prototype.forEach.call(document.querySelectorAll("[data-glass]"), function (el) {
+    LS.all("[data-glass]").forEach(function (el) {
       el.classList.add("lg-fallback");
     });
   }
@@ -256,15 +253,11 @@
     root.setAttribute("data-glass-mode", "frosted");
   }
 
-  var resizeTimer = null;
-  window.addEventListener("resize", function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      var wanted = glassBudget();
-      if (wanted === "refractive" && !handles.length) applyGlass();
-      else if (wanted !== "refractive" && handles.length) downgrade();
-    }, 260);
-  }, { passive: true });
+  window.addEventListener("resize", LS.debounce(function () {
+    var wanted = glassBudget();
+    if (wanted === "refractive" && !handles.length) applyGlass();
+    else if (wanted !== "refractive" && handles.length) downgrade();
+  }, 260), { passive: true });
 
   /* ==================================================================
      3. Departure and return
@@ -323,7 +316,8 @@
       links.forEach(function (a) {
         if (ok) { a.setAttribute("data-state", "ready"); return; }
         a.setAttribute("data-state", "missing");
-        a.setAttribute("href", "mailto:lincolnstewart4@gmail.com?subject=Resume%20request");
+        var mail = LS.contact().emailHref || "mailto:";
+        a.setAttribute("href", mail + "?subject=Resume%20request");
         a.removeAttribute("download");
         a.textContent = "Request resume by email";
       });
@@ -348,8 +342,8 @@
      across every glass surface. liquid-glass.js does the refraction, the CSS
      carries the gradient, and this writes the two custom properties it reads. */
   function initGlare() {
-    var surfaces = Array.prototype.slice.call(document.querySelectorAll(".glass, .glass--flat, .pill"));
-    if (!surfaces.length || !window.matchMedia("(any-hover: hover)").matches) return;
+    var surfaces = LS.all(".glass, .glass--flat, .pill");
+    if (!surfaces.length || !LS.hover) return;
     var queued = false, last = null;
 
     window.addEventListener("pointermove", function (e) {
@@ -468,8 +462,7 @@
   function initTouchLight() {
     var RADIUS = 320;
     var surfaces = function () {
-      return Array.prototype.slice.call(
-        document.querySelectorAll(".glass, .glass--flat, .pill, .nav__cmd"));
+      return LS.all(".glass, .glass--flat, .pill, .nav__cmd");
     };
     var decay = null;
 
@@ -558,7 +551,7 @@
       var meta = document.querySelector('meta[name="theme-color"]');
       if (meta) {
         meta.setAttribute("content",
-          getComputedStyle(root).getPropertyValue("--c-paper").trim() || "#FBFBF9");
+          LS.token("--c-paper", "#FBFBF9"));
       }
       if (window.SignalField && window.SignalField.recolor) window.SignalField.recolor();
     }
@@ -601,9 +594,5 @@
     initServiceWorker();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+  LS.ready(boot);
 })();

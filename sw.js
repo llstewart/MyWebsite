@@ -16,7 +16,7 @@
 /* Bump this on every deploy that changes CORE. The activate handler deletes
    every cache that is not this version, so a stale name is what keeps an old
    asset alive. */
-var VERSION = "ls-2026-08-03b";
+var VERSION = "ls-2026-08-03c";
 var CORE = [
   "./",
   "./index.html",
@@ -27,6 +27,7 @@ var CORE = [
   "./assets/css/sections.css",
   "./assets/css/depth.css",
   "./assets/css/states.css",
+  "./assets/js/env.js",
   "./assets/js/liquid-glass.js",
   "./assets/js/instrument.js",
   "./assets/js/field.js",

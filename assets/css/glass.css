@@ -25,9 +25,9 @@
      background: linear-gradient(180deg, rgba(14,14,22,0.18), rgba(14,14,22,0.32));
      box-shadow:
        0 24px 60px rgba(0,0,0,0.45),
-       inset 0 1px 1px rgba(var(--c-up), calc(0.5 * var(--up-k))),
-       inset 0 -8px 20px rgba(var(--c-up), calc(0.06 * var(--up-k))),
-       inset 0 0 0 1px rgba(var(--c-up), calc(0.13 * var(--up-k)));
+       inset 0 1px 1px rgba(255,255,255,0.5),
+       inset 0 -8px 20px rgba(255,255,255,0.06),
+       inset 0 0 0 1px rgba(255,255,255,0.13);
      ::after -> radial-gradient(160px circle at var(--gx) var(--gy),
                  rgba(var(--c-up), calc(0.22 * var(--up-k))), rgba(var(--c-up), calc(0.04 * var(--up-k))) 45%, transparent 70%)
 
@@ -46,9 +46,7 @@
   background: linear-gradient(180deg, rgba(var(--c-up), calc(0.34 * var(--up-k))), rgba(var(--c-up), calc(0.20 * var(--up-k))));
   box-shadow:
     0 24px 60px rgba(var(--c-dn), calc(0.13 * var(--dn-k))),
-    inset 0 1px 1px rgba(var(--c-up), calc(0.85 * var(--up-k))),
-    inset 0 -8px 20px rgba(var(--c-up), calc(0.30 * var(--up-k))),
-    inset 0 0 0 1px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
+    var(--glass-inset);
 }
 
 /* Frosted tier and the Safari/Firefox fallback share one declaration. */
@@ -95,9 +93,7 @@
   transform: translateY(-2px);
   box-shadow:
     0 30px 70px rgba(var(--c-dn), calc(0.17 * var(--dn-k))),
-    inset 0 1px 1px rgba(var(--c-up), calc(0.9 * var(--up-k))),
-    inset 0 -8px 20px rgba(var(--c-up), calc(0.34 * var(--up-k))),
-    inset 0 0 0 1px rgba(var(--c-dn), calc(0.13 * var(--dn-k)));
+    var(--glass-inset-lift);
 }
 
 /* ---------------------------------------------------------------------------

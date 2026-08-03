@@ -250,7 +250,7 @@ a[data-state="missing"] { color: var(--c-live); }
   .approach__scene { display: none; }
   .approach { background: var(--c-paper-2); }
   .glass, .glass--flat, .nav, .palette__panel, .incident, .pill, .approach__panel {
-    background: #FBFCFA !important;
+    background: var(--c-solid) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -260,7 +260,7 @@ a[data-state="missing"] { color: var(--c-live); }
 }
 :root[data-glass-mode="opaque"] .glass,
 :root[data-glass-mode="opaque"] .glass--flat {
-  background: #FBFCFA;
+  background: var(--c-solid);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -272,18 +272,12 @@ a[data-state="missing"] { color: var(--c-live); }
 /* A photograph behind body copy is a contrast risk. Under an explicit
    preference the page wash goes nearly opaque and the scene is dropped. */
 @media (prefers-contrast: more) {
-  .field::after { background: rgba(251, 251, 249, 0.97); }
+  /* The scrim is paper at an alpha. It was the literal light paper colour,
+     which in dark mode would have laid a white sheet over a dark page: the
+     exact failure the channel tokens exist to prevent, hiding in the one
+     block that had not been converted. */
+  .field::after { background: rgba(var(--c-paper-ch), 0.97); }
   .approach__scene { display: none; }
-
-  :root {
-    --c-ink-2: #24302C;
-    --c-ink-3: #35423D;
-    --c-ink-4: #43504A;
-    --c-line: rgba(var(--c-dn), calc(0.28 * var(--dn-k)));
-    --c-line-strong: rgba(var(--c-dn), calc(0.5 * var(--dn-k)));
-    --glass-tint-top: rgba(var(--c-up), calc(0.86 * var(--up-k)));
-    --glass-tint-bottom: rgba(var(--c-up), calc(0.78 * var(--up-k)));
-  }
   .field { opacity: 0.45; }
 }
 

@@ -23,8 +23,12 @@
      noticed: a surface. The colour in this page lives in the field behind
      the glass, at an alpha you have to look for.                            */
   --c-paper:   #FBFBF9;
+  /* The same colour as channels, for anywhere paper is needed at an alpha.
+     A scrim cannot use the hex. */
+  --c-paper-ch: 251, 251, 249;
   --c-paper-2: #F4F4F1;
   --c-paper-3: #EAEAE6;
+  --c-solid:   #FBFCFA;   /* the opaque tier, for reduced transparency */
 
   /* --- Ink ----------------------------------------------------------------
      Never pure black. Every step clears 4.5:1 on paper and on glass.        */
@@ -98,6 +102,20 @@
   --glass-tint-bottom: rgba(var(--c-up), calc(0.30 * var(--up-k)));
   --glass-specular:    rgba(var(--c-up), calc(0.95 * var(--up-k)));
   --glass-border:      rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
+  /* The inset dressing, which is what makes bent light read as a material:
+     a specular line along the top edge, a lift from below, and a rim. It was
+     written out in full in six places across two files, so a change to the
+     recipe meant six edits and the nav quietly drifted 0.02 away from the
+     rest. Two variants, one at rest and one raised, cover every use. */
+  --glass-inset:
+      inset 0 1px 1px rgba(var(--c-up), calc(0.85 * var(--up-k))),
+      inset 0 -8px 20px rgba(var(--c-up), calc(0.30 * var(--up-k))),
+      inset 0 0 0 1px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
+  --glass-inset-lift:
+      inset 0 1px 1px rgba(var(--c-up), calc(0.90 * var(--up-k))),
+      inset 0 -8px 20px rgba(var(--c-up), calc(0.34 * var(--up-k))),
+      inset 0 0 0 1px rgba(var(--c-dn), calc(0.13 * var(--dn-k)));
+
   --glass-shadow:
       0 1px 2px 0 rgba(var(--c-dn), calc(0.04 * var(--dn-k))),
       0 14px 30px -14px rgba(var(--c-dn), calc(0.16 * var(--dn-k))),
@@ -289,8 +307,10 @@
    =========================================================================== */
 :root[data-theme="dark"] {
   --c-paper:   #0E1211;
+  --c-paper-ch: 14, 18, 17;
   --c-paper-2: #161B1A;
   --c-paper-3: #1E2423;
+  --c-solid:   #141918;
 
   --c-ink:    #F1F4F3;
   --c-ink-2:  #C0C7C4;
@@ -320,5 +340,29 @@
 @media (prefers-reduced-motion: reduce) {
   :root {
     --d-fast: 1ms; --d-base: 1ms; --d-slow: 1ms; --d-enter: 1ms;
+  }
+}
+
+/* ===========================================================================
+   High contrast.
+
+   Token overrides live here with every other token rather than in
+   states.css, which is for behaviour. These were the last three raw hex
+   values outside this file.
+   =========================================================================== */
+@media (prefers-contrast: more) {
+  :root {
+    --c-ink-2: #24302C;
+    --c-ink-3: #35423D;
+    --c-ink-4: #43504A;
+    --c-line:        rgba(var(--c-dn), calc(0.28 * var(--dn-k)));
+    --c-line-strong: rgba(var(--c-dn), calc(0.50 * var(--dn-k)));
+    --glass-tint-top:    rgba(var(--c-up), calc(0.86 * var(--up-k)));
+    --glass-tint-bottom: rgba(var(--c-up), calc(0.78 * var(--up-k)));
+  }
+  :root[data-theme="dark"] {
+    --c-ink-2: #DCE2E0;
+    --c-ink-3: #BFC7C4;
+    --c-ink-4: #A3ABA8;
   }
 }

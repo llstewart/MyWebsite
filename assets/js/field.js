@@ -44,26 +44,21 @@
   if (!canvas) return;
 
   var root = document.documentElement;
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ""))) return;
+  var reduced = LS.reduced;
+  if (LS.saveData || LS.slowLink) return;
 
   var ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  function token(name, fallback) {
-    var v = getComputedStyle(root).getPropertyValue(name).trim();
-    return v || fallback;
-  }
-  var PAPER = token("--c-paper", "#FBFBF9");
-  var GRAIN = token("--c-field-grain", "#4A5054");
+  var PAPER = LS.token("--c-paper", "#FBFBF9");
+  var GRAIN = LS.token("--c-field-grain", "#4A5054");
 
   /* Colours are sampled from CSS once at startup, so a theme change has to
      say so. Everything else on the page inverts through the cascade; a
      canvas cannot. */
   function recolor() {
-    PAPER = token("--c-paper", "#FBFBF9");
-    GRAIN = token("--c-field-grain", "#4A5054");
+    PAPER = LS.token("--c-paper", "#FBFBF9");
+    GRAIN = LS.token("--c-field-grain", "#4A5054");
     P = rgbOf(PAPER);
     ctx.fillStyle = PAPER;
     ctx.fillRect(0, 0, cw, ch);
@@ -523,8 +518,7 @@
   /* Thirty on a desktop, twenty on a phone. Nobody has ever looked at a
      background and wanted more frames, and the difference on a battery is
      a third of the work. */
-  var FRAME_MS = window.matchMedia("(any-hover: hover)").matches
-    ? 1000 / 30 : 1000 / 20;
+  var FRAME_MS = LS.hover ? 1000 / 30 : 1000 / 20;
 
   /* No trails. The canvas is cleared every frame.
 
@@ -800,11 +794,7 @@
     lastScroll = y;
   }, { passive: true });
 
-  var resizeTimer = null;
-  window.addEventListener("resize", function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(layout, 160);
-  }, { passive: true });
+  window.addEventListener("resize", LS.debounce(layout, 160), { passive: true });
 
   document.addEventListener("visibilitychange", function () {
     if (document.hidden) stop(); else start();
