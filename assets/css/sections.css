@@ -542,13 +542,32 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
 .entry__head:hover .entry__toggle::before,
 .feature__more-head:hover .entry__toggle::before { border-color: var(--c-ink); }
 
+/* Padded on every side, because it is a surface now.
+
+   This was laid out as a bare block that opened under a row: no top padding
+   because the summary above it provided the separation, and no right
+   padding because nothing bounded it on that side. The elevation pass then
+   gave it a recessed background, a radius and an inset shadow, which made
+   it a panel, and its text has been pressed against the top and right edges
+   of that panel ever since. Same oversight as the language cards: a surface
+   added to something whose box model was written for no surface.
+
+   The left indent stays larger than the rest. It is not padding for its own
+   sake, it aligns the opened content with the column the year sits in, so
+   the panel reads as belonging to its row rather than floating under it. */
 .entry__body {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--s-6);
-  padding: 0 0 var(--s-6) calc(5.5rem + var(--s-5));
+  padding: var(--s-5) var(--s-5) var(--s-5) calc(5.5rem + var(--s-5));
 }
-@media (max-width: 900px) { .entry__body { grid-template-columns: 1fr; gap: var(--s-5); padding-left: 0; } }
+@media (max-width: 900px) {
+  .entry__body {
+    grid-template-columns: 1fr;
+    gap: var(--s-5);
+    padding: var(--s-5);
+  }
+}
 
 .entry__col h4 { margin-bottom: var(--s-3); }
 .entry__col p {
@@ -644,8 +663,9 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
   font-family: var(--f-mono); color: var(--c-ink-3);
 }
 .incident[open] .incident__head::after { content: "\2013"; }
+/* Same fix, same reason. */
 .incident__body {
-  padding: 0 var(--s-5) var(--s-5);
+  padding: var(--s-5);
   font-size: var(--t-small);
   line-height: 1.68;
   color: var(--c-ink-2);
