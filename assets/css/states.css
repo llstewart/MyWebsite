@@ -360,8 +360,12 @@ a[data-state="missing"] { color: var(--c-live); }
    ========================================================================= */
 
 @media print {
-  .field, .grain, .nav, .palette, .loader, .net, .toast,
+  .field, .nav, .palette, .loader, .net, .toast,
   .pills, .entry__toggle, .approach__scene { display: none !important; }
+
+  /* Nothing may print at a fifth of its opacity because of where the page
+     happened to be scrolled when print was pressed. */
+  .js [data-reveal] { opacity: 1 !important; transform: none !important; }
 
   html, body { background: #fff !important; color: #111 !important; }
   .glass, .glass--flat, .incident {

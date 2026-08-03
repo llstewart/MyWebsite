@@ -37,19 +37,24 @@ Light, warm, and almost monochrome. Colour is a signal, not a mood.
 | `--c-ink-2` | `#3A4642` | Body text |
 | `--c-ink-3` | `#58635E` | Labels and metadata |
 | `--c-ink-4` | `#6E7973` | The quietest legible step |
-| `--c-brand` | `#0E6B52` | Links, active state, results, the turn of a headline |
-| `--c-live` | `#B4732A` | Reserved. Currently unused, and that is correct |
+| `--c-brand` | `#101A17` | Links, active state, results. Ink, not a hue |
+| `--c-live` | `#3A4642` | Reserved for a genuine live state. There is not one |
+
+There is no accent colour. A teal sat in this slot for a while and the question
+that killed it was the right one: what is it for? It marked links, active nav,
+and result numbers, all of which were already the strongest thing in their line
+by size and weight. It was decoration claiming to be a system, and on a page
+whose whole argument is restraint it was the one thing performing.
 
 Field hues (`--c-field-sage`, `--c-field-sky`, `--c-field-sand`) exist **only**
-inside the background canvas so the glass has something to bend. They never
-appear in the interface.
+inside the background canvas, and never appear in the interface. Their job is to
+give the glass something to bend: a lens over a flat colour returns that same
+flat colour, so without them the refraction has nothing to show.
 
 **Rules**
 
-1. Green is the only interface accent. If you are reaching for a second one, the
-   layout is wrong.
-2. Amber is reserved for a genuine live state. There is not one on this page,
-   so it does not appear. A colour with no job does not get used for decoration.
+1. There is no accent. If you are reaching for one, the layout is wrong.
+2. A colour with no job does not get used for decoration.
 3. Every ink step clears 4.5:1 against the glass fill. Hierarchy comes from size
    and weight, not from fading text out of legibility.
 
@@ -160,6 +165,41 @@ at all: it is type on paper, and the glass appears first as the nav bar. Map gen
 and the filtered backdrop is recomposited over a moving field, so long content
 panels use the frosted tier by design, not by omission.
 
+### The field
+
+`assets/js/field.js`. One full viewport canvas, one WebGL2 fragment shader, two
+effects stacked.
+
+**The wave** is fractal Brownian motion: five octaves of value noise, sampled at
+coordinates that are themselves noise. That second step is what matters. An fBm
+field moved by a time uniform slides; a *domain warped* one folds into itself,
+which is the difference between a texture panning past and a surface that is
+alive.
+
+**The grain** is deliberate per pixel dithering, and it is a fix for a technical
+problem that happens to look like film. A gradient this soft, stretched across
+two thousand pixels of eight bit colour, bands: you can see the stripes where
+the value steps. Adding a small random offset per pixel breaks those step
+boundaries apart, and the eye averages it back to smooth while still reading the
+texture up close. Two terms, one at roughly a single least significant bit to
+kill the banding and one slightly larger that is the visible grain.
+
+Colour was the part that took a second attempt. Mixing all three field hues on
+every pixel produced grey, because sage, sky and sand averaged together are a
+neutral: the result had a lightness range and no colour in it. Walking the
+palette with the field value instead means a region is mostly one hue and the
+hue changes as the field moves under it. Measured across the viewport the whole
+range sits between 237 and 251, so it stays paper with a breath of colour in it
+rather than a picture.
+
+It is capped hard, on the same tiering discipline as the glass: device pixel
+ratio at 1.5, thirty frames a second, asleep when the tab is hidden, a single
+static frame under `prefers-reduced-motion`, and it does not start at all on a
+metered connection. Every one of those exits leaves the CSS radial gradients
+underneath untouched, and `.has-shader` is only set on `<html>` after a frame
+has actually been drawn, so a shader that fails to compile degrades to the old
+background rather than to a blank page.
+
 ## 6. Motion
 
 Two curves, and nothing bounces.
@@ -197,6 +237,33 @@ not clipped at the baseline.
 
 The eyebrow arrives first, the sentence at 1150ms, the contents table at 1400ms.
 Everything after that is scroll reveal: opacity and a 16px lift, nothing else.
+
+**Content leaves as well as arrives.** Reveal used to be one way: an element
+faded in on first intersection and the observer stopped watching it, so the page
+was a single long sheet sliding past. Anything scrolled past stayed at full
+weight, which is why the section you were reading never felt like the current
+one.
+
+The reference for the other behaviour was `p5aholic.me`, where sections appear
+to come and go rather than scroll. Measuring it showed that site takes the
+scroll away from the browser entirely: `document.scrollHeight` equals
+`window.innerHeight` and a wrapper is moved with a transform. That was rejected.
+It costs find on page, PageDown and the spacebar, screen reader navigation,
+anchor links, scroll restoration, and phone momentum, and none of that is worth
+paying for a transition.
+
+The part worth having is not the hijacking. It is that content has an exit as
+well as an entrance, which is one extra class. `.is-past` takes an element to
+0.2 opacity and lifts it 16px, and it is only applied to things that have gone
+up, never to things below the fold that have not been read yet.
+
+Two details it would be easy to get wrong. It fades to 0.2 rather than to 0,
+because anything fully transparent is gone for someone searching the page or
+tabbing through it. And an element is marked revealed at the same time it is
+marked past: an anchor link, a `#hash` on load, or a restored scroll position
+jumps over content that then never intersects, and marking it past alone would
+leave it at the entrance state, invisible for good.
+
 The field drifts continuously and the carriers surge with scroll energy, which
 decays on its own.
 

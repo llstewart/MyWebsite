@@ -200,13 +200,28 @@ summary::-webkit-details-marker { display: none; }
   pointer-events: none;
   background: var(--c-paper);
 }
+/* The canvas is only a canvas. Everything it draws is in assets/js/field.js:
+   an fBm noise field moved by a time uniform, dithered per pixel. This is
+   also what gives the glass something to refract. Flat paper is the worst
+   possible surface to put a lens on, because a lens bending a uniform colour
+   returns the same uniform colour, and the effect only appears where there
+   is detail underneath it to bend. */
+#field-gl { display: block; width: 100%; height: 100%; }
+
+/* The fallback, and it stays the fallback. These three tints are what the
+   page looks like with no WebGL2, with a shader that failed to compile, or
+   on a metered connection. field.js sets .has-shader on <html> only after it
+   has drawn a frame, so a failure anywhere in that file leaves this in place
+   rather than leaving a blank page. */
 .field::after {
   content: ""; position: absolute; inset: 0;
   background:
     radial-gradient(70% 55% at 12% 8%,  rgba(118,168,140,0.13), transparent 70%),
     radial-gradient(60% 50% at 92% 22%, rgba(124,160,200,0.11), transparent 72%),
     radial-gradient(60% 55% at 70% 96%, rgba(224,190,136,0.10), transparent 70%);
+  transition: opacity var(--d-slow) linear;
 }
+.has-shader .field::after { opacity: 0; }
 
 /* ---------------------------------------------------------------------------
    OPTIONAL, off by default.
@@ -321,8 +336,25 @@ summary::-webkit-details-marker { display: none; }
   transition-delay: var(--reveal-delay, 0ms);
 }
 .js [data-reveal].is-revealed { opacity: 1; transform: none; }
+
+/* Content leaves as well as arrives.
+
+   What reads as "sections coming and going" on the sites that hijack the
+   scroll is not the hijacking. It is that content has an exit as well as an
+   entrance. Getting that does not require taking the scroll away from the
+   browser, which costs find on page, keyboard paging, screen readers,
+   anchor links, scroll restoration and phone momentum. It requires a second
+   state, which is this one.
+
+   It fades rather than disappears. Anything at zero opacity is gone for
+   someone reading with a keyboard or searching the page, and a portfolio is
+   not the place to hide content from a reader who is looking for it. */
+.js [data-reveal].is-past {
+  opacity: 0.2;
+  transform: translateY(-16px);
+}
 @media (prefers-reduced-motion: reduce) {
-  .js [data-reveal] { opacity: 1; transform: none; }
+  .js [data-reveal], .js [data-reveal].is-past { opacity: 1; transform: none; }
 }
 
 .sr-only {

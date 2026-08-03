@@ -150,66 +150,8 @@
    decayed within half a second.
    --------------------------------------------------------------------------- */
 
-.glass, .glass--flat, .pill, /* The two marks live in the bar rather than in a floating bubble.
-
-   A persistent social bubble in a corner was considered and rejected: it is
-   a blog convention, it asks for attention for the whole scroll the way the
-   telemetry panel used to, and on a phone it parks itself under the thumb.
-   The problem it was solving is real though. Those links only existed at the
-   very bottom of the page, so anyone who read half of it and wanted the
-   GitHub had to scroll to the end. A navigation bar is where a persistent
-   link belongs, and this one is already glass. */
-.nav__sep {
-  width: 1px; height: 18px;
-  margin-inline: var(--s-2);
-  background: var(--c-line-strong);
-  flex: none;
-}
-.nav__mark {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px;
-  border-radius: 999px;
-  color: var(--c-ink-3);
-  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
-}
-.nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
-.nav__mark:hover, .nav__mark:focus-visible {
-  color: var(--c-ink);
-  background: rgba(255, 255, 255, 0.55);
-}
-@media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
-
-.nav__cmd { --lit: 0; }
-.pill, /* The two marks live in the bar rather than in a floating bubble.
-
-   A persistent social bubble in a corner was considered and rejected: it is
-   a blog convention, it asks for attention for the whole scroll the way the
-   telemetry panel used to, and on a phone it parks itself under the thumb.
-   The problem it was solving is real though. Those links only existed at the
-   very bottom of the page, so anyone who read half of it and wanted the
-   GitHub had to scroll to the end. A navigation bar is where a persistent
-   link belongs, and this one is already glass. */
-.nav__sep {
-  width: 1px; height: 18px;
-  margin-inline: var(--s-2);
-  background: var(--c-line-strong);
-  flex: none;
-}
-.nav__mark {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px;
-  border-radius: 999px;
-  color: var(--c-ink-3);
-  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
-}
-.nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
-.nav__mark:hover, .nav__mark:focus-visible {
-  color: var(--c-ink);
-  background: rgba(255, 255, 255, 0.55);
-}
-@media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
-
-.nav__cmd { position: relative; }
+.glass, .glass--flat, .pill, .nav__cmd { --lit: 0; }
+.pill, .nav__cmd { position: relative; }
 
 .glass::after,
 .glass--flat::after,
@@ -283,13 +225,6 @@
     calc(var(--s-3) - (var(--s-3) - var(--s-2)) * var(--nav-t))
     calc(var(--s-4) - (var(--s-4) - var(--s-2)) * var(--nav-t));
   gap: calc(var(--s-2) - (var(--s-2) - var(--s-1)) * var(--nav-t));
-  /* The number itself is transitioned, so every dimension derived from it
-     follows. Short and linear: it needs to feel attached to the scroll, not
-     to lag behind it, and the easing that matters is already in the fact
-     that it is chasing a continuously changing target. */
-  transition:
-    transform var(--d-slow) var(--e-out),
-    --nav-t 260ms linear;
   max-width: calc(100vw - 2 * var(--s-3));
   /* The number itself is transitioned, so every dimension derived from it
      follows. Short and linear: it needs to feel attached to the scroll, not
@@ -372,35 +307,6 @@
   background: rgba(255, 255, 255, 0.62);
   box-shadow: inset 0 0 0 1px rgba(16, 26, 23, 0.08);
 }
-
-/* The two marks live in the bar rather than in a floating bubble.
-
-   A persistent social bubble in a corner was considered and rejected: it is
-   a blog convention, it asks for attention for the whole scroll the way the
-   telemetry panel used to, and on a phone it parks itself under the thumb.
-   The problem it was solving is real though. Those links only existed at the
-   very bottom of the page, so anyone who read half of it and wanted the
-   GitHub had to scroll to the end. A navigation bar is where a persistent
-   link belongs, and this one is already glass. */
-.nav__sep {
-  width: 1px; height: 18px;
-  margin-inline: var(--s-2);
-  background: var(--c-line-strong);
-  flex: none;
-}
-.nav__mark {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px;
-  border-radius: 999px;
-  color: var(--c-ink-3);
-  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
-}
-.nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
-.nav__mark:hover, .nav__mark:focus-visible {
-  color: var(--c-ink);
-  background: rgba(255, 255, 255, 0.55);
-}
-@media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
 
 .nav__cmd {
   display: inline-flex; align-items: center; gap: var(--s-3);

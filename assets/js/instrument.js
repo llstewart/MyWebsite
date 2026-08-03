@@ -23,13 +23,36 @@
       items.forEach(function (el) { el.classList.add("is-revealed"); });
       return;
     }
+    /* Both edges, not just the first crossing.
+
+       This used to unobserve on the first hit, which made an exit state
+       impossible: once an element had been revealed nothing ever heard from
+       it again. It keeps observing now, because scrolling back up the page
+       has to undo the exit as well. */
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-revealed");
-        io.unobserve(entry.target);
+        var el = entry.target;
+        if (entry.isIntersecting) {
+          el.classList.add("is-revealed");
+          el.classList.remove("is-past");
+          return;
+        }
+        /* Only fade what has gone up. Something still below the fold has
+           not been read yet, and should sit at its entrance state waiting
+           its turn rather than being treated as already finished. */
+        if (entry.boundingClientRect.top >= 0) return;
+
+        /* is-revealed as well as is-past, and this is the part that is easy
+           to miss: an element can end up above the viewport without ever
+           having intersected it. Follow an anchor link, open the page on a
+           #hash, or let the browser restore a scroll position, and
+           everything jumped over is skipped entirely. Marking it past
+           without marking it revealed would leave it at the entrance
+           state, which is opacity 0, permanently invisible to anyone who
+           scrolls back up. */
+        el.classList.add("is-revealed", "is-past");
       });
-    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
+    }, { rootMargin: "-6% 0px -12% 0px", threshold: 0.04 });
     items.forEach(function (el) { io.observe(el); });
   }
 
