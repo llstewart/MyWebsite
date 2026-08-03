@@ -109,7 +109,7 @@ body { opacity: 1; transition: opacity var(--d-base) linear; }
    ========================================================================= */
 
 .action, .nav__link, .nav__cmd, .palette__item, .palette__close,
-.rail__tick, .link, .skip, .entry__head, .incident__head, .hub__row {
+.rail__tick, .link, .skip, .entry__head, .incident__head, .pill {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -124,8 +124,8 @@ body { opacity: 1; transition: opacity var(--d-base) linear; }
 .rail__tick.is-pressed::before { width: 28px; background: var(--c-brand); }
 .link.is-pressed            { background-size: 100% var(--hairline); }
 .entry__head.is-pressed,
-.hub__row.is-pressed,
 .incident__head.is-pressed  { background: rgba(16, 26, 23, 0.06); }
+.pill.is-pressed            { transform: scale(0.97); }
 
 /* No hover on touch. Without this the last tapped card keeps its lift. */
 @media (hover: none) {
@@ -218,16 +218,10 @@ a[data-state="missing"] { color: var(--c-live); }
    becomes the navigation and every row grows.
    ========================================================================= */
 
-@media (max-width: 1000px) {
-  .nav { padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4); }
-  .nav__cmd { margin-left: auto; }
-}
-
 /* The palette becomes a bottom sheet: reachable by thumb, never taller than
    it needs to be, and it never swallows the whole screen. */
 @media (max-width: 760px) {
   .nav__cmd kbd { display: none; }
-  .nav__id span { display: none; }
 
   .palette {
     padding-top: 0;
@@ -248,7 +242,7 @@ a[data-state="missing"] { color: var(--c-live); }
 
 .nav__cmd .is-wide { display: inline; }
 .nav__cmd .is-narrow { display: none; }
-@media (max-width: 1000px) {
+@media (max-width: 720px) {
   .nav__cmd .is-wide { display: none; }
   .nav__cmd .is-narrow { display: inline; }
 }
@@ -285,7 +279,7 @@ a[data-state="missing"] { color: var(--c-live); }
 
 @media print {
   .field, .grain, .rail, .nav, .palette, .loader, .net, .toast,
-  .hub, .entry__toggle { display: none !important; }
+  .pills, .entry__toggle { display: none !important; }
 
   html, body { background: #fff !important; color: #111 !important; }
   .page { padding-left: 0; }

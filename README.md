@@ -50,7 +50,7 @@ assets/
     sections.css        one block per region, in document order
     states.css          arrival, departure, offline, pointer, preferences, print
   js/
-    liquid-glass.js     vendored, unmodified, MIT
+    liquid-glass.js     deepika-builds/liquid-glass, byte for byte, MIT
     field.js            the contour field canvas
     instrument.js       reveal, position gauge, disclosures, command palette
     main.js             lifecycle, glass tier decision, resilience
@@ -95,11 +95,15 @@ trimmed to hold one page and why.
 
 ## The glass
 
-Refraction is real: an SVG displacement map applied through `backdrop-filter`,
-using the technique published by
+`assets/js/liquid-glass.js` is
 [deepika-builds/liquid-glass](https://github.com/deepika-builds/liquid-glass)
-(MIT). `assets/js/liquid-glass.js` is vendored unmodified so upstream fixes can
-be dropped in.
+(MIT) byte for byte, sha256 `dfadcbd3e72646a1...`, 8,695 bytes. Do not edit it;
+re-fetch it. The CSS dressing in `glass.css` follows her `demo/index.html`
+recipe, and the cursor tracked glare in `main.js` is hers.
+
+Refraction bends what is behind it, so it needs detail to bend. Her demo puts a
+photograph back there. A flat white page is the worst surface for this effect.
+Here the nav reads properly because real page content scrolls under it.
 
 Three tiers, chosen per device by `main.js`:
 

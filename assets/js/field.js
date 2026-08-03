@@ -7,14 +7,16 @@
       buffer and upscaled. They are pure gradient, so resolution buys nothing
       and costs a full screen of radial fill every frame. Their only job is to
       give the glass a hue to bend.
-   2. Contour lines. Fourteen smooth curves stacked down the page, each a sum
-      of three sines, so the spacing opens and closes the way a topographic
-      map does. These are what the glass visibly refracts, because refraction
-      only reads where there is an edge to bend.
-   3. Carriers. Small marks that travel along the contours, left to right.
-      They drift at rest and surge while the page is scrolling, then settle
-      again. It is a pipeline drawn as a landscape, which is the thing Lincoln
-      actually builds.
+
+   The contour lines and the carriers that travelled along them were removed
+   on 2026-08-02. What is left is the wash, which is deliberately quiet.
+
+   Worth knowing for whoever turns something back on: refraction needs high
+   frequency detail behind it to bend. deepika-builds/liquid-glass puts a
+   photograph back there for exactly this reason. A smooth gradient gives the
+   displacement map almost nothing to work with, so on this page the glass
+   reads properly on the nav, where real page content scrolls underneath it,
+   and reads as frost everywhere else.
 
    Runs at a 30fps ceiling, sleeps when the tab is hidden, and renders exactly
    one frame when the visitor has asked for reduced motion.
@@ -62,44 +64,6 @@
     { color: SAND, r: 0.60, fx: 0.000115, fy: 0.000075, ox: 0.55, oy: 0.82, a: 0.22 }
   ];
 
-  /* Fourteen contours, generated rather than listed, so the spacing stays even
-     while every line gets its own shape. */
-  var LINES = [];
-  (function buildLines() {
-    for (var i = 0; i < 14; i++) {
-      var t = i / 13;
-      LINES.push({
-        y:  0.04 + t * 0.94,
-        a1: 16 + 22 * Math.sin(i * 1.7),
-        f1: 0.0009 + 0.0006 * ((i % 3) / 2),
-        p1: i * 0.9,
-        a2: 8 + 9 * Math.cos(i * 2.3),
-        f2: 0.0026 + 0.0011 * ((i % 4) / 3),
-        p2: i * 1.7,
-        a3: 5,
-        f3: 0.0051,
-        p3: i * 0.4,
-        drift: 0.000018 + 0.000012 * ((i % 5) / 4),
-        w: i % 4 === 0 ? 1.05 : 0.8,
-        o: i % 4 === 0 ? 0.085 : 0.05
-      });
-    }
-  })();
-
-  /* One carrier per few lines, offset so they never form a column. */
-  var CARRIERS = [];
-  (function buildCarriers() {
-    for (var i = 0; i < 22; i++) {
-      CARRIERS.push({
-        line: (i * 5) % LINES.length,
-        x: (i / 22),
-        base: 0.018 + 0.020 * ((i % 6) / 5),
-        size: i % 5 === 0 ? 2.2 : 1.6,
-        lead: 26 + (i % 4) * 12
-      });
-    }
-  })();
-
   /* Scroll energy. Rises with movement, decays on its own, and is what makes
      the field feel attached to the reader rather than playing at them. */
   var energy = 0, lastScroll = window.scrollY;
@@ -132,13 +96,6 @@
     draw(performance.now());
   }
 
-  function lineY(l, x, time) {
-    return l.y * H
-      + l.a1 * Math.sin(x * l.f1 + l.p1 + time * l.drift)
-      + l.a2 * Math.sin(x * l.f2 + l.p2 - time * l.drift * 1.6)
-      + l.a3 * Math.sin(x * l.f3 + l.p3);
-  }
-
   function drawMasses(time) {
     bctx.setTransform(1, 0, 0, 1, 0, 0);
     bctx.fillStyle = PAPER;
@@ -158,50 +115,6 @@
     }
   }
 
-  function drawContours(time) {
-    var step = Math.max(8, Math.round(W / 110));
-    ctx.lineCap = "round";
-    for (var i = 0; i < LINES.length; i++) {
-      var l = LINES[i];
-      ctx.beginPath();
-      for (var x = -step; x <= W + step; x += step) {
-        var y = lineY(l, x, time);
-        if (x <= -step) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = "rgba(16,26,23," + l.o + ")";
-      ctx.lineWidth = l.w;
-      ctx.stroke();
-    }
-  }
-
-  function drawCarriers(time, dt) {
-    for (var i = 0; i < CARRIERS.length; i++) {
-      var c = CARRIERS[i];
-      var l = LINES[c.line];
-      c.x += (c.base * (1 + energy * 7)) * (dt / 1000);
-      if (c.x > 1.08) c.x -= 1.16;
-
-      var px = c.x * W;
-      var py = lineY(l, px, time);
-
-      // A short trail along the line, so movement reads as travel.
-      var tailX = px - c.lead * (0.4 + energy);
-      ctx.beginPath();
-      ctx.moveTo(tailX, lineY(l, tailX, time));
-      var seg = Math.max(6, (px - tailX) / 5);
-      for (var x = tailX + seg; x < px; x += seg) ctx.lineTo(x, lineY(l, x, time));
-      ctx.lineTo(px, py);
-      ctx.strokeStyle = "rgba(" + BRAND + "," + (0.07 + energy * 0.13) + ")";
-      ctx.lineWidth = 1.1;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(px, py, c.size, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(" + BRAND + "," + (0.20 + energy * 0.22) + ")";
-      ctx.fill();
-    }
-  }
-
   /* The masses drift over minutes, so they are re-rendered a couple of times
      a second and cached at full size. Every frame just copies the cache. */
   function refreshBackground(time) {
@@ -217,8 +130,6 @@
     if (time - bgAt > BG_MS) refreshBackground(time);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(bg, 0, 0, bg.width, bg.height, 0, 0, W, H);
-    drawContours(time);
-    drawCarriers(time, dt || FRAME_MS);
   }
 
   function loop(now) {

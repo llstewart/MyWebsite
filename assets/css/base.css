@@ -318,54 +318,6 @@ summary::-webkit-details-marker { display: none; }
   .js [data-reveal] { opacity: 1; transform: none; }
 }
 
-/* =========================================================================
-   The hub. Five doors on the landing, set as a contents table rather than
-   as buttons. The number is the reading order, which is real information:
-   it is the order these things should be read in.
-   ========================================================================= */
-
-.hub { margin-top: clamp(3rem, 7vw, 6rem); }
-
-.hub__row {
-  display: grid;
-  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) auto;
-  gap: var(--s-5);
-  align-items: baseline;
-  padding-block: var(--s-5);
-  border-top: var(--hairline) solid var(--c-line);
-  transition: background-color var(--d-fast) linear;
-}
-.hub__row:last-child { border-bottom: var(--hairline) solid var(--c-line); }
-.hub__row:hover { background: rgba(16, 26, 23, 0.025); }
-
-.hub__name {
-  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: var(--c-ink);
-  transition: color var(--d-fast) linear;
-}
-.hub__row:hover .hub__name { color: var(--c-brand); }
-
-.hub__note {
-  font-size: var(--t-small);
-  line-height: 1.55;
-  color: var(--c-ink-3);
-  text-wrap: pretty;
-}
-.hub__meta { color: var(--c-ink-4); font-variant-numeric: tabular-nums; }
-
-@media (max-width: 760px) {
-  .hub__row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--s-2) var(--s-4);
-    align-items: start;
-  }
-  .hub__name { grid-column: 1; }
-  .hub__meta { grid-column: 2; grid-row: 1; }
-  .hub__note { grid-column: 1 / -1; }
-}
-
 .sr-only {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;

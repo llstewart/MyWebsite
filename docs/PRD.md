@@ -1,7 +1,7 @@
 # Product requirements: llstewart.github.io
 
 **Owner:** Lincoln Stewart
-**Version:** 2.1, 2 August 2026
+**Version:** 3.0, 2 August 2026
 **Status:** Implemented
 **Related:** [BUSINESS-PLAN.md](./BUSINESS-PLAN.md), [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)
 
@@ -104,7 +104,7 @@ Deliberately one page. Every extra route is another chance for a reviewer to sto
 
 | ID | Requirement |
 |---|---|
-| N1 | A fixed glass bar carries the name, section links, and a search control. It is held off screen only during arrival. |
+| N1 | A floating glass capsule carries the section links and search. It carries no name or title: the name is already the largest thing on the landing, and repeating it was chrome competing with content. |
 | N2 | Below 1000px the section links collapse and the command palette becomes the navigation, labelled "Menu". |
 | N3 | A fixed left rail shows one tick per section, lights the current one, and reports scroll depth as a percentage. Hidden below 900px. |
 | N4 | Current section is reflected on both the rail and the nav via `aria-current`, driven by one writer so they cannot disagree. |

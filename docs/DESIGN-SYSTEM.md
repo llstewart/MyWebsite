@@ -1,6 +1,6 @@
 # Design system
 
-**Version:** 2.1, 2 August 2026
+**Version:** 3.0, 2 August 2026
 **Source of truth:** `assets/css/tokens.css`. If a value is not in that file, it
 should not exist anywhere else.
 
@@ -97,8 +97,11 @@ Radii: `--r-glass: 28px`, `--r-panel: 18px`, `--r-tight: 10px`.
 build the displacement map's neutral inset. Change it and the refraction band
 stops matching the corner.
 
-**No pills.** Nothing on this page is a capsule. Buttons are rectangles with a
-10px radius, and metadata is set as a plain line, never as a chip.
+**Pills are used, deliberately and only twice.** An earlier version of this
+system banned them. Lincoln reversed that on 2 August 2026, and he is right that
+the capsule is the correct form here: the nav bar and the landing's section row
+are both floating chrome over content, which is exactly what iOS uses a capsule
+for. They are not used for metadata, tags, or skills, which stay as plain lines.
 
 ## 5. The material
 
@@ -110,9 +113,25 @@ Three tiers, chosen per device by `main.js`.
 | `frosted` | `backdrop-filter: blur(18px) saturate(1.4)` | Phones, tablets, save-data, Safari, Firefox, and anything the frame rate watchdog demotes |
 | `opaque` | Solid `#FBFCFA`, no filter | `prefers-reduced-transparency: reduce` |
 
-Dressing, in `glass.css`, is the same for every tier: a white tint gradient, a
-bright specular top edge, a hairline rim, and a shadow that seats the panel above
-the paper. The refraction itself is never in CSS.
+**`assets/js/liquid-glass.js` is deepika-builds/liquid-glass byte for byte**
+(sha256 `dfadcbd3e72646a1...`, 8,695 bytes). Not adapted, not reimplemented.
+Upstream fixes drop straight in.
+
+The dressing in `glass.css` is her `demo/index.html` `.glass-card` recipe in the
+same order: drop shadow, `inset 0 1px 1px` specular, `inset 0 -8px 20px` lift,
+`inset 0 0 0 1px` rim, plus her cursor tracked glare, a 160px radial at
+`--gx`/`--gy` written from `pointermove` in `main.js`. The one departure is the
+alpha on the tint and the drop shadow: hers assume a dark photograph underneath,
+and used unchanged on light paper they read as a grey box.
+
+**On backgrounds, since it comes up.** Refraction bends what is behind it, so it
+needs high frequency detail to bend. Her demo puts a photograph back there for
+precisely this reason. A flat white page is the worst possible surface for this
+effect: there is nothing to displace and the glass collapses to plain frost. On
+this page the nav is the surface that reads properly, because real page content
+scrolls underneath it, which is also how iOS 26 uses the material. The background
+wash is deliberately quiet and the contour lines that used to give it structure
+were removed on 2 August 2026.
 
 **Only three surfaces ever get a displacement map.** The landing has no panel
 at all: it is type on paper, and the glass appears first as the nav bar. Map generation is O(w x h)

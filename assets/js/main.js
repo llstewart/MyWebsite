@@ -165,7 +165,9 @@
     // The nav is the one glass surface that passes over body copy, and the
     // name is 6.6rem. A strong displacement there reads as a smear rather
     // than as glass, so it gets a gentle bend and a heavier blur instead.
-    nav:      { scale: -46,  chroma: 3, blur: 8, saturate: 1.35, border: 0.14, mapBlur: 11 },
+    // Page content scrolls under this bar, which is the one place on the page
+    // with the high frequency detail refraction needs. Close to her defaults.
+    nav:      { scale: -96, chroma: 5, blur: 3, saturate: 1.5, border: 0.09, mapBlur: 11 },
     contact:  { scale: -96,  chroma: 6, blur: 3, saturate: 1.5,  border: 0.07, mapBlur: 12 },
     palette:  { scale: -74,  chroma: 4, blur: 6, saturate: 1.4,  border: 0.09, mapBlur: 10 }
   };
@@ -321,9 +323,35 @@
     update();
   }
 
+  /* The glare from her demo: a 160px highlight that follows the pointer
+     across every glass surface. liquid-glass.js does the refraction, the CSS
+     carries the gradient, and this writes the two custom properties it reads. */
+  function initGlare() {
+    var surfaces = Array.prototype.slice.call(document.querySelectorAll(".glass, .glass--flat"));
+    if (!surfaces.length || !window.matchMedia("(any-hover: hover)").matches) return;
+    var queued = false, last = null;
+
+    window.addEventListener("pointermove", function (e) {
+      last = e;
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () {
+        queued = false;
+        if (!last) return;
+        for (var i = 0; i < surfaces.length; i++) {
+          var el = surfaces[i];
+          var r = el.getBoundingClientRect();
+          if (r.bottom < -200 || r.top > window.innerHeight + 200) continue;
+          el.style.setProperty("--gx", ((last.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+          el.style.setProperty("--gy", ((last.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+        }
+      });
+    }, { passive: true });
+  }
+
   /* Touch has no hover, so every control gets a press state instead. */
   function initPressFeedback() {
-    var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .rail__tick, .link, .hub__row, .entry__head";
+    var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .rail__tick, .link, .pill, .entry__head";
 
     document.addEventListener("pointerdown", function (e) {
       var target = e.target.closest ? e.target.closest(SELECTOR) : null;
@@ -355,6 +383,7 @@
     arrive();
     applyGlass();
     initTransitions();
+    initGlare();
     initPressFeedback();
     initConnection();
     verifyResume();

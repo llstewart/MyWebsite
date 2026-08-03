@@ -4,8 +4,6 @@
 
 /* =========================================================================
    THE LANDING
-
-   No panel. The whole point of this screen is the room around the words.
    ========================================================================= */
 
 .hero {
@@ -18,36 +16,72 @@
 }
 .hero__shell { position: relative; }
 
-.hero__eyebrow { color: var(--c-ink-3); }
-
+/* Sized to run the full width of the column on one line. 15 characters at
+   Satoshi 600 with this tracking is close enough to 0.55em each that
+   11.6vw fills the measure and stops at the column cap. */
 .hero__name {
-  margin-top: var(--s-5);
-  font-size: var(--t-name);
+  font-size: clamp(2.4rem, 11.6vw, 8.6rem);
   font-weight: 600;
-  line-height: var(--lh-tight);
-  letter-spacing: var(--tr-name);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
   color: var(--c-ink);
+  white-space: nowrap;
 }
-
-/* Each line is a mask while the letters are still travelling, then opens so
-   the settled shadow is not clipped at the baseline. */
-.hero__line {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.1em;
-}
+.hero__line { display: block; overflow: hidden; padding-bottom: 0.08em; }
 .hero__name.is-settled .hero__line { overflow: visible; }
 .hero__word { display: block; }
 
-.hero__claim {
-  margin-top: clamp(1.75rem, 3.4vw, 3rem);
-  max-width: 24ch;
-  font-size: clamp(1.25rem, 2.2vw, 1.9rem);
+.hero__title {
+  margin-top: var(--s-4);
+  font-size: clamp(1.05rem, 2.2vw, 1.65rem);
   font-weight: 400;
-  line-height: 1.26;
-  letter-spacing: -0.022em;
+  letter-spacing: -0.012em;
+  color: var(--c-brand);
+}
+
+.hero__claim {
+  margin-top: var(--s-5);
+  max-width: 34ch;
+  font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.45;
   color: var(--c-ink-2);
-  text-wrap: balance;
+  text-wrap: pretty;
+}
+
+/* The sections, horizontal. */
+.pills {
+  display: flex; flex-wrap: wrap; gap: var(--s-3);
+  margin-top: clamp(2rem, 4vw, 3.25rem);
+}
+.pill {
+  display: inline-flex; align-items: center;
+  padding: var(--s-3) var(--s-5);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(16, 26, 23, 0.11);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  font-family: var(--f-mono); font-size: var(--t-label);
+  letter-spacing: var(--tr-label); text-transform: uppercase;
+  color: var(--c-ink-2);
+  transition: color var(--d-fast) linear, background-color var(--d-fast) linear,
+              transform var(--d-base) var(--e-out);
+}
+.pill:hover, .pill:focus-visible {
+  color: var(--c-brand);
+  background: rgba(255, 255, 255, 0.78);
+  transform: translateY(-1px);
+}
+.pill--solid {
+  background: var(--c-ink); color: var(--c-paper);
+  box-shadow: inset 0 0 0 1px var(--c-ink);
+}
+.pill--solid:hover, .pill--solid:focus-visible {
+  background: var(--c-brand); color: #fff;
+  box-shadow: inset 0 0 0 1px var(--c-brand);
 }
 
 /* =========================================================================
@@ -57,9 +91,6 @@
    below its place, blurred and weightless, and settles into a soft shadow
    that reads as type sitting a millimetre above the paper. Ease out only:
    nothing overshoots, nothing bounces, and it happens exactly once.
-
-   The stagger is 46ms, which at this size is slow enough to read as a
-   sequence rather than as a wave.
    ========================================================================= */
 
 .hero__ch {
@@ -74,30 +105,26 @@
     opacity 820ms linear,
     filter 980ms var(--e-out),
     text-shadow 1400ms var(--e-out);
-  transition-delay: calc(var(--i, 0) * 46ms + var(--row, 0) * 150ms);
+  transition-delay: calc(var(--i, 0) * 46ms);
 }
 .is-ready .hero__ch {
   transform: none;
   opacity: 1;
   filter: blur(0);
-  /* The resting shadow. Two layers: a tight contact edge and a wide, very
-     faint ambient one. Enough to lift the type off the paper, not enough to
-     announce itself. */
   text-shadow:
     0 1px 0 rgba(16, 26, 23, 0.06),
     0 10px 26px rgba(16, 26, 23, 0.07);
 }
 
-/* Everything after the name arrives once the last letter has landed. */
-.is-loading .hero__eyebrow,
+.is-loading .hero__title,
 .is-loading .hero__claim,
-.is-loading .hub { opacity: 0; transform: translateY(12px); }
-.hero__eyebrow, .hero__claim, .hub {
+.is-loading .pills { opacity: 0; transform: translateY(12px); }
+.hero__title, .hero__claim, .pills {
   transition: opacity 900ms var(--e-out), transform 900ms var(--e-out);
 }
-.hero__eyebrow { transition-delay: 120ms; }
-.hero__claim   { transition-delay: 1150ms; }
-.hub           { transition-delay: 1400ms; }
+.hero__title { transition-delay: 1050ms; }
+.hero__claim { transition-delay: 1200ms; }
+.pills       { transition-delay: 1350ms; }
 
 @media (prefers-reduced-motion: reduce) {
   .hero__ch {
@@ -105,266 +132,9 @@
     transition: none; text-shadow: none;
   }
   .hero__line { overflow: visible; }
-  .is-loading .hero__eyebrow, .is-loading .hero__claim, .is-loading .hub {
+  .is-loading .hero__title, .is-loading .hero__claim, .is-loading .pills {
     opacity: 1; transform: none;
   }
-}
-
-/* =========================================================================
-   SYSTEMS
-
-   A feature and an index. Six identical panels stacked is a list of
-   documents; one piece with weight followed by five scannable lines is an
-   argument about what matters most.
-   ========================================================================= */
-
-/* --- The feature --------------------------------------------------------- */
-
-.feature {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  gap: var(--s-7);
-  padding: clamp(1.5rem, 3vw, 2.75rem);
-  border-radius: var(--r-glass);
-}
-@media (max-width: 1000px) { .feature { grid-template-columns: 1fr; gap: var(--s-6); } }
-
-.feature__name {
-  margin-top: var(--s-4);
-  font-size: clamp(2rem, 4vw, 3.1rem);
-  font-weight: 500;
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  color: var(--c-ink);
-}
-.feature__claim {
-  margin-top: var(--s-4);
-  max-width: 34ch;
-  font-size: var(--t-lead);
-  line-height: 1.42;
-  color: var(--c-ink-2);
-  text-wrap: pretty;
-}
-.feature__result {
-  margin-top: var(--s-5);
-  padding-top: var(--s-4);
-  border-top: 2px solid var(--c-brand);
-  color: var(--c-brand);
-  letter-spacing: 0.07em;
-  text-transform: none;
-  line-height: 1.8;
-}
-.feature__lede p:last-child { margin-top: var(--s-4); }
-
-.feature__detail {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--s-5) var(--s-6);
-  align-content: start;
-}
-@media (max-width: 620px) { .feature__detail { grid-template-columns: 1fr; } }
-.feature__col h4 { margin-bottom: var(--s-3); }
-.feature__col p {
-  font-size: var(--t-small);
-  line-height: 1.65;
-  color: var(--c-ink-2);
-  text-wrap: pretty;
-}
-/* The build column is the long one, so it takes the full width beneath. */
-.feature__col:nth-child(2) { grid-row: span 2; }
-@media (max-width: 620px) { .feature__col:nth-child(2) { grid-row: auto; } }
-
-/* The summary only exists where the disclosure does any work. On a wide
-   screen the content is simply open and the control would be noise. */
-.feature__more, .role__more { display: contents; }
-.feature__more-head {
-  display: none;
-  align-items: center; gap: var(--s-4);
-  padding-block: var(--s-4);
-  border-top: var(--hairline) solid var(--c-line);
-  cursor: pointer;
-  list-style: none;
-}
-.feature__more-head::-webkit-details-marker { display: none; }
-.feature__more-head .entry__toggle { margin-left: auto; }
-
-@media (max-width: 900px) {
-  .feature__more, .role__more { display: block; }
-  .feature__more-head { display: flex; }
-  .feature__more[open] .feature__detail { padding-top: var(--s-4); }
-  .role__more[open] .role__points { margin-top: var(--s-4); }
-}
-
-.feature__stack {
-  grid-column: 1 / -1;
-  padding-top: var(--s-4);
-  border-top: var(--hairline) solid var(--c-line);
-  color: var(--c-ink-3);
-  line-height: 1.9;
-  text-transform: none;
-  letter-spacing: 0.03em;
-}
-
-/* --- The index ----------------------------------------------------------- */
-
-.index { margin-top: var(--s-6); }
-
-.entry { border-top: var(--hairline) solid var(--c-line-strong); }
-.entry:last-child { border-bottom: var(--hairline) solid var(--c-line-strong); }
-
-.entry__head {
-  display: grid;
-  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) auto 30px;
-  gap: var(--s-5);
-  align-items: baseline;
-  padding-block: var(--s-5);
-  cursor: pointer;
-  list-style: none;
-  transition: background-color var(--d-fast) linear;
-}
-.entry__head::-webkit-details-marker { display: none; }
-.entry__head:hover { background: rgba(16, 26, 23, 0.03); }
-
-.entry__name {
-  font-size: var(--t-h3);
-  font-weight: 500;
-  letter-spacing: -0.016em;
-  color: var(--c-ink);
-}
-.entry__claim {
-  font-size: var(--t-small);
-  line-height: 1.5;
-  color: var(--c-ink-2);
-  text-wrap: pretty;
-}
-.entry__meta { color: var(--c-ink-3); white-space: nowrap; }
-
-.entry__toggle {
-  position: relative;
-  width: 30px; height: 30px;
-  border: var(--hairline) solid var(--c-line-strong);
-  border-radius: var(--r-tight);
-  align-self: center;
-  justify-self: end;
-  transition: border-color var(--d-fast) linear;
-}
-.entry__toggle::before,
-.entry__toggle::after {
-  content: ""; position: absolute; inset: 0; margin: auto;
-  background: var(--c-ink-2);
-}
-.entry__toggle::before { width: 10px; height: var(--hairline); }
-.entry__toggle::after  { width: var(--hairline); height: 10px;
-  transition: transform var(--d-base) var(--e-out); }
-.entry__d[open] .entry__toggle::after { transform: scaleY(0); }
-.entry__head:hover .entry__toggle { border-color: var(--c-brand-edge); }
-
-.entry__body {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-6);
-  padding: 0 0 var(--s-6);
-}
-@media (max-width: 900px) { .entry__body { grid-template-columns: 1fr; gap: var(--s-5); } }
-
-.entry__col h4 { margin-bottom: var(--s-3); }
-.entry__col p {
-  font-size: var(--t-small);
-  line-height: 1.65;
-  color: var(--c-ink-2);
-  text-wrap: pretty;
-}
-.entry__stack {
-  grid-column: 1 / -1;
-  padding-top: var(--s-4);
-  border-top: var(--hairline) solid var(--c-line);
-  color: var(--c-ink-3);
-  line-height: 1.9;
-  text-transform: none;
-  letter-spacing: 0.03em;
-}
-
-@media (max-width: 900px) {
-  .entry__head {
-    grid-template-columns: minmax(0, 1fr) 30px;
-    gap: var(--s-3) var(--s-4);
-    align-items: start;
-  }
-  .entry__name { grid-column: 1; }
-  .entry__toggle { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
-  .entry__claim, .entry__meta { grid-column: 1; }
-  .entry__meta { white-space: normal; }
-}
-
-/* =========================================================================
-   EXPERIENCE
-   ========================================================================= */
-
-.roles { display: grid; gap: var(--s-7); }
-
-.role {
-  display: grid;
-  grid-template-columns: 13rem minmax(0, 1fr);
-  gap: var(--s-6);
-  padding-top: var(--s-5);
-  border-top: 2px solid var(--c-ink);
-}
-@media (max-width: 900px) { .role { grid-template-columns: 1fr; gap: var(--s-4); } }
-
-.role__when { display: flex; flex-direction: column; gap: var(--s-2); }
-@media (max-width: 900px) { .role__when { flex-direction: row; flex-wrap: wrap; gap: var(--s-4); } }
-
-.role__title { margin-bottom: var(--s-2); }
-.role__org { color: var(--c-ink-3); font-size: var(--t-small); }
-.role__note { margin-top: var(--s-4); max-width: 52ch; color: var(--c-ink-2); font-size: var(--t-small); }
-
-.role__points { margin-top: var(--s-5); display: grid; gap: var(--s-4); max-width: 68ch; }
-.role__points li {
-  position: relative;
-  padding-left: var(--s-5);
-  font-size: var(--t-small);
-  line-height: 1.65;
-  color: var(--c-ink-2);
-  text-wrap: pretty;
-}
-/* The marker is a tick, matching the rail. Structure, not decoration. */
-.role__points li::before {
-  content: "";
-  position: absolute; left: 0; top: 0.68em;
-  width: 10px; height: var(--hairline);
-  background: var(--c-brand);
-}
-.role--edu .role__title { font-weight: 400; }
-
-/* The incident is a disclosure too, so the section stays scannable and the
-   people who want the detail get all of it. */
-.incident {
-  margin-top: var(--s-5);
-  max-width: 68ch;
-  border: var(--hairline) solid var(--c-line-strong);
-  border-radius: var(--r-panel);
-  background: rgba(255, 255, 255, 0.5);
-  overflow: hidden;
-}
-.incident__head {
-  display: flex; align-items: center; gap: var(--s-3);
-  padding: var(--s-4) var(--s-5);
-  cursor: pointer;
-  list-style: none;
-}
-.incident__head::-webkit-details-marker { display: none; }
-.incident__head::after {
-  content: "+";
-  margin-left: auto;
-  font-family: var(--f-mono); color: var(--c-ink-3);
-}
-.incident[open] .incident__head::after { content: "\2013"; }
-.incident__body {
-  padding: 0 var(--s-5) var(--s-5);
-  font-size: var(--t-small);
-  line-height: 1.68;
-  color: var(--c-ink-2);
-  text-wrap: pretty;
 }
 
 /* =========================================================================
