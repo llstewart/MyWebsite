@@ -227,32 +227,6 @@ summary::-webkit-details-marker { display: none; }
 }
 .has-dots .field::after { opacity: 0; }
 
-/* ---------------------------------------------------------------------------
-   OPTIONAL, off by default.
-
-   The one page-wide texture worth considering: a deep crop of the same
-   Bateke aerial, zoomed past the point where it reads as a landscape. It is
-   organic detail with no subject, so it gives every glass surface something
-   to bend without putting a savanna behind a skills list, and it keeps the
-   approach section's reveal intact because nobody recognises this as the
-   same photograph.
-
-   To turn it on, add class="has-texture" to <html> (or to <body>).
-   --------------------------------------------------------------------------- */
-
-.has-texture .field {
-  background:
-    var(--c-paper)
-    url("../img/bateke-texture.webp") center / cover no-repeat;
-}
-.has-texture .field::before {
-  content: ""; position: absolute; inset: 0;
-  /* Paper at an alpha, via the channel. This was the literal light paper
-     colour, which would lay a white sheet over a dark page: the third
-     instance of the same mistake, and the reason a channel exists. */
-  background: rgba(var(--c-paper-ch), 0.90);
-}
-
 /* =========================================================================
    Links and actions
    ========================================================================= */
