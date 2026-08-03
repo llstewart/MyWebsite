@@ -149,9 +149,34 @@
 .glass, .glass--flat, .pill, .nav__cmd { --lit: 0; }
 .pill, .nav__cmd { position: relative; }
 
+/* The filled button is excluded from the glare below and given its own.
+
+   Two things were wrong with it wearing the standard one. It is opaque, so
+   a 160px white radial at 0.22 sat on top of a near black surface as a
+   visible pale blob rather than as light on glass, and it opened to 0.77
+   under the pointer. And it carried a displacement map it could not use:
+   refraction bends what is BEHIND a surface, and nothing is behind an
+   opaque one, so the filter was rasterising a layer for no visual result
+   and leaving a seam along the bottom edge where the map's neutral inset
+   band met the boundary. That seam is the flicker.
+
+   A filled control still catches light, it just catches it the way metal
+   does: a sheen along the top edge that strengthens as the pointer nears,
+   not a lamp behind frosted glass. */
+.pill--solid::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(var(--c-up), calc((0.16 + var(--lit) * 0.20) * var(--up-k))),
+    rgba(var(--c-up), 0) 55%);
+  transition: background 380ms var(--e-sheet);
+}
+
 .glass::after,
 .glass--flat::after,
-.pill::after,
+.pill:not(.pill--solid)::after,
 .nav__cmd::after {
   content: "";
   position: absolute; inset: 0;
