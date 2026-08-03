@@ -512,6 +512,7 @@
    --------------------------------------------------------------------------- */
 .theme {
   position: fixed;
+  border-radius: 999px;   /* wins over .glass, and the map is built from it */
   top: var(--s-3);
   right: var(--s-4);
   z-index: var(--z-nav);
@@ -521,12 +522,14 @@
   background: linear-gradient(180deg,
     rgba(var(--c-up), calc(0.55 * var(--up-k))),
     rgba(var(--c-up), calc(0.34 * var(--up-k))));
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  /* No backdrop-filter here any more. The tier owns it: liquid-glass.js
+     applies the displacement map plus its own blur when this device can
+     afford refraction, and .lg-fallback supplies a plain frost when it
+     cannot. Declaring one here as well meant the frosted fallback and the
+     real material were both being asked for at once. */
   box-shadow:
     var(--e-2),
-    inset 0 1px 1px rgba(var(--c-up), calc(0.9 * var(--up-k))),
-    inset 0 0 0 1px rgba(var(--c-dn), calc(0.10 * var(--dn-k)));
+    var(--glass-inset-lift);
   transition:
     transform var(--d-base) var(--e-out),
     box-shadow var(--d-base) var(--e-out),

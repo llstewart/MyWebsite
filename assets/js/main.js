@@ -182,6 +182,24 @@
     // tighter, because the band has to stay inside a capsule a third the
     // height, and that is a geometry difference rather than a material one.
     pill:     { scale: -96, chroma: 5, blur: 3, saturate: 1.5,  border: 0.22, mapBlur: 7 },
+    /* The theme control. Refractive, and the reasoning that kept it frosted
+       was mine and was wrong.
+
+       I ruled it out on the grounds that a displacement map is O(w x h) and
+       that is what stalled the Approach panel. True there: that panel is
+       about 650,000 pixels. This button is 38 by 38, which is 1,444. Three
+       orders of magnitude apart, and the pills beside it have been carrying
+       real refraction at almost exactly this size the whole time.
+
+       A cost rule that is right at one scale is not a principle. Applying
+       it here cost the one control that sits alone on the page, with
+       nothing around it to borrow character from, the only thing that would
+       have given it any.
+
+       A larger neutral inset than the pills get, because the band has to
+       stay inside a circle rather than a capsule, and a circle has no
+       straight run for it to sit along. */
+    theme:    { scale: -88, chroma: 4, blur: 3, saturate: 1.45, border: 0.36, mapBlur: 6 },
     feature:  { scale: -88,  chroma: 5, blur: 4, saturate: 1.45, border: 0.06, mapBlur: 13 }
   };
 
@@ -342,7 +360,8 @@
      across every glass surface. liquid-glass.js does the refraction, the CSS
      carries the gradient, and this writes the two custom properties it reads. */
   function initGlare() {
-    var surfaces = LS.all(".glass, .glass--flat, .pill");
+    var HOVER_REACH = 180;
+    var surfaces = LS.all(".glass, .glass--flat, .pill, .nav__link, .nav__cmd, .theme");
     if (!surfaces.length || !LS.hover) return;
     var queued = false, last = null;
 
@@ -359,9 +378,35 @@
           if (r.bottom < -200 || r.top > window.innerHeight + 200) continue;
           el.style.setProperty("--gx", ((last.clientX - r.left) / r.width * 100).toFixed(1) + "%");
           el.style.setProperty("--gy", ((last.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+
+          /* And the light itself, not only where it is pointed.
+
+             --lit was only ever raised by pointerdown, so the description
+             of this material, that glass changes light rather than colour
+             when you approach it, was true of pressing and merely
+             aspirational for hovering. On a mouse the whole effect was a
+             background alpha stepping up.
+
+             It is the same falloff the press uses, at a shorter reach:
+             full on the surface under the pointer, gone by 180px, so a
+             neighbouring capsule catches a little of it and the row reads
+             as connected rather than as separate buttons. Nothing is
+             animated here; the CSS transition on the glare does that. */
+          var cx = Math.max(r.left, Math.min(last.clientX, r.right));
+          var cy = Math.max(r.top, Math.min(last.clientY, r.bottom));
+          var d = Math.hypot(last.clientX - cx, last.clientY - cy);
+          var v = d >= HOVER_REACH ? 0 : Math.pow(1 - d / HOVER_REACH, 2);
+          el.style.setProperty("--lit", v.toFixed(3));
         }
       });
     }, { passive: true });
+
+    /* Pointer gone, light out. Without this the last surface it passed
+       keeps its highlight until something else claims it, which reads as a
+       control stuck in a hover state. */
+    document.addEventListener("pointerleave", function () {
+      surfaces.forEach(function (el) { el.style.setProperty("--lit", "0"); });
+    });
   }
 
   /* The bar is open at the top of the page and contracts as the reader
