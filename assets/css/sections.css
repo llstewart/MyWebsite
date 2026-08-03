@@ -248,12 +248,10 @@
 .proof {
   display: grid; gap: var(--s-5);
   padding-left: var(--s-5);
-  border-left: 2px solid var(--c-ink);
 }
 @media (max-width: 900px) {
   .proof {
     padding-left: 0; padding-top: var(--s-4);
-    border-left: 0; border-top: 2px solid var(--c-ink);
   }
 }
 .proof__n {
@@ -338,8 +336,7 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
 .feature__result {
   margin-top: var(--s-5);
   padding-top: var(--s-4);
-  border-top: 2px solid var(--c-brand);
-  color: var(--c-brand);
+  color: var(--c-ink-2);
   letter-spacing: 0.07em;
   text-transform: none;
   line-height: 1.8;
@@ -538,7 +535,6 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
   grid-template-columns: 13rem minmax(0, 1fr);
   gap: var(--s-6);
   padding-top: var(--s-5);
-  border-top: 2px solid var(--c-ink);
 }
 @media (max-width: 900px) { .role { grid-template-columns: 1fr; gap: var(--s-4); } }
 
@@ -668,7 +664,7 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
 }
 @media (max-width: 860px) { .approach__grid { grid-template-columns: 1fr; gap: var(--s-5); } }
 
-.approach__col { padding-top: var(--s-4); border-top: 2px solid var(--c-ink); }
+.approach__col { padding-top: var(--s-4); }
 .approach__col .prose { margin-top: var(--s-3); font-size: var(--t-small); line-height: 1.68; }
 
 /* =========================================================================
@@ -716,7 +712,11 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
   align-items: baseline; justify-content: space-between;
 }
 .colophon { max-width: 62ch; }
-.colophon .more { font-size: var(--t-label); font-family: var(--f-mono);
+/* Smaller than the label step, which is the only place on the page that
+   goes below it. This is a footnote about the footnotes: it should be
+   findable and never read. "Colophon" was the wrong word for it too, being
+   a term that assumes the reader already knows the term. */
+.colophon .more { font-size: 0.625rem; font-family: var(--f-mono);
   letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-ink-4); }
 .colophon .more:hover { color: var(--c-ink-2); }
 .colophon .footer__note { margin-top: var(--s-3); }
@@ -726,4 +726,58 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
   font-size: var(--t-small);
   line-height: 1.6;
   color: var(--c-ink-3);
+}
+
+/* ---------------------------------------------------------------------------
+   The measure rule.
+
+   Four places carried a plain 2px line across the top or down the side: the
+   roles, the approach columns, the feature result, and the proof column. A
+   full width 2px rule is the most default thing a stylesheet can do. It is
+   what you get when a divider is needed and nobody decided what it should
+   say, and four of them made the page look assembled from a starter kit.
+
+   This is a ruler mark instead. One short heavy tick where the line starts,
+   then a hairline carrying on to the end. It reads as a measurement rather
+   than as a divider, which is the language the rest of the page already
+   speaks: year led entries, mono labels, counted results. It also sets a
+   direction, since the tick marks the origin and the hairline runs away
+   from it, so the eye is told where the block begins.
+
+   Drawn with backgrounds rather than borders or pseudo elements. Borders
+   cannot do two weights on one edge, and a pseudo element would need a
+   positioning context on every one of these, several of which are grid
+   items where that has consequences.
+   --------------------------------------------------------------------------- */
+
+.role,
+.approach__col {
+  --tick: 2.5rem;
+  border-top: 0;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(90deg, var(--c-ink) 0 var(--tick), transparent var(--tick)),
+    linear-gradient(90deg, var(--c-line-strong) 0 100%);
+  background-size: 100% 2px, 100% var(--hairline);
+  background-position: 0 0, 0 0;
+}
+
+.proof {
+  --tick: 2.5rem;
+  border-left: 0;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(180deg, var(--c-ink) 0 var(--tick), transparent var(--tick)),
+    linear-gradient(180deg, var(--c-line-strong) 0 100%);
+  background-size: 2px 100%, var(--hairline) 100%;
+  background-position: 0 0, 0 0;
+}
+@media (max-width: 900px) {
+  /* Stacked, the proof column becomes a top rule like the others. */
+  .proof {
+    background-image:
+      linear-gradient(90deg, var(--c-ink) 0 var(--tick), transparent var(--tick)),
+      linear-gradient(90deg, var(--c-line-strong) 0 100%);
+    background-size: 100% 2px, 100% var(--hairline);
+  }
 }

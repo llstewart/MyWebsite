@@ -83,9 +83,13 @@
 
 /* Roles. A resting surface, because each one is a discrete period of work
    and the eye should be able to count them without reading the dates. */
+/* background-color, not the background shorthand. The shorthand resets
+   background-image, and the measure rule at the top of a role is drawn with
+   gradients. This file loads after sections.css, so a shorthand here wins
+   and would silently erase the rule. */
 .role {
   border-radius: var(--r-panel);
-  background: rgba(255, 255, 255, 0.34);
+  background-color: rgba(255, 255, 255, 0.34);
   box-shadow: var(--e-1), var(--edge-lit);
   transition: box-shadow var(--d-base) var(--e-out);
 }
@@ -123,7 +127,7 @@
    page rather than onto it. */
 .proof {
   border-radius: var(--r-tight);
-  background: rgba(16, 26, 23, 0.022);
+  background-color: rgba(16, 26, 23, 0.022);
   box-shadow: var(--e-in-1);
 }
 
