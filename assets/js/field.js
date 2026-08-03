@@ -117,90 +117,89 @@
   }
 
   /* ------------------------------------------------------------------
-     The keyboard.
+     The globe.
 
-     Every other movement is a current: it says which way to go, and the
-     dots spread evenly because nothing tells them where to be. This one is
-     a formation. It leaves the angle almost alone and puts the whole idea
-     in the density, which the renderer already treats as "how likely is a
-     dot here". A density that is high on the keys and near zero between
-     them draws a keyboard out of dots.
+     This replaces a keyboard that was here first. The keyboard worked in
+     the sense that it drew, and did not work in the sense that mattered: at
+     this dot size it read as a grid of dots rather than as keys, and a
+     keyboard on a developer's page is the most literal image available. It
+     said "software" the way a stock photo does.
 
-     The dots are still flowing the whole time. The shape is what persists;
-     the particles passing through it are not. That is the reason to do it
-     this way rather than by pinning particles to positions, which would
-     look like a diagram and would stop dead the moment the shape changed.
+     A globe says something this page has already earned. The approach
+     section is about the Bateke Plateau and about being from the Congo, and
+     the site's one photograph is that place from the air. Putting a slowly
+     turning globe on the landing means the background is the same argument
+     as the copy instead of a decoration next to it.
 
-     And it types. One key at a time is struck on a beat, brightening for a
-     moment, in a pseudo random order that avoids repeating the same key
-     twice running. It is a software engineer's landing page: the first
-     thing the background does should be the thing he does.
+     How it is drawn. Every other movement is a current: it says which way
+     to go, and the dots spread evenly because nothing says where to BE.
+     This one is a formation, and it puts the whole idea in the density,
+     which the renderer already reads as "how likely is a dot here".
+
+     For a cell inside the disc, the screen position is read as a point on
+     the front of a sphere: z comes from the radius, latitude from the
+     height, and longitude from x and z after rotating them about the
+     vertical axis. Density is then high near whole numbers of latitude and
+     longitude, which is a wireframe, plus a rim term so the silhouette
+     closes. Turning the sphere moves the longitude lines across it, and
+     because they are computed per cell per frame they compress toward the
+     edges exactly the way a real projection does.
+
+     The dots keep flowing through it the whole time. The shape persists,
+     the particles do not. Pinning particles to positions would look like a
+     diagram and would stop dead the moment the shape changed.
      ------------------------------------------------------------------ */
 
-  var KB_ROWS = 4;
-  var KB_COLS = [10, 10, 9, 7];   // keys per row, narrowing like a real one
-  /* Placed low and left, in the quiet corner under the hero copy.
+  /* Pulled in off the right edge, which was cropping the far limb, and the
+     wireframe is coarser than it looks like it should be on purpose: the
+     density grid is sampled at 26px cells, so a line thinner than a cell
+     falls between samples and simply is not there. Fewer lines, each wide
+     enough to land on a cell, reads as a globe. More lines, each too thin,
+     reads as noise. */
+  var G = { cx: 0.70, cy: 0.46, r: 0.37, spin: 0.20 };
 
-     It sat at y 0.40 to 0.62 first, which is exactly where the title and
-     the claim are, so the keys drew straight through the sentences. A
-     background that has to compete with the one paragraph on the landing
-     has lost before it starts. Below the text and hard against the left is
-     empty on every section, which is where a formation like this belongs. */
-  var KB = { x0: 0.03, x1: 0.50, y0: 0.63, y1: 0.90 };   // fractions of the grid
+  function globe(x, y, t) {
+    var R = gridH * G.r;
+    var dx = (x - gridW * G.cx) / R;
+    var dy = (y - gridH * G.cy) / R;
+    var d2 = dx * dx + dy * dy;
+    if (d2 > 1) return 0;
 
-  /* Which key is being struck, and how hard. floor(t * rate) is the beat;
-     the hash scatters the order so it is not a march left to right. */
-  function struck(row, col, t) {
-    var beat = Math.floor(t * 5.5);
-    var h = (Math.sin(beat * 12.9898) * 43758.5453);
-    h = h - Math.floor(h);
-    var total = 36;
-    var pick = Math.floor(h * total);
-    var idx = row * 10 + col;
-    if (idx !== pick % total) return 0;
-    /* Decay across the beat, so a key lights and releases rather than
-       switching on for a whole tick. */
-    var within = t * 5.5 - beat;
-    return Math.pow(1 - within, 2.2);
-  }
+    var z = Math.sqrt(1 - d2);
+    var a = t * G.spin;
+    /* Longitude after turning the sphere about its vertical axis. Only the
+       near face is sampled: the far side would need a second solution for
+       z, and a wireframe with both faces on reads as a ball of wool. */
+    var lon = Math.atan2(dx * Math.cos(a) - z * Math.sin(a),
+                         dx * Math.sin(a) + z * Math.cos(a));
+    var lat = Math.asin(dy < -1 ? -1 : dy > 1 ? 1 : dy);
 
-  function keyboard(x, y, t) {
-    var fx = x / gridW, fy = y / gridH;
-    if (fx < KB.x0 || fx > KB.x1 || fy < KB.y0 || fy > KB.y1) return 0;
+    /* Sharp powers, so a line is a line and not a gradient. */
+    var lats = Math.pow(Math.abs(Math.cos(lat * 6.0)), 9);
+    var lons = Math.pow(Math.abs(Math.cos(lon * 5.0)), 9);
+    var wire = lats > lons ? lats : lons;
 
-    var v = (fy - KB.y0) / (KB.y1 - KB.y0);
-    var row = Math.min(KB_ROWS - 1, Math.floor(v * KB_ROWS));
-    var rowV = v * KB_ROWS - row;
-    /* A gap between rows, so the keys read as separate. */
-    if (rowV < 0.16 || rowV > 0.88) return 0;
+    /* The rim. Without it the sphere has no edge and reads as a flat mesh. */
+    var rim = Math.pow(d2, 9);
 
-    var cols = KB_COLS[row];
-    /* Each row is inset a little more than the one above, the way a
-       staggered keyboard is. */
-    var inset = row * 0.022;
-    var u = (fx - KB.x0 - inset) / (KB.x1 - KB.x0 - inset);
-    if (u < 0 || u > 1) return 0;
-
-    var col = Math.min(cols - 1, Math.floor(u * cols));
-    var colU = u * cols - col;
-    if (colU < 0.14 || colU > 0.86) return 0;
-
-    /* Dense, because a shape has to be legible where a current only has to
-       be present. The weight is multiplied by the mask and the tide before
-       it reaches the renderer, so a key asking for 0.42 was arriving at
-       nearer 0.15 and the keyboard dissolved. */
-    return 0.85 + 0.15 * struck(row, col, t);
+    var v = wire * 0.92 + rim * 0.9;
+    return v > 1 ? 1 : v;
   }
 
   var MOVEMENTS = [
-    /* The landing state. See the note above. A very slow rightward drift so
-       the dots are still travelling through the shape rather than sitting
-       in it, but slow enough that the keyboard stays legible. */
-    { name: "keyboard", speed: 0.34,
+    /* The landing state. See the note above.
+
+       Slow, and it ignores the page mask. The mask is a half ellipse on the
+       left, which is the right composition for a current filling the page;
+       a formation has its own shape and its own place and would be cut in
+       half by it. So a movement may opt out, and the globe is the one that
+       does: type on the left, globe on the right, which is a composition
+       rather than an overlap. */
+    { name: "globe", speed: 0.30, ignoreMask: true,
       angle: function (x, y, t) {
-        return Math.sin(y * 0.09 + t * 0.10) * 0.5;
+        return Math.sin(y * 0.07 + t * 0.09) * 0.45;
       },
-      density: keyboard },
+      density: globe },
 
     /* Open noise current. Broad and wandering, no nameable structure. Two
        octaves, because one alone sweeps the whole page one way. */
@@ -348,6 +347,18 @@
     return a + (b - a) * blend;
   }
 
+  /* How much of the page mask applies right now.
+
+     A formation carries its own shape and its own position, so the half
+     ellipse would crop it. A movement can opt out, and during a transition
+     the mask fades in or out along with everything else rather than
+     switching on the frame the movement changes. */
+  function maskWeight() {
+    var a = MOVEMENTS[from].ignoreMask ? 0 : 1;
+    var b = MOVEMENTS[to].ignoreMask ? 0 : 1;
+    return blend <= 0 ? a : a + (b - a) * blend;
+  }
+
   /* Both grids are filled in one pass, once per frame.
 
      The weight used to be computed per particle, which meant a square root,
@@ -370,6 +381,7 @@
        unrelated periods, so it never repeats on a beat you could count. */
     var tide = 0.70 + 0.30 * Math.sin(t * 0.041)
                     + 0.30 * Math.sin(t * 0.017 + 1.7);
+    var mw = maskWeight();
     for (var y = 0; y < rows; y++) {
       var base = y * cols;
       var py_ = y * CELL + half;
@@ -380,7 +392,8 @@
            and a zero length direction stalls every particle standing in
            that cell. */
         angles[base + x] = k <= 0 ? a : a + arc(a, B(x, y, t)) * k;
-        weights[base + x] = mask(x * CELL + half, py_) * bandAt(x, y, t) * tide;
+        var m = 1 - mw + mw * mask(x * CELL + half, py_);
+        weights[base + x] = m * bandAt(x, y, t) * tide;
       }
     }
   }
