@@ -488,12 +488,16 @@
   color: var(--c-ink);
   box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
 }
+/* ink-3, not ink-4. Measured on the panel fill at 4.03:1, which is under
+   the 4.5:1 floor, and this is the word that tells you what a row will DO,
+   Go or Copy or Open. The quietest step on the scale is for metadata you
+   can ignore; a verb is not that. ink-3 measures 5.57:1. */
 .palette__kind {
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
-  color: var(--c-ink-4); min-width: 4.5rem;
+  color: var(--c-ink-3); min-width: 4.5rem;
 }
-.palette__item[aria-selected="true"] .palette__kind { color: var(--c-ink-3); }
+.palette__item[aria-selected="true"] .palette__kind { color: var(--c-ink-2); }
 
 /* The selected row carries the same chevron every other way in on the site
    uses, so the affordance is the same shape here as everywhere else. */
