@@ -94,6 +94,28 @@
 
   var gridW = 0, gridH = 0;   // read by the centre-relative movements
 
+  /* Phase helpers, shared by a movement's angle and its density.
+
+     Both have to be driven by the same number or the crests of the bands
+     drift away from the direction the particles are steering, and the wave
+     stops looking like one thing. Speeds are chosen here rather than in the
+     movements so there is one place to change how fast a wave travels. */
+  var WAVE_SPEED = 0.95;    // how fast the bands cross the page
+  var RIPPLE_SPEED = 1.45;  // how fast the rings expand
+
+  function wavePhase(x, y, t) {
+    var rot = t * 0.052;
+    return (x * Math.cos(rot) + y * Math.sin(rot)) * 0.42 - t * WAVE_SPEED;
+  }
+
+  function rippleAt(x, y, t) {
+    var cx = gridW * (0.5 + 0.22 * Math.sin(t * 0.023));
+    var cy = gridH * (0.5 + 0.18 * Math.cos(t * 0.031));
+    var dx = x - cx, dy = y - cy;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    return { radial: Math.atan2(dy, dx), phase: d * 0.34 - t * RIPPLE_SPEED };
+  }
+
   var MOVEMENTS = [
     /* Open noise current. Broad and wandering, no nameable structure. Two
        octaves, because one alone sweeps the whole page one way. */
@@ -107,10 +129,19 @@
        set of them turning, so the direction they travel comes around over a
        couple of minutes. Medium pace: enough to read as movement, not
        enough to flicker. */
-    { name: "waves", speed: 1.20, angle: function (x, y, t) {
+    { name: "waves", speed: 1.20,
+      angle: function (x, y, t) {
         var rot = t * 0.052;
-        return rot + Math.sin((x * Math.cos(rot) + y * Math.sin(rot)) * 0.42
-                              - t * 1.15) * 0.85;
+        return rot + Math.sin(wavePhase(x, y, t)) * 0.85;
+      },
+      /* The bands. Steering alone never produced a visible wave: every
+         particle turned, but they stayed evenly spread, so there was
+         nothing to see travelling. A wave you can see is a density
+         variation, not a direction variation. Raising the sinusoid to a
+         power keeps the crests and empties the space between them, which
+         is what turns a gradient into bands with gaps. */
+      density: function (x, y, t) {
+        return Math.pow(0.5 + 0.5 * Math.sin(wavePhase(x, y, t)), 2.2);
       } },
 
     /* Two drifting vortices. Particles run tangentially, pulling the spray
@@ -143,15 +174,17 @@
        something dropped in water. Particles turn to face the wavefront as
        it passes and settle back once it has gone by, so the page gets a
        pulse crossing it rather than a steady current. */
-    { name: "ripple", speed: 1.10, angle: function (x, y, t) {
-        var cx = gridW * (0.5 + 0.22 * Math.sin(t * 0.023));
-        var cy = gridH * (0.5 + 0.18 * Math.cos(t * 0.031));
-        var dx = x - cx, dy = y - cy;
-        var d = Math.sqrt(dx * dx + dy * dy);
-        var radial = Math.atan2(dy, dx);
+    { name: "ripple", speed: 1.10,
+      angle: function (x, y, t) {
+        var c = rippleAt(x, y, t);
         /* The wavefront turns the radial direction into a tangential one
            and back again as it passes. */
-        return radial + Math.sin(d * 0.34 - t * 1.9) * 1.25;
+        return c.radial + Math.sin(c.phase) * 1.25;
+      },
+      /* Rings, for the same reason the waves have bands: without a density
+         term the rings exist in the maths and not on the screen. */
+      density: function (x, y, t) {
+        return Math.pow(0.5 + 0.5 * Math.sin(rippleAt(x, y, t).phase), 2.0);
       } },
 
     /* NEW. Turbulence: the noise current sampled at a much finer scale and
@@ -206,6 +239,19 @@
   /* Shortest signed arc from a to b, always in [-PI, PI]. */
   function arc(a, b) {
     return Math.atan2(Math.sin(b - a), Math.cos(b - a));
+  }
+
+  /* Density, blended across a transition the same way angles are. Scalars,
+     so a plain linear blend is correct here: there is no wrap to go the
+     long way round. A movement with no density function is uniform, which
+     is what the four steady currents want. */
+  function bandAt(x, y, t) {
+    var A = MOVEMENTS[from].density;
+    var a = A ? A(x, y, t) : 1;
+    if (blend <= 0) return a;
+    var B = MOVEMENTS[to].density;
+    var b = B ? B(x, y, t) : 1;
+    return a + (b - a) * blend;
   }
 
   function buildGrid(t) {
@@ -274,8 +320,13 @@
      Flip SIDE to "right" to mirror it. Nothing else needs to change.
      ------------------------------------------------------------------ */
   var SIDE = "left";
-  var SPREAD_X = 0.66;   // fraction of the viewport width it reaches
-  var SPREAD_Y = 0.78;   // fraction of half the height, from the middle
+  /* Wider than it was. At 0.66 the horizontal reach was short enough
+     against the full height that the visible arc curved like the side of a
+     tall oval rather than the edge of a globe. Reaching further across, and
+     pulling the vertical in a little, makes the curve read as part of a
+     circle instead of part of an ellipse standing on end. */
+  var SPREAD_X = 0.92;   // fraction of the viewport width it reaches
+  var SPREAD_Y = 0.72;   // fraction of half the height, from the middle
   var FALLOFF = 1.5;     // >1 concentrates toward the anchored edge
 
   function mask(x, y) {
@@ -310,7 +361,10 @@
     occRows = Math.ceil(ch / OCC) + 2;
     occ = new Uint8Array(occCols * occRows);
 
-    count = Math.min(11000, Math.max(1600, Math.round(cw * ch / 240)));
+    /* Raised, because the band density now refuses a large share of draws
+       on the movements that have crests. Without more particles the wave
+       troughs and the whole page thin out together. */
+    count = Math.min(15000, Math.max(2200, Math.round(cw * ch / 165)));
     px = new Float32Array(count);
     py = new Float32Array(count);
     pl = new Float32Array(count);
@@ -367,15 +421,30 @@
       px[i] += Math.cos(a) * v;
       py[i] += Math.sin(a) * v;
 
-      /* The per cell budget is the ceiling scaled by the mask, so the same
-         one mechanism does two jobs: it stops any area saturating, and it
-         shapes the piece. Outside the mask the budget rounds to zero and
-         nothing is drawn at all, while the particle carries on moving. */
+      /* Two jobs, two mechanisms. Folding them into one number was a bug.
+
+         Shaping is stochastic: a dot is drawn with probability equal to the
+         mask. Because each dot is an independent coin flip, density falls
+         off exactly as smoothly as the mask does, with no edge anywhere.
+
+         The ceiling stays a flat integer cap, which is the only thing an
+         integer is right for here.
+
+         These were one line before: the budget was the ceiling multiplied
+         by the mask and truncated to an integer. That turned a smooth
+         falloff into a step function, so the budget dropped 5, 4, 3, 2, 1,
+         0 in bands and drew visible concentric arcs with a hard edge where
+         it hit zero. It read as a circle stamped on the page. A continuous
+         quantity had been quantised to five levels and the quantisation was
+         the thing you could see. */
       var ox = (px[i] / OCC) | 0, oy = (py[i] / OCC) | 0;
       if (ox >= 0 && oy >= 0 && ox < occCols && oy < occRows) {
         var oi = oy * occCols + ox;
-        var budget = (OCC_MAX * mask(px[i], py[i]) + 0.35) | 0;
-        if (budget > 0 && occ[oi] < budget) {
+        /* Where it may be drawn, times how much of a crest it is standing
+           in. Both are continuous and both are applied as a probability,
+           so neither can band. */
+        var chance = mask(px[i], py[i]) * bandAt(px[i] / CELL, py[i] / CELL, t);
+        if (Math.random() < chance && occ[oi] < OCC_MAX) {
           occ[oi]++;
           ctx.fillRect(px[i], py[i], DOT_SIZE, DOT_SIZE);
         }
