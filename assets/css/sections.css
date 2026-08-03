@@ -55,7 +55,14 @@
   margin-top: clamp(2rem, 4vw, 3.25rem);
 }
 .pill {
+  /* Text directly inside a flex box becomes an anonymous flex item, and an
+     anonymous item is allowed to shrink. In a wrapping row that let the
+     labels collapse to nothing while the text spilled over the neighbour.
+     nowrap plus an explicit basis keeps each capsule at its own width. */
   display: inline-flex; align-items: center;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  width: max-content;
   padding: var(--s-3) var(--s-5);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.5);
@@ -342,15 +349,38 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
   color: var(--c-ink-2);
   text-wrap: pretty;
 }
-.feature__stack {
+/* A labelled list, not a row of middots.
+
+   Twelve technologies joined by dots is a tag cloud that has changed its
+   separator, and it was the same shape as the meta blob the index rows used
+   to carry. This is the pattern the skills section already uses: a mono
+   label, then plain prose commas. One way of listing tools on the page. */
+.feature__stack, .entry__stack {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: baseline;
   margin-top: var(--s-5);
   padding-top: var(--s-4);
   border-top: var(--hairline) solid var(--c-line);
-  color: var(--c-ink-3);
-  line-height: 1.9;
-  text-transform: none;
-  letter-spacing: 0.03em;
 }
+.stack-label { color: var(--c-ink-4); }
+.stack-list {
+  font-size: var(--t-small);
+  line-height: 1.7;
+  color: var(--c-ink-3);
+  text-wrap: pretty;
+}
+@media (max-width: 620px) {
+  .feature__stack, .entry__stack { grid-template-columns: 1fr; gap: var(--s-2); }
+}
+
+/* The feature tag: a year and a context word, kept apart rather than
+   welded together with a dot. Same language as the index rows. */
+.feature__tag {
+  display: flex; align-items: baseline; gap: var(--s-4);
+}
+.feature__year { font-size: var(--t-small); color: var(--c-ink-3); }
 
 /* The detail collapses on a phone only. It ships open in the markup so no
    JavaScript, print, and crawlers all get the full text, and the summary
@@ -472,15 +502,7 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
   color: var(--c-ink-2);
   text-wrap: pretty;
 }
-.entry__stack {
-  grid-column: 1 / -1;
-  padding-top: var(--s-4);
-  border-top: var(--hairline) solid var(--c-line);
-  color: var(--c-ink-3);
-  line-height: 1.9;
-  text-transform: none;
-  letter-spacing: 0.03em;
-}
+.entry__stack { grid-column: 1 / -1; }
 
 @media (max-width: 900px) {
   .entry__head {

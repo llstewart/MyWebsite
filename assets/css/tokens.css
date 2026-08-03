@@ -9,7 +9,11 @@
    how the nav resizes smoothly without a JavaScript easing loop. */
 @property --nav-t {
   syntax: "<number>";
-  inherits: false;
+  /* Must inherit. The bar writes this on itself and its children size
+     themselves off it; with inherits:false the children read the initial
+     value instead of the parent, their padding calc collapses to zero, and
+     the labels stack on top of each other. */
+  inherits: true;
   initial-value: 0;
 }
 

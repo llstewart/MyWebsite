@@ -150,8 +150,66 @@
    decayed within half a second.
    --------------------------------------------------------------------------- */
 
-.glass, .glass--flat, .pill, .nav__cmd { --lit: 0; }
-.pill, .nav__cmd { position: relative; }
+.glass, .glass--flat, .pill, /* The two marks live in the bar rather than in a floating bubble.
+
+   A persistent social bubble in a corner was considered and rejected: it is
+   a blog convention, it asks for attention for the whole scroll the way the
+   telemetry panel used to, and on a phone it parks itself under the thumb.
+   The problem it was solving is real though. Those links only existed at the
+   very bottom of the page, so anyone who read half of it and wanted the
+   GitHub had to scroll to the end. A navigation bar is where a persistent
+   link belongs, and this one is already glass. */
+.nav__sep {
+  width: 1px; height: 18px;
+  margin-inline: var(--s-2);
+  background: var(--c-line-strong);
+  flex: none;
+}
+.nav__mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 999px;
+  color: var(--c-ink-3);
+  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
+}
+.nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
+.nav__mark:hover, .nav__mark:focus-visible {
+  color: var(--c-ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+@media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
+
+.nav__cmd { --lit: 0; }
+.pill, /* The two marks live in the bar rather than in a floating bubble.
+
+   A persistent social bubble in a corner was considered and rejected: it is
+   a blog convention, it asks for attention for the whole scroll the way the
+   telemetry panel used to, and on a phone it parks itself under the thumb.
+   The problem it was solving is real though. Those links only existed at the
+   very bottom of the page, so anyone who read half of it and wanted the
+   GitHub had to scroll to the end. A navigation bar is where a persistent
+   link belongs, and this one is already glass. */
+.nav__sep {
+  width: 1px; height: 18px;
+  margin-inline: var(--s-2);
+  background: var(--c-line-strong);
+  flex: none;
+}
+.nav__mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 999px;
+  color: var(--c-ink-3);
+  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
+}
+.nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
+.nav__mark:hover, .nav__mark:focus-visible {
+  color: var(--c-ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+@media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
+
+.nav__cmd { position: relative; }
 
 .glass::after,
 .glass--flat::after,
@@ -210,6 +268,10 @@
   transform: translate(-50%, 0);
   z-index: var(--z-nav);
   display: flex; align-items: center;
+  /* Same reason the pills needed it: a fixed, shrink to fit flex box whose
+     children are text does not reliably take its childrens width, and the
+     capsule ended up 32px wide with its own contents spilling out of it. */
+  width: max-content;
   border-radius: 999px;
   /* Scroll linked, not stepped. --nav-t runs 0 to 1 as the page moves and
      every dimension below is a straight interpolation off it, so the bar is
@@ -257,7 +319,41 @@
   transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
 }
 
+/* The two marks live in the bar rather than in a floating bubble.
+
+   A persistent social bubble in a corner was considered and rejected: it is
+   a blog convention, it asks for attention for the whole scroll the way the
+   telemetry panel used to, and on a phone it parks itself under the thumb.
+   The problem it was solving is real though. Those links only existed at the
+   very bottom of the page, so anyone who read half of it and wanted the
+   GitHub had to scroll to the end. A navigation bar is where a persistent
+   link belongs, and this one is already glass. */
+.nav__sep {
+  width: 1px; height: 18px;
+  margin-inline: var(--s-2);
+  background: var(--c-line-strong);
+  flex: none;
+}
+.nav__mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 999px;
+  color: var(--c-ink-3);
+  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
+}
+.nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
+.nav__mark:hover, .nav__mark:focus-visible {
+  color: var(--c-ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+@media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
+
+/* Nothing in the bar may shrink below its own text. Flex items default to
+   shrinking, which with two more children in the row collapsed the labels
+   on top of each other. */
+.nav > *, .nav__links > * { flex: none; }
 .nav__links { display: flex; gap: var(--s-1); }
+.nav__link, .nav__cmd { white-space: nowrap; }
 @media (max-width: 720px) { .nav__links { display: none; } }
 
 .nav__link {
@@ -276,6 +372,35 @@
   background: rgba(255, 255, 255, 0.62);
   box-shadow: inset 0 0 0 1px rgba(16, 26, 23, 0.08);
 }
+
+/* The two marks live in the bar rather than in a floating bubble.
+
+   A persistent social bubble in a corner was considered and rejected: it is
+   a blog convention, it asks for attention for the whole scroll the way the
+   telemetry panel used to, and on a phone it parks itself under the thumb.
+   The problem it was solving is real though. Those links only existed at the
+   very bottom of the page, so anyone who read half of it and wanted the
+   GitHub had to scroll to the end. A navigation bar is where a persistent
+   link belongs, and this one is already glass. */
+.nav__sep {
+  width: 1px; height: 18px;
+  margin-inline: var(--s-2);
+  background: var(--c-line-strong);
+  flex: none;
+}
+.nav__mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 999px;
+  color: var(--c-ink-3);
+  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
+}
+.nav__mark .mark { width: 16px; height: 16px; margin: 0; opacity: 1; }
+.nav__mark:hover, .nav__mark:focus-visible {
+  color: var(--c-ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+@media (max-width: 560px) { .nav__sep, .nav__mark { display: none; } }
 
 .nav__cmd {
   display: inline-flex; align-items: center; gap: var(--s-3);
