@@ -181,7 +181,9 @@
       </ul>
     </div>
 
-    <dl class="skills">
+    <details class="skills__more">
+      <summary class="more">All tools and platforms</summary>
+      <dl class="skills">
       <div class="skills__row" data-reveal>
         <dt class="skills__key label">Frontend</dt>
         <dd class="skills__val">React, Next.js, Vue.js, Tailwind CSS, responsive build, design systems</dd>
@@ -222,13 +224,14 @@
         <dt class="skills__key label">Familiar with</dt>
         <dd class="skills__val">PyTorch, Prometheus, Cypress. Used, not shipped at depth</dd>
       </div>
-    </dl>
+      </dl>
+    </details>
 
     </div>
 
-    <p class="section__note skills__note" data-reveal>
-      This is what I have used in production. If a tool you need is not on this list, I have not
-      shipped with it, and I will tell you that in the first conversation rather than the third.
+    <p class="section__note skills__note lede" data-reveal>
+      <b>This is what I have used in production.</b> If a tool you need is not on this list, I have
+      not shipped with it, and I will tell you that in the first conversation rather than the third.
     </p>
   </div>
 </section>
@@ -246,31 +249,43 @@
     <header class="section__head">
       <p class="section__label label" data-reveal>Projects</p>
       <h2 class="h1 section__title" data-reveal>Things that run, <em>and who they run for.</em></h2>
-      <p class="section__note" data-reveal>
-        Six projects, every one in production or delivered to real users. Problem, build, result, in
-        that order, because that is the order that matters.
+      <p class="section__note lede" data-reveal>
+        <b>Six projects, every one in production or delivered to real users.</b> Problem, build,
+        result, in that order, because that is the order that matters.
       </p>
     </header>
 
     <article class="feature glass" data-glass="feature" id="sys-packleads" data-reveal>
-      <div class="feature__lede">
-        <p class="label label--brand">Flagship &middot; launched April 2026</p>
-        <h3 class="feature__name">Packleads</h3>
-        <p class="feature__claim">
-          A local business intelligence platform that measures how visible a business really is,
-          then turns the gaps into a report you can hand a client.
-        </p>
-        <p class="feature__result label">
-          1,200 leads in 12 weeks &middot; 4,478 businesses &middot; 18,792 US cities &middot; 7,197 review snapshots
-        </p>
-        <p><a class="link" href="https://packleads.io" target="_blank" rel="noopener">packleads.io</a></p>
+      <div class="claimset">
+        <div class="feature__lede">
+          <p class="label label--brand">Flagship &middot; launched April 2026</p>
+          <h3 class="feature__name">Packleads</h3>
+          <p class="feature__claim lede">
+            <b>A local business intelligence platform that measures how visible a business really
+            is.</b> It scores every signal a buyer would otherwise check by hand, then turns the
+            gaps into a report you can hand a client.
+          </p>
+          <p><a class="link" href="https://packleads.io" target="_blank" rel="noopener">packleads.io</a></p>
+        </div>
+
+        <div class="proof">
+          <div>
+            <span class="proof__n">4,478</span>
+            <span class="proof__c">businesses measured, across 18,792 US cities</span>
+          </div>
+          <div>
+            <span class="proof__n">1,200</span>
+            <span class="proof__c">leads processed in the first twelve weeks</span>
+          </div>
+          <div>
+            <span class="proof__n">7,197</span>
+            <span class="proof__c">review snapshots, which is data you can only build by watching rather than looking up</span>
+          </div>
+        </div>
       </div>
 
-      <details class="feature__more" data-open-wide open>
-        <summary class="feature__more-head">
-          <span class="label">Problem, build, result</span>
-          <span class="entry__toggle" aria-hidden="true"></span>
-        </summary>
+      <details class="feature__more">
+        <summary class="feature__more-head">How it was built<span class="entry__toggle" aria-hidden="true"></span></summary>
       <div class="feature__detail">
         <div class="feature__col">
           <h4 class="label">Problem</h4>
@@ -460,7 +475,20 @@
         <div class="role__what">
           <h3 class="h2 role__title">Software Engineer</h3>
           <p class="role__org">Oshkosh Corporation, JLG Industries</p>
-          <p class="role__results label">4s to 800ms dashboard load &middot; 40% faster releases &middot; 25% better uptime and response</p>
+          <div class="claimset">
+            <p class="lede role__lede">
+              <b>I own the software plant operations teams open every morning.</b> The dashboards,
+              the telemetry pipelines behind them, the APIs underneath, and the CI/CD and cloud
+              infrastructure the whole thing ships on.
+            </p>
+            <div class="proof">
+              <div><span class="proof__n">4s to 800ms</span><span class="proof__c">average dashboard load, after rebuilding the endpoints and the SQL behind them</span></div>
+              <div><span class="proof__n">40%</span><span class="proof__c">faster release cycle, after moving the team onto CI/CD</span></div>
+              <div><span class="proof__n">25%</span><span class="proof__c">better uptime and response, from the MQTT telemetry pipeline</span></div>
+            </div>
+          </div>
+          <details class="role__more" open>
+          <summary class="feature__more-head">What I do there<span class="entry__toggle" aria-hidden="true"></span></summary>
           <ul class="role__points">
             <li>Own the front end for three internal dashboards in React and Vue.js, used daily by operations managers across manufacturing plants to track production throughput, equipment status, and alarm history.</li>
             <li>Write Python services that pull sensor telemetry over MQTT from edge gateways, transform it, and land it in time series stores backing Grafana dashboards. Uptime and response times improved 25%.</li>
@@ -486,6 +514,7 @@
               unnoticed, and wrote the postmortem.
             </p>
           </details>
+          </details>
         </div>
       </article>
 
@@ -497,12 +526,19 @@
         <div class="role__what">
           <h3 class="h2 role__title">Systems Engineer Intern</h3>
           <p class="role__org">Oshkosh Corporation, JLG Industries</p>
-          <p class="role__results label">98% recognition accuracy &middot; 45min to 20min troubleshooting &middot; 25% less downtime</p>
-          <details class="role__more" data-open-wide open>
-          <summary class="feature__more-head">
-            <span class="label">What I did there</span>
-            <span class="entry__toggle" aria-hidden="true"></span>
-          </summary>
+          <div class="claimset">
+            <p class="lede role__lede">
+              <b>I started on the plant floor, on computer vision and diagnostics.</b> Models that
+              read labels off moving equipment, and dashboards that told a technician what had
+              actually gone wrong rather than that something had.
+            </p>
+            <div class="proof">
+              <div><span class="proof__n">98%</span><span class="proof__c">recognition accuracy, across three production lines</span></div>
+              <div><span class="proof__n">45 to 20 min</span><span class="proof__c">maintenance troubleshooting, after consolidating the alarm data</span></div>
+            </div>
+          </div>
+          <details class="role__more">
+          <summary class="feature__more-head">What I did there<span class="entry__toggle" aria-hidden="true"></span></summary>
           <ul class="role__points">
             <li>Trained and deployed a TensorFlow computer vision model on Azure ML for automated text recognition on welding labels, reaching 98% accuracy across three production lines.</li>
             <li>Built React dashboards backed by Python and PostgreSQL that consolidated alarm data, cutting average troubleshooting for maintenance technicians from about 45 minutes to under 20 and reducing equipment downtime 25%.</li>

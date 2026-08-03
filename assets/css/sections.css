@@ -195,6 +195,99 @@
 .skills__note { margin-top: var(--s-5); }
 
 /* =========================================================================
+   The lede.
+
+   Linear's move, and the most useful thing found while looking at how the
+   big platforms deliver a paragraph without it reading as a wall: the first
+   sentence sits at full contrast and the rest of the same paragraph drops to
+   the muted step. One block, two levels of attention, no separate headline.
+   A reader takes the first line at a glance and the remainder only if they
+   want it.
+   ========================================================================= */
+
+.lede { color: var(--c-ink-3); text-wrap: pretty; }
+.lede b { font-weight: inherit; color: var(--c-ink); }
+
+/* =========================================================================
+   The proof column.
+
+   Stripe's move. The number does not sit inside the paragraph where it gets
+   skimmed past. It is lifted out beside the argument, behind a rule, with
+   one line of caption. Argument on the left, evidence on the right, and the
+   reader can take either one first.
+   ========================================================================= */
+
+.claimset {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 17rem);
+  gap: var(--s-7);
+  align-items: start;
+  margin-top: var(--s-4);
+}
+@media (max-width: 900px) { .claimset { grid-template-columns: 1fr; gap: var(--s-5); } }
+
+.proof {
+  display: grid; gap: var(--s-5);
+  padding-left: var(--s-5);
+  border-left: 2px solid var(--c-brand);
+}
+@media (max-width: 900px) {
+  .proof {
+    padding-left: 0; padding-top: var(--s-4);
+    border-left: 0; border-top: 2px solid var(--c-brand);
+  }
+}
+.proof__n {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--c-brand);
+  font-variant-numeric: tabular-nums;
+}
+.proof__c {
+  display: block;
+  margin-top: var(--s-2);
+  font-size: var(--t-small);
+  line-height: 1.45;
+  color: var(--c-ink-3);
+  text-wrap: pretty;
+}
+
+.role__lede { font-size: var(--t-small); line-height: 1.68; max-width: 56ch; }
+
+/* =========================================================================
+   The way in.
+
+   One affordance, used everywhere: a label and a chevron. Apple's pages
+   carry an enormous amount of information and never look busy because the
+   thing that says "there is more here" is always the same shape and always
+   in the same place.
+   ========================================================================= */
+
+.more {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--c-brand);
+  cursor: pointer;
+  list-style: none;
+}
+.more::-webkit-details-marker { display: none; }
+.more::after {
+  content: "";
+  width: 6px; height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--d-open) var(--e-sheet);
+}
+details[open] > .more::after { transform: rotate(45deg) translate(-1px, -1px); }
+details[open].is-closing > .more::after { transform: rotate(-45deg); }
+.more:hover { color: var(--c-brand-lit); }
+
+/* =========================================================================
    Sheets.
 
    A section's body copy sits on a glass sheet rather than loose on the
@@ -222,13 +315,9 @@
    ========================================================================= */
 
 .feature {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  gap: var(--s-7);
-  padding: clamp(1.5rem, 3vw, 2.75rem);
+  padding: clamp(1.75rem, 3.4vw, 3rem);
   border-radius: var(--r-glass);
 }
-@media (max-width: 1000px) { .feature { grid-template-columns: 1fr; gap: var(--s-6); } }
 
 .feature__name {
   margin-top: var(--s-4);
@@ -259,11 +348,12 @@
 
 .feature__detail {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--s-5) var(--s-6);
-  align-content: start;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-6);
+  padding-top: var(--s-5);
+  border-top: var(--hairline) solid var(--c-line);
 }
-@media (max-width: 620px) { .feature__detail { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .feature__detail { grid-template-columns: 1fr; gap: var(--s-5); } }
 .feature__col h4 { margin-bottom: var(--s-3); }
 .feature__col p {
   font-size: var(--t-small);
@@ -271,12 +361,8 @@
   color: var(--c-ink-2);
   text-wrap: pretty;
 }
-/* Build is the long column, so it takes the full height beside the others. */
-.feature__col:nth-child(2) { grid-row: span 2; }
-@media (max-width: 620px) { .feature__col:nth-child(2) { grid-row: auto; } }
-
 .feature__stack {
-  grid-column: 1 / -1;
+  margin-top: var(--s-5);
   padding-top: var(--s-4);
   border-top: var(--hairline) solid var(--c-line);
   color: var(--c-ink-3);
@@ -288,24 +374,23 @@
 /* The detail collapses on a phone only. It ships open in the markup so no
    JavaScript, print, and crawlers all get the full text, and the summary
    only exists at the width where the disclosure does any work. */
-.feature__more, .role__more { display: contents; }
 .feature__more-head {
-  display: none;
-  align-items: center; gap: var(--s-4);
-  padding-block: var(--s-4);
-  border-top: var(--hairline) solid var(--c-line);
+  display: inline-flex;
+  align-items: center; gap: var(--s-2);
+  margin-top: var(--s-5);
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--c-brand);
   cursor: pointer;
   list-style: none;
 }
 .feature__more-head::-webkit-details-marker { display: none; }
+.feature__more-head::-webkit-details-marker { display: none; }
 .feature__more-head .entry__toggle { margin-left: auto; }
 
-@media (max-width: 900px) {
-  .feature__more, .role__more { display: block; }
-  .feature__more-head { display: flex; }
-  .feature__more[open] .feature__detail { padding-top: var(--s-4); }
-  .role__more[open] .role__points { margin-top: var(--s-4); }
-}
+.feature__more, .role__more { display: block; }
+.feature__more[open] .feature__detail { padding-top: var(--s-5); }
+.role__more[open] .role__points { margin-top: var(--s-4); }
 
 /* --- The index ----------------------------------------------------------- */
 
@@ -341,25 +426,34 @@
 }
 .entry__meta { color: var(--c-ink-3); white-space: nowrap; }
 
+/* A chevron, not a plus box. Apple marks every way in with one and nothing
+   else, which is why their pages carry a great deal of information without
+   ever looking busy: the affordance is always the same shape. */
 .entry__toggle {
   position: relative;
-  width: 30px; height: 30px;
-  border: var(--hairline) solid var(--c-line-strong);
-  border-radius: var(--r-tight);
+  width: 24px; height: 24px;
   align-self: center;
   justify-self: end;
-  transition: border-color var(--d-fast) linear;
 }
-.entry__toggle::before,
-.entry__toggle::after {
-  content: ""; position: absolute; inset: 0; margin: auto;
-  background: var(--c-ink-2);
+.entry__toggle::before {
+  content: "";
+  position: absolute; inset: 0; margin: auto;
+  width: 8px; height: 8px;
+  border-right: 1.5px solid var(--c-ink-3);
+  border-bottom: 1.5px solid var(--c-ink-3);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform var(--d-open) var(--e-sheet),
+              border-color var(--d-fast) linear;
 }
-.entry__toggle::before { width: 10px; height: var(--hairline); }
-.entry__toggle::after  { width: var(--hairline); height: 10px;
-  transition: transform var(--d-base) var(--e-out); }
-.entry__d[open] .entry__toggle::after { transform: scaleY(0); }
-.entry__head:hover .entry__toggle { border-color: var(--c-brand-edge); }
+details[open] > .entry__head .entry__toggle::before,
+details[open] > summary .entry__toggle::before {
+  transform: translateY(1px) rotate(-135deg);
+}
+details[open].is-closing > summary .entry__toggle::before {
+  transform: translateY(-2px) rotate(45deg);
+}
+.entry__head:hover .entry__toggle::before,
+.feature__more-head:hover .entry__toggle::before { border-color: var(--c-brand); }
 
 .entry__body {
   display: grid;
