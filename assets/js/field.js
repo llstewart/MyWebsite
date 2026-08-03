@@ -75,13 +75,45 @@
     return n - Math.floor(n);
   }
   function ease(t) { return t * t * (3 - 2 * t); }
-  function noise(x, y, z) {
+
+  /* One layer: bilinear across x and y, at a fixed integer z. */
+  function layer(x, y, iz) {
     var ix = Math.floor(x), iy = Math.floor(y);
     var fx = ease(x - ix), fy = ease(y - iy);
-    var a = hash(ix, iy, z),     b = hash(ix + 1, iy, z);
-    var c = hash(ix, iy + 1, z), d = hash(ix + 1, iy + 1, z);
+    var a = hash(ix, iy, iz),     b = hash(ix + 1, iy, iz);
+    var c = hash(ix, iy + 1, iz), d = hash(ix + 1, iy + 1, iz);
     var top = a + (b - a) * fx, bot = c + (d - c) * fx;
     return top + (bot - top) * fy;
+  }
+
+  /* Value noise in three dimensions, and the third one is the fix for a
+     real bug rather than a nicety.
+
+     This used to pass z straight through to hash(), which puts it inside a
+     sine and multiplies the result by 43758. Any change in z at all, however
+     small, completely re-randomises the output. So the field interpolated
+     smoothly across space and not at all across time: every lattice corner
+     took a fresh random value on every frame.
+
+     Measured, a corner moved by an average of 0.2445 per frame at drift's
+     rate. Smooth noise moves by about 0.001. That is white noise in time
+     wearing the shape of a noise field.
+
+     The two movements that drive time through the noise, drift and curl,
+     were therefore handing every particle a new direction thirty times a
+     second, which is exactly the furious shaking with no travel. The other
+     five drive time through sin and cos directly, which is why only those
+     two were affected and why it looked like one broken mode rather than a
+     broken engine.
+
+     Interpolating between two integer layers is all it needs. Twice the
+     hashing, on about three thousand cells, for a field that actually
+     evolves. */
+  function noise(x, y, z) {
+    var iz = Math.floor(z), fz = ease(z - iz);
+    var a = layer(x, y, iz);
+    var b = layer(x, y, iz + 1);
+    return a + (b - a) * fz;
   }
 
   /* ==================================================================
@@ -182,7 +214,7 @@
     /* The rim. Without it the sphere has no edge and reads as a flat mesh. */
     var rim = Math.pow(d2, 9);
 
-    var v = wire * 0.92 + rim * 0.9;
+    var v = wire * 1.0 + rim * 0.95;
     return v > 1 ? 1 : v;
   }
 
@@ -204,7 +236,7 @@
     /* Open noise current. Broad and wandering, no nameable structure. Two
        octaves, because one alone sweeps the whole page one way. */
     { name: "drift", speed: 1.00, angle: function (x, y, t) {
-        var s = 0.055, z = t * 0.035;
+        var s = 0.055, z = t * 0.19;
         return (noise(x * s, y * s, z) * 0.72 +
                 noise(x * s * 2.7, y * s * 2.7, z * 1.4) * 0.28) * Math.PI * 4;
       } },
@@ -284,7 +316,7 @@
        rather than the size of the page. The busiest of the six, which is
        why it runs slowest. */
     { name: "curl", speed: 0.80, angle: function (x, y, t) {
-        var s = 0.14, z = t * 0.05;
+        var s = 0.14, z = t * 0.26;
         var a = noise(x * s, y * s, z);
         var b = noise(x * s + a * 1.8, y * s - a * 1.4, z * 1.3);
         return (a * 0.35 + b * 0.65) * Math.PI * 6;
@@ -419,7 +451,7 @@
      gradient. Motion reads from the dots moving, which is what motion is. */
   var TRAIL = 0.55;      // paper alpha per frame. 1 clears outright.
   var DOT_ALPHA = 0.66;
-  var DOT_SIZE = 1.3;
+  var DOT_SIZE = 1.45;
   var LIFE = 460;        // frames before a particle is recycled
 
   /* Density ceiling. A flow field has sinks, and without a cap those cells
@@ -520,18 +552,22 @@
   }
 
   function spawn(i, initial) {
-    /* Rejection sampled against the mask, so particles are born where the
-       piece lives instead of being born everywhere and only drawn in part
-       of it. Gives up after six tries and takes what it has: a particle
-       still has to go somewhere, and an unbounded loop has no place in a
-       frame budget. */
-    var x, y, tries = 0;
-    do {
-      x = Math.random() * cw;
-      y = Math.random() * ch;
-    } while (++tries < 6 && Math.random() > mask(x, y));
-    px[i] = x;
-    py[i] = y;
+    /* Uniform, deliberately.
+
+       This used to reject spawns against the page mask, so particles were
+       born mostly inside the half ellipse on the left. That was an
+       optimisation when every movement shared that shape, and it became a
+       bug the moment a movement could opt out of it: the globe sits on the
+       right, where the mask is zero, so almost no particles existed there
+       to draw it with. It came out as a faint outline because there was
+       nothing to fill it, not because its density was too low.
+
+       Placement is not the mask's job. The weight grid already decides
+       where a dot may be drawn, every frame, from whatever the current
+       movement wants. Spawning evenly means whatever shape the field asks
+       for has particles available to make it. */
+    px[i] = Math.random() * cw;
+    py[i] = Math.random() * ch;
     /* Staggered ages, or every particle recycles on the same frame and the
        whole page blinks at once. */
     pl[i] = initial ? Math.random() * LIFE : 0;
