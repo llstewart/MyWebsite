@@ -88,13 +88,14 @@ window.LS = (function () {
        the one place these exist. Lazy, because the scripts that want them
        may load before the body does. */
     contact: function () {
+      /* Email only. The phone number was removed from the site on
+         2026-08-03 at Lincoln's request, so there is no tel: anchor to
+         derive one from, and a reader that goes looking for a value that
+         is deliberately absent invites someone to helpfully put it back. */
       var mail = document.querySelector('a[href^="mailto:"]');
-      var tel = document.querySelector('a[href^="tel:"]');
       return {
         email: mail ? mail.getAttribute("href").replace(/^mailto:/, "").split("?")[0] : "",
-        emailHref: mail ? mail.getAttribute("href") : "",
-        phone: tel ? (tel.textContent || "").trim() : "",
-        phoneHref: tel ? tel.getAttribute("href") : ""
+        emailHref: mail ? mail.getAttribute("href") : ""
       };
     }
   };
