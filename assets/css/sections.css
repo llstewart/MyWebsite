@@ -36,7 +36,7 @@
   font-size: clamp(1.05rem, 2.2vw, 1.65rem);
   font-weight: 400;
   letter-spacing: -0.012em;
-  color: var(--c-brand);
+  color: var(--c-ink-2);
 }
 
 .hero__claim {
@@ -173,7 +173,7 @@
   font-size: var(--t-label);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--c-brand);
+  color: var(--c-ink-3);
 }
 
 .skills { display: grid; }
@@ -229,12 +229,12 @@
 .proof {
   display: grid; gap: var(--s-5);
   padding-left: var(--s-5);
-  border-left: 2px solid var(--c-brand);
+  border-left: 2px solid var(--c-ink);
 }
 @media (max-width: 900px) {
   .proof {
     padding-left: 0; padding-top: var(--s-4);
-    border-left: 0; border-top: 2px solid var(--c-brand);
+    border-left: 0; border-top: 2px solid var(--c-ink);
   }
 }
 .proof__n {
@@ -243,7 +243,7 @@
   font-size: clamp(1.1rem, 1.6vw, 1.35rem);
   font-weight: 500;
   letter-spacing: -0.02em;
-  color: var(--c-brand);
+  color: var(--c-ink);
   font-variant-numeric: tabular-nums;
 }
 .proof__c {
@@ -270,7 +270,7 @@
   display: inline-flex; align-items: center; gap: var(--s-2);
   font-size: var(--t-small);
   font-weight: 500;
-  color: var(--c-brand);
+  color: var(--c-ink);
   cursor: pointer;
   list-style: none;
 }
@@ -285,26 +285,7 @@
 }
 details[open] > .more::after { transform: rotate(45deg) translate(-1px, -1px); }
 details[open].is-closing > .more::after { transform: rotate(-45deg); }
-.more:hover { color: var(--c-brand-lit); }
-
-/* =========================================================================
-   Sheets.
-
-   A section's body copy sits on a glass sheet rather than loose on the
-   page. It groups the section into one object, it gives the material
-   somewhere to live outside the chrome, and it is what keeps the approach
-   section's photograph readable when it arrives.
-   ========================================================================= */
-
-.sheet {
-  padding: clamp(1.5rem, 3vw, 2.75rem);
-  border-radius: var(--r-glass);
-  background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.44));
-}
-.sheet.index { margin-top: var(--s-5); }
-.sheet.index .entry:first-child { border-top: 0; }
-.sheet.index .entry:last-child { border-bottom: 0; }
-.sheet .role:first-child { border-top: 0; padding-top: 0; }
+.more:hover { color: var(--c-ink-2); }
 
 /* =========================================================================
    PROJECTS
@@ -380,7 +361,7 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
   margin-top: var(--s-5);
   font-size: var(--t-small);
   font-weight: 500;
-  color: var(--c-brand);
+  color: var(--c-ink);
   cursor: pointer;
   list-style: none;
 }
@@ -453,7 +434,7 @@ details[open].is-closing > summary .entry__toggle::before {
   transform: translateY(-2px) rotate(45deg);
 }
 .entry__head:hover .entry__toggle::before,
-.feature__more-head:hover .entry__toggle::before { border-color: var(--c-brand); }
+.feature__more-head:hover .entry__toggle::before { border-color: var(--c-ink); }
 
 .entry__body {
   display: grid;
@@ -535,7 +516,7 @@ details[open].is-closing > summary .entry__toggle::before {
   content: "";
   position: absolute; left: 0; top: 0.68em;
   width: 10px; height: var(--hairline);
-  background: var(--c-brand);
+  background: var(--c-ink-4);
 }
 .role--edu .role__title { font-weight: 400; }
 
@@ -617,7 +598,7 @@ details[open].is-closing > summary .entry__toggle::before {
   color: var(--c-ink);
   text-wrap: balance;
 }
-.statement em { font-style: normal; color: var(--c-brand); }
+.statement em { font-style: normal; color: var(--c-ink); font-weight: 500; }
 
 .approach__grid {
   display: grid;

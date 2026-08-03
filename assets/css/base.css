@@ -138,8 +138,23 @@ summary::-webkit-details-marker { display: none; }
   padding-inline: var(--gutter);
 }
 
+/* Sections are not the same height, on purpose.
+
+   Every section carried identical padding, which made the page read as a
+   metronome: heading, slab, heading, slab. The references never do that.
+   Apple alternates a full bleed band against a tight two up against a wide
+   row, and the variation is what stops a long page feeling like a list.
+
+   Skills is tight because it is reference material. Projects is tall
+   because it is the reason anyone is here. Approach is a full bleed band.
+   Contact is tight because it is an address, not an argument. */
 .section { position: relative; padding-block: var(--s-9); }
 .section--tight { padding-block: var(--s-7); }
+
+#skills     { padding-block: var(--s-8) var(--s-7); }
+#projects   { padding-block: var(--s-10) var(--s-10); }
+#experience { padding-block: var(--s-8) var(--s-9); }
+#contact    { padding-block: var(--s-8) var(--s-9); }
 .section__head { margin-bottom: var(--s-6); }
 
 /* The two-tone heading is retired. Used on every section it stopped being a
@@ -217,19 +232,26 @@ summary::-webkit-details-marker { display: none; }
    Links and actions
    ========================================================================= */
 
-/* The underline grows from the left on hover. The colour does not change. */
+/* With no accent colour, a link has to be legible as a link without one.
+   It carries a permanent hairline at a third opacity which goes solid on
+   hover, which is how a well set document marks a reference. */
 .link {
   position: relative;
-  color: var(--c-brand);
+  color: var(--c-ink);
   font-weight: 500;
   padding-bottom: 1px;
-  background-image: linear-gradient(var(--c-brand), var(--c-brand));
+  background-image: linear-gradient(var(--c-ink), var(--c-ink));
   background-repeat: no-repeat;
   background-position: 0 100%;
-  background-size: 0% var(--hairline);
-  transition: background-size var(--d-base) var(--e-out);
+  background-size: 100% var(--hairline);
+  opacity: 1;
+  box-shadow: none;
+  transition: background-size var(--d-base) var(--e-out), opacity var(--d-fast) linear;
 }
-.link:hover, .link:focus-visible { background-size: 100% var(--hairline); }
+.link { background-image: linear-gradient(rgba(16,26,23,0.35), rgba(16,26,23,0.35)); }
+.link:hover, .link:focus-visible {
+  background-image: linear-gradient(var(--c-ink), var(--c-ink));
+}
 .link--quiet { color: var(--c-ink); }
 
 .action {

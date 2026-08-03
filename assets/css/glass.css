@@ -89,6 +89,56 @@
     inset 0 0 0 1px rgba(16, 26, 23, 0.13);
 }
 
+/* ---------------------------------------------------------------------------
+   How the material reacts.
+
+   Apple's glass does not change colour when you touch it, it changes light.
+   Hovering brightens the specular edge and opens the glare. Pressing
+   compresses the element into the page: it scales down, the top highlight
+   dims, and the shadow tightens as though the lens has been pushed against
+   the surface. Releasing springs it back on the sheet curve.
+
+   Nothing here changes a hue, because on this page there are no hues.
+   --------------------------------------------------------------------------- */
+
+.glass, .glass--flat, .pill, .nav__link, .nav__cmd, .action {
+  transition:
+    transform var(--d-open) var(--e-sheet),
+    box-shadow var(--d-open) var(--e-sheet),
+    background-color var(--d-fast) linear,
+    color var(--d-fast) linear;
+}
+
+@media (hover: hover) {
+  .pill:hover, .nav__cmd:hover {
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 1),
+      inset 0 -6px 14px rgba(255, 255, 255, 0.5),
+      inset 0 0 0 1px rgba(16, 26, 23, 0.16),
+      0 6px 18px -8px rgba(16, 26, 23, 0.22);
+  }
+}
+
+/* The press. Short in, long out, and it never bounces past its own size. */
+.pill:active, .nav__cmd:active, .nav__link:active, .action:active,
+.pill.is-pressed, .nav__cmd.is-pressed, .nav__link.is-pressed, .action.is-pressed {
+  transform: scale(0.968);
+  transition-duration: var(--d-press);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(16, 26, 23, 0.16),
+    0 1px 2px rgba(16, 26, 23, 0.10);
+}
+.glass--lift:active, .glass--lift.is-pressed {
+  transform: scale(0.995);
+  transition-duration: var(--d-press);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass, .glass--flat, .pill, .nav__link, .nav__cmd, .action { transition: none; }
+  .pill:active, .nav__cmd:active, .action:active, .glass--lift:active { transform: none; }
+}
+
 /* =========================================================================
    Navigation.
 
