@@ -37,12 +37,12 @@
 
 <meta property="og:type" content="profile">
 <meta property="og:title" content="Lincoln Stewart · Software Engineer">
-<meta property="og:description" content="I build the systems people depend on while their shift is running. Telemetry pipelines, real-time dashboards, and the APIs underneath them.">
+<meta property="og:description" content="I build the internal systems people depend on to get their work done. Telemetry pipelines, real-time dashboards, and the APIs underneath them.">
 <meta property="og:url" content="https://llstewart.github.io/MyWebsite/">
 <meta property="og:site_name" content="Lincoln Stewart">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lincoln Stewart · Software Engineer">
-<meta name="twitter:description" content="I build the systems people depend on while their shift is running.">
+<meta name="twitter:description" content="I build the internal systems people depend on to get their work done.">
 
 <link rel="icon" href="./favicon.ico" sizes="any">
 <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
@@ -106,7 +106,7 @@
     <a class="nav__link" href="#skills"     data-nav="skills">Skills</a>
     <a class="nav__link" href="#projects"   data-nav="projects">Projects</a>
     <a class="nav__link" href="#experience" data-nav="experience">Experience</a>
-    <a class="nav__link" href="#approach"   data-nav="approach">Approach</a>
+    <a class="nav__link" href="#approach"   data-nav="approach">Practice</a>
     <a class="nav__link" href="#contact"    data-nav="contact">Contact</a>
   </nav>
     <span class="nav__sep" aria-hidden="true"></span>
@@ -134,14 +134,14 @@
     <p class="hero__title">Full Stack Software Engineer</p>
 
     <p class="hero__claim">
-      I build the systems people depend on while their shift is running.
+      I build the internal systems people depend on to get their work done.
     </p>
 
     <nav class="pills" aria-label="Contents">
       <a class="pill" data-glass="pill" href="#skills">Skills</a>
       <a class="pill" data-glass="pill" href="#projects">Projects</a>
       <a class="pill" data-glass="pill" href="#experience">Experience</a>
-      <a class="pill" data-glass="pill" href="#approach">Approach</a>
+      <a class="pill" data-glass="pill" href="#approach">Practice</a>
       <a class="pill" data-glass="pill" href="#contact">Contact</a>
       <a class="pill pill--solid" data-glass="pill" href="./assets/Lincoln_Stewart_Resume.pdf" download>Resume</a>
     </nav>
@@ -372,7 +372,7 @@
             <span class="entry__year num">2024</span>
             <span class="entry__id">
               <span class="entry__name">Global Report Builder</span>
-              <span class="entry__claim">One reporting surface across every plant, so sites stopped reporting in their own private dialect.</span>
+              <span class="entry__claim">One reporting surface across every site, so teams stopped reporting in their own private dialect.</span>
             </span>
             <span class="entry__stat">
             <span class="entry__n num">100+ users</span>
@@ -422,7 +422,7 @@
             </div>
             <div class="entry__col">
               <h4 class="label">Result</h4>
-              <p>98% accuracy across three production lines, and the pipeline scaled to multiple sites.</p>
+              <p>98% accuracy in production, and the pipeline scaled to multiple sites.</p>
             </div>
             <p class="entry__stack"><span class="stack-label label">Built with</span><span class="stack-list">Python, TensorFlow, Azure ML, Azure AI, OpenCV, OCR, Ignition Perspective</span></p>
           </div>
@@ -565,21 +565,21 @@
           <p class="role__org">Oshkosh Corporation, JLG Industries</p>
           <div class="claimset">
             <p class="lede role__lede">
-              <b>I started on the plant floor, on computer vision and diagnostics.</b> Models that
-              read labels off moving equipment, and dashboards that told a technician what had
-              actually gone wrong rather than that something had.
+              <b>I started on computer vision and diagnostics.</b> Models that read labels off
+              moving equipment, and internal dashboards that told an engineer what had actually
+              failed rather than that something had.
             </p>
             <div class="proof">
-              <div><span class="proof__n">98%</span><span class="proof__c">recognition accuracy, across three production lines</span></div>
+              <div><span class="proof__n">98%</span><span class="proof__c">recognition accuracy, in production</span></div>
               <div><span class="proof__n">45 to 20 min</span><span class="proof__c">maintenance troubleshooting, after consolidating the alarm data</span></div>
             </div>
           </div>
           <details class="role__more">
           <summary class="feature__more-head">What I did there<span class="entry__toggle" aria-hidden="true"></span></summary>
           <ul class="role__points">
-            <li>I trained and deployed a TensorFlow model on Azure ML that reads the text off welding labels, and got it to 98% accuracy across three production lines.</li>
-            <li>Alarm data was spread across systems, so a technician spent about 45 minutes working out what had actually failed. I built React dashboards on Python and PostgreSQL that put it in one place, and that came down to under 20 minutes. Downtime dropped 25%.</li>
-            <li>I refactored the control logic on the robotic welding cells for cycle consistency and precision, 30% better, and validated every change on live equipment with the controls engineers and the floor technicians.</li>
+            <li>I trained and deployed a TensorFlow model on Azure ML that reads stamped and printed text off equipment labels, and got it to 98% accuracy in production.</li>
+            <li>Alarm data was spread across systems, so working out what had actually failed took about 45 minutes. I built React dashboards on Python and PostgreSQL that consolidated it into one place, and that came down to under 20 minutes. Downtime dropped 25%.</li>
+            <li>I refactored control logic on automated equipment for cycle consistency and precision, 30% better, and validated every change against live hardware with the engineers who owned it.</li>
             <li>I configured the Linux servers behind the round the clock diagnostics, which took uptime up about 20%.</li>
           </ul>
           </details>
@@ -619,7 +619,7 @@
 
   <div class="shell">
     <article class="approach__panel" data-reveal>
-      <p class="section__label label">Approach</p>
+      <p class="section__label label">Practice</p>
 
       <blockquote class="statement">
         Software that matters is software <em>somebody is depending on right now.</em>
@@ -638,10 +638,11 @@
         <div class="approach__col">
           <h3 class="label">Who it is for</h3>
           <p class="prose">
-            The people using what I build at work are plant operators and maintenance technicians,
-            reading a screen mid shift with a line waiting on them. Watching someone depend on your
-            interface under pressure permanently changes how you think about a loading state, an
-            error message, and where the important number goes.
+            Internal tools and operational workflows: the systems a company runs on rather than
+            the ones it sells. The users are colleagues, they did not choose the software, and they
+            are working against something already in progress when they open it. That changes what
+            a loading state is worth, what an error message has to say, and where the number
+            somebody is actually looking for belongs on the screen.
           </p>
         </div>
         <div class="approach__col">
@@ -656,9 +657,10 @@
         <div class="approach__col">
           <h3 class="label">What I hold to</h3>
           <p class="prose">
-            If I built it, I stand behind it. That means writing the runbook as well as the service,
-            adding the alert after the incident, and telling you plainly what I have not done yet.
-            Overselling gets found out in week two, and I would rather be the person you keep calling.
+            Ownership past the merge. The runbook ships with the service, the alert gets added
+            after the incident that proved it was missing, and the known gaps are written down
+            rather than left to be discovered. An estimate I can defend is worth more than a
+            shorter one I cannot, and a system nobody can operate without me is not finished.
           </p>
         </div>
       </div>

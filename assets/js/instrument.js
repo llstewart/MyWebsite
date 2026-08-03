@@ -116,7 +116,7 @@
       { kind: "Go",     label: "PulseHue",                run: function () { jump("#sys-pulsehue"); } },
       { kind: "Go",     label: "Client web practice",     run: function () { jump("#sys-agency"); } },
       { kind: "Go",     label: "Experience",              run: function () { jump("#experience"); } },
-      { kind: "Go",     label: "Approach",                run: function () { jump("#approach"); } },
+      { kind: "Go",     label: "Practice",                run: function () { jump("#approach"); } },
       { kind: "Go",     label: "Contact",                 run: function () { jump("#contact"); } },
       { kind: "Copy",   label: "Copy email address",      run: function () { copy(LS.contact().email, "Email address copied"); } },
       { kind: "Open",   label: "Email Lincoln",           run: function () { location.href = LS.contact().emailHref; } },
