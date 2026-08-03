@@ -200,6 +200,10 @@ summary::-webkit-details-marker { display: none; }
 
 .field {
   position: fixed; inset: 0;
+  /* The largest viewport, so the background is already behind the URL bar
+     before it retracts rather than being extended afterwards. lvh is
+     ignored where unsupported, and inset: 0 covers it there. */
+  height: 100lvh;
   z-index: var(--z-field);
   pointer-events: none;
   background: var(--c-paper);

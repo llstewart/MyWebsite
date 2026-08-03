@@ -601,13 +601,24 @@
 
   function layout() {
     dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
-    cw = window.innerWidth;
-    ch = window.innerHeight;
+
+    /* Measured from the canvas's own box, not from window.innerHeight.
+
+       .field is position: fixed with inset 0, which on a phone covers the
+       LAYOUT viewport, the full height including the strip behind a
+       retracted URL bar. window.innerHeight is the VISUAL viewport, which
+       is shorter whenever that bar is showing. Sizing the canvas from the
+       window therefore left a band along the bottom that was inside the
+       field and outside the canvas: paper with no spray on it, appearing
+       and disappearing as the bar came and went.
+
+       The stylesheet already says width and height are 100%, so the element
+       is the right size; it just has to be asked rather than told. */
+    cw = canvas.clientWidth || window.innerWidth;
+    ch = canvas.clientHeight || window.innerHeight;
 
     canvas.width = Math.round(cw * dpr);
     canvas.height = Math.round(ch * dpr);
-    canvas.style.width = cw + "px";
-    canvas.style.height = ch + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     allocGrid(cw, ch);

@@ -226,7 +226,11 @@
 
 .nav {
   position: fixed;
-  top: var(--s-3);
+  /* Clear of the notch and the dynamic island. viewport-fit=cover lets the
+     page reach the physical edges, which is what we want for the
+     background, and it also means fixed chrome is no longer automatically
+     out of the way of the hardware. */
+  top: max(var(--s-3), env(safe-area-inset-top));
   left: 50%;
   transform: translate(-50%, 0);
   z-index: var(--z-nav);
@@ -398,6 +402,23 @@
 
 /* Opens the way a sheet does: up from slightly below, settling rather than
    snapping, on the same curve as every disclosure on the page. */
+/* The glare leaves with the panel.
+
+   Clearing --lit on close stopped the bloom, and replaced it with a blink:
+   the glare transitions over 380ms while the panel is hidden at 220, so
+   the light was still fading when the element was taken away, and losing
+   the last of it all at once reads as a blank rather than an exit.
+
+   Fading the highlight itself on the panel's own timing means the two
+   leave together. The light is part of the panel, so it should go when the
+   panel goes, not on a schedule of its own. */
+.palette__panel::after {
+  transition:
+    background 380ms var(--e-sheet),
+    opacity var(--d-close) var(--e-sheet);
+}
+.palette:not(.is-open) .palette__panel::after { opacity: 0; }
+
 .palette__panel {
   --card-pad: var(--s-3);
   width: min(38rem, calc(100vw - 2 * var(--s-5)));
@@ -488,16 +509,23 @@
   color: var(--c-ink);
   box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
 }
-/* ink-3, not ink-4. Measured on the panel fill at 4.03:1, which is under
-   the 4.5:1 floor, and this is the word that tells you what a row will DO,
-   Go or Copy or Open. The quietest step on the scale is for metadata you
-   can ignore; a verb is not that. ink-3 measures 5.57:1. */
+/* ink-2, measured at 8.78:1 on the panel fill.
+
+   It was ink-4 at 4.03:1, under the floor, and one step up to ink-3 cleared
+   the floor at 5.57 without being comfortable. This is a verb, Go or Copy
+   or Open, and it is the word that tells you what a row will DO.
+
+   It is deliberately still not full ink. The command label beside it is,
+   at 15.85:1, and that gap is what makes the list scannable: you read down
+   the labels and the categories group them. Set both to full ink and a row
+   becomes one flat string, GO PROJECTS, with no hierarchy to skim. Readable
+   and subordinate is the target, not maximum contrast on everything. */
 .palette__kind {
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
-  color: var(--c-ink-3); min-width: 4.5rem;
+  color: var(--c-ink-2); min-width: 4.5rem;
 }
-.palette__item[aria-selected="true"] .palette__kind { color: var(--c-ink-2); }
+.palette__item[aria-selected="true"] .palette__kind { color: var(--c-ink); }
 
 /* The selected row carries the same chevron every other way in on the site
    uses, so the affordance is the same shape here as everywhere else. */
@@ -542,8 +570,8 @@
 .theme {
   position: fixed;
   border-radius: 999px;   /* wins over .glass, and the map is built from it */
-  top: var(--s-3);
-  right: var(--s-4);
+  top: max(var(--s-3), env(safe-area-inset-top));
+  right: max(var(--s-4), env(safe-area-inset-right));
   z-index: var(--z-nav);
   display: grid; place-items: center;
   width: 38px; height: 38px;
