@@ -29,7 +29,7 @@
        inset 0 -8px 20px rgba(255,255,255,0.06),
        inset 0 0 0 1px rgba(255,255,255,0.13);
      ::after -> radial-gradient(160px circle at var(--gx) var(--gy),
-                 rgba(var(--c-up), calc(0.22 * var(--up-k))), rgba(var(--c-up), calc(0.04 * var(--up-k))) 45%, transparent 70%)
+                 rgba(255,255,255,0.22), rgba(255,255,255,0.04) 45%, transparent 70%)
 
    Every layer below is that same stack in the same order. The alphas on the
    tint and the drop shadow are the one departure: hers assume a dark photo
@@ -160,8 +160,8 @@
   background:
     radial-gradient(
       calc(160px + var(--lit) * 120px) circle at var(--gx, 50%) var(--gy, 50%),
-      rgba(255, 255, 255, calc(0.22 + var(--lit) * 0.55)),
-      rgba(255, 255, 255, calc(0.04 + var(--lit) * 0.22)) 45%,
+      rgba(var(--c-up), calc((0.22 + var(--lit) * 0.55) * var(--up-k))),
+      rgba(var(--c-up), calc((0.04 + var(--lit) * 0.22) * var(--up-k))) 45%,
       transparent 70%
     );
   transition: background 380ms var(--e-sheet);

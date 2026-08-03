@@ -212,9 +212,9 @@ summary::-webkit-details-marker { display: none; }
 .field::after {
   content: ""; position: absolute; inset: 0;
   background:
-    radial-gradient(70% 55% at 12% 8%,  rgba(118,168,140,0.13), transparent 70%),
-    radial-gradient(60% 50% at 92% 22%, rgba(124,160,200,0.11), transparent 72%),
-    radial-gradient(60% 55% at 70% 96%, rgba(224,190,136,0.10), transparent 70%);
+    radial-gradient(70% 55% at 12% 8%,  rgba(var(--c-field-sage), 0.13), transparent 70%),
+    radial-gradient(60% 50% at 92% 22%, rgba(var(--c-field-sky),  0.11), transparent 72%),
+    radial-gradient(60% 55% at 70% 96%, rgba(var(--c-field-sand), 0.10), transparent 70%);
   transition: opacity var(--d-slow) linear;
 }
 .has-dots .field::after { opacity: 0; }
@@ -239,7 +239,10 @@ summary::-webkit-details-marker { display: none; }
 }
 .has-texture .field::before {
   content: ""; position: absolute; inset: 0;
-  background: rgba(251, 251, 249, 0.90);
+  /* Paper at an alpha, via the channel. This was the literal light paper
+     colour, which would lay a white sheet over a dark page: the third
+     instance of the same mistake, and the reason a channel exists. */
+  background: rgba(var(--c-paper-ch), 0.90);
 }
 
 /* =========================================================================
