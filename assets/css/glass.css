@@ -107,21 +107,50 @@
   left: 50%;
   transform: translate(-50%, 0);
   z-index: var(--z-nav);
-  display: flex; align-items: center; gap: var(--s-2);
-  padding: var(--s-2);
+  display: flex; align-items: center;
   border-radius: 999px;
+  /* Scroll linked, not stepped. --nav-t runs 0 to 1 as the page moves and
+     every dimension below is a straight interpolation off it, so the bar is
+     continuously between its two sizes rather than snapping at a threshold.
+     main.js eases the value toward its target each frame, so it also
+     settles rather than tracking the wheel exactly. */
+  --nav-t: 0;
+  padding:
+    calc(var(--s-3) - (var(--s-3) - var(--s-2)) * var(--nav-t))
+    calc(var(--s-4) - (var(--s-4) - var(--s-2)) * var(--nav-t));
+  gap: calc(var(--s-2) - (var(--s-2) - var(--s-1)) * var(--nav-t));
+  /* The number itself is transitioned, so every dimension derived from it
+     follows. Short and linear: it needs to feel attached to the scroll, not
+     to lag behind it, and the easing that matters is already in the fact
+     that it is chasing a continuously changing target. */
+  transition:
+    transform var(--d-slow) var(--e-out),
+    --nav-t 260ms linear;
   max-width: calc(100vw - 2 * var(--s-3));
-  transition: transform var(--d-slow) var(--e-out);
+  /* The number itself is transitioned, so every dimension derived from it
+     follows. Short and linear: it needs to feel attached to the scroll, not
+     to lag behind it, and the easing that matters is already in the fact
+     that it is chasing a continuously changing target. */
+  transition:
+    transform var(--d-slow) var(--e-out),
+    --nav-t 260ms linear;
   transition-delay: 300ms;
 }
 .is-loading .nav { transform: translate(-50%, calc(-100% - var(--s-5))); }
+
+/* The controls inside ride the same number. */
+.nav__link, .nav__cmd {
+  padding:
+    calc(var(--s-3) - (var(--s-3) - var(--s-2)) * var(--nav-t))
+    calc(var(--s-5) - (var(--s-5) - var(--s-3)) * var(--nav-t));
+  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
+}
 
 .nav__links { display: flex; gap: var(--s-1); }
 @media (max-width: 720px) { .nav__links { display: none; } }
 
 .nav__link {
   position: relative;
-  padding: var(--s-3) var(--s-4);
   border-radius: 999px;
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;

@@ -192,6 +192,7 @@
       el.classList.remove("lg-fallback");     // may be re-upgrading after a resize
       try {
         var handle = window.liquidGlass(el, profile);
+        handle.el = el;                       // so a resized element can be found later
         handles.push(handle);
         if (!handle.supported) window.__glassMode = "frosted";
       } catch (err) {
@@ -358,6 +359,57 @@
     }, { passive: true });
   }
 
+  /* The bar is open at the top of the page and contracts as the reader
+     moves, continuously rather than at a threshold.
+
+     A scroll position is turned into --nav-t, a number from 0 to 1, and
+     every dimension in the CSS is an interpolation off it. The value is
+     eased toward its target once per frame rather than written raw, so the
+     bar settles instead of tracking the wheel exactly, which is the
+     difference between something that resizes and something that feels
+     attached to the page.
+
+     The displacement map is sized for one exact set of dimensions, and
+     rebuilding it costs O(w x h). It is therefore rebuilt once, 180ms after
+     the value stops changing. Being a few pixels stale mid scroll is
+     invisible; rebuilding per frame is not. */
+  function initNavScale() {
+    var nav = document.getElementById("nav");
+    if (!nav) return;
+
+    var RANGE = 140;          // px of scroll over which the bar collapses
+    var last = -1, settle = null;
+
+    /* The displacement map is generated for one exact size and rebuilding it
+       costs O(w x h). It is therefore rebuilt once, after the value has
+       stopped changing. A map a few pixels stale mid scroll is invisible;
+       rebuilding one per frame is not. */
+    function scheduleRefresh() {
+      clearTimeout(settle);
+      settle = setTimeout(function () {
+        for (var i = 0; i < handles.length; i++) {
+          if (handles[i] && handles[i].el === nav && handles[i].refresh) handles[i].refresh();
+        }
+      }, 200);
+    }
+
+    function measure() {
+      var t = Math.min(1, Math.max(0, window.scrollY / RANGE));
+      if (Math.abs(t - last) < 0.002) return;
+      last = t;
+      nav.style.setProperty("--nav-t", t.toFixed(4));
+      scheduleRefresh();
+    }
+
+    /* Written straight from the scroll event rather than through
+       requestAnimationFrame. The smoothing lives in the CSS transition on
+       --nav-t, which keeps working when rAF is throttled: a background tab,
+       a battery saver, or an automated browser. */
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure, { passive: true });
+    measure();
+  }
+
   /* Touch has no hover, so every control gets a press state instead. */
   function initPressFeedback() {
     var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .link, .pill, .entry__head";
@@ -393,6 +445,7 @@
     applyGlass();
     initTransitions();
     initGlare();
+    initNavScale();
     initPressFeedback();
     initConnection();
     verifyResume();

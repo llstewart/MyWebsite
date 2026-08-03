@@ -197,16 +197,16 @@
 /* =========================================================================
    Sheets.
 
-   Body copy does not sit directly on the photograph. It sits on a glass
-   sheet over it, which is how iOS handles content over a wallpaper: the
-   material carries the legibility so the image underneath does not have to
-   be washed out to nothing.
+   A section's body copy sits on a glass sheet rather than loose on the
+   page. It groups the section into one object, it gives the material
+   somewhere to live outside the chrome, and it is what keeps the approach
+   section's photograph readable when it arrives.
    ========================================================================= */
 
 .sheet {
   padding: clamp(1.5rem, 3vw, 2.75rem);
   border-radius: var(--r-glass);
-  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.70));
+  background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.44));
 }
 .sheet.index { margin-top: var(--s-5); }
 .sheet.index .entry:first-child { border-top: 0; }

@@ -149,38 +149,57 @@ summary::-webkit-details-marker { display: none; }
 /* =========================================================================
    The field.
 
-   An aerial of the Bateke Plateau, held far enough back that it reads as
-   texture rather than as a photograph. It is not decoration: refraction
-   bends what is behind it, and over flat paper there is nothing to bend, so
-   every glass surface on this page would collapse to plain frost without it.
+   Paper, and a whisper of the Bateke aerial at the very edges only.
 
-   Two layers, on purpose. The image sits at full opacity and a paper wash
-   sits on top, which keeps the detail intact for the displacement map while
-   holding the contrast where type still reads. Lightening the file itself
-   would have thrown that detail away.
+   This was a full page photograph for about an hour. It was the wrong call
+   and it is worth writing down why: refraction needs detail to bend, so
+   putting the photograph everywhere made every glass surface work. But the
+   first thing a recruiter saw on a software engineering portfolio was an
+   African savanna behind a skills list, and the connection to the work is
+   not visible until the approach section explains it. It also destroyed the
+   one good idea: if the image has been on screen at a third strength for
+   the whole page, arriving at it full strength is not a reveal.
 
-   The wash is 0.66. That is measured, not guessed: against the brightest
-   pixel in the aerial it leaves --c-ink at 14.1:1, --c-ink-2 at 7.8:1, and
-   --c-ink-3, the quietest step on the page, at 5.0:1. It started at 0.88,
-   which was over cautious and washed the place out for no benefit.
+   So the photograph appears exactly once, where the Congo is the subject.
+   Here there is only a soft radial of it at the corners, far enough back to
+   be a tint rather than a scene.
    ========================================================================= */
 
 .field {
   position: fixed; inset: 0;
   z-index: var(--z-field);
   pointer-events: none;
-  background:
-    url("../img/bateke-plateau.webp") center 22% / cover no-repeat;
+  background: var(--c-paper);
 }
-@media (max-width: 900px) {
-  .field { background-image: url("../img/bateke-plateau-1100.webp"); }
-}
-
-/* The wash. Everything above it is legible, everything below it is texture. */
 .field::after {
   content: ""; position: absolute; inset: 0;
   background:
-    linear-gradient(180deg, rgba(251,251,249,0.70) 0%, rgba(251,251,249,0.64) 45%, rgba(251,251,249,0.74) 100%);
+    radial-gradient(70% 55% at 12% 8%,  rgba(118,168,140,0.13), transparent 70%),
+    radial-gradient(60% 50% at 92% 22%, rgba(124,160,200,0.11), transparent 72%),
+    radial-gradient(60% 55% at 70% 96%, rgba(224,190,136,0.10), transparent 70%);
+}
+
+/* ---------------------------------------------------------------------------
+   OPTIONAL, off by default.
+
+   The one page-wide texture worth considering: a deep crop of the same
+   Bateke aerial, zoomed past the point where it reads as a landscape. It is
+   organic detail with no subject, so it gives every glass surface something
+   to bend without putting a savanna behind a skills list, and it keeps the
+   approach section's reveal intact because nobody recognises this as the
+   same photograph.
+
+   To turn it on, add class="has-texture" to <html> (or to <body>).
+   --------------------------------------------------------------------------- */
+
+.has-texture .field {
+  background:
+    var(--c-paper)
+    url("../img/bateke-texture.webp") center / cover no-repeat;
+}
+.has-texture .field::before {
+  content: ""; position: absolute; inset: 0;
+  background: rgba(251, 251, 249, 0.90);
 }
 
 /* =========================================================================

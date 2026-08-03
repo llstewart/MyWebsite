@@ -3,6 +3,16 @@
    Nothing below this file hardcodes a color, a size, or a duration.
    =========================================================================== */
 
+/* Registering the property is what makes it animatable. An unregistered
+   custom property is just a string to the engine and cannot be interpolated;
+   declaring a syntax lets CSS transition it like any other number, which is
+   how the nav resizes smoothly without a JavaScript easing loop. */
+@property --nav-t {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
 :root {
   /* --- Paper --------------------------------------------------------------
      Near white, one degree warm. Not a tinted background asking to be
