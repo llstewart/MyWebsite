@@ -125,12 +125,12 @@ summary::-webkit-details-marker { display: none; }
    Page frame
    ========================================================================= */
 
+/* No left rail any more, so the content column is centred on the viewport
+   rather than on the space beside one. */
 .page {
   position: relative;
   z-index: var(--z-body);
-  padding-left: var(--rail-width);
 }
-@media (max-width: 900px) { .page { padding-left: 0; } }
 
 .shell {
   width: 100%;
@@ -159,98 +159,35 @@ summary::-webkit-details-marker { display: none; }
 .rule { height: var(--hairline); background: var(--c-line); border: 0; margin: 0; }
 
 /* =========================================================================
-   Contour field — the living background the glass refracts.
+   The field.
+
+   An aerial of the Bateke Plateau, held far enough back that it reads as
+   texture rather than as a photograph. It is not decoration: refraction
+   bends what is behind it, and over flat paper there is nothing to bend, so
+   every glass surface on this page would collapse to plain frost without it.
+
+   Two layers, on purpose. The image sits at full opacity and a paper wash
+   sits on top at 0.88, which keeps the detail intact for the displacement
+   map while pulling the contrast down to where black type still reads.
+   Lightening the file itself would have thrown that detail away.
    ========================================================================= */
 
 .field {
   position: fixed; inset: 0;
   z-index: var(--z-field);
   pointer-events: none;
-  background: var(--c-paper);
+  background:
+    url("../img/bateke-plateau.webp") center 22% / cover no-repeat;
 }
-.field__canvas { width: 100%; height: 100%; }
-/* Softens the field toward the page edges so it never competes with text. */
+@media (max-width: 900px) {
+  .field { background-image: url("../img/bateke-plateau-1100.webp"); }
+}
+
+/* The wash. Everything above it is legible, everything below it is texture. */
 .field::after {
   content: ""; position: absolute; inset: 0;
   background:
-    radial-gradient(130% 100% at 50% 12%, transparent 58%, rgba(251, 251, 249, 0.5) 100%);
-}
-
-/* Paper grain. A fixed, tiled fractal noise at very low opacity. It is what
-   makes the background read as a surface rather than as a blank white
-   rectangle, and it costs one inlined SVG. */
-.grain {
-  position: fixed; inset: 0;
-  z-index: 1;                       /* over the field, under the content */
-  pointer-events: none;
-  opacity: 0.24;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-}
-@media (prefers-contrast: more) { .grain { display: none; } }
-
-/* =========================================================================
-   Instrument rail — fixed left gauge. Ticks are sections, the lit tick is
-   where you are. It is navigation and a position readout at once.
-   ========================================================================= */
-
-.rail {
-  position: fixed; top: 0; left: 0; bottom: 0;
-  width: var(--rail-width);
-  z-index: var(--z-rail);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: var(--s-5);
-  border-right: var(--hairline) solid var(--c-line);
-  background: linear-gradient(90deg, rgba(251,251,249,0.9), rgba(251,251,249,0.62));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-@media (max-width: 900px) { .rail { display: none; } }
-
-.rail__tick {
-  position: relative;
-  width: 100%; height: var(--s-6);
-  display: flex; align-items: center; justify-content: center;
-}
-.rail__tick::before {
-  content: "";
-  width: 14px; height: var(--hairline);
-  background: var(--c-line-strong);
-  transition: width var(--d-base) var(--e-out),
-              background-color var(--d-base) var(--e-out);
-}
-.rail__tick:hover::before { width: 22px; background: var(--c-ink-3); }
-.rail__tick[aria-current="true"]::before {
-  width: 28px; height: 2px; background: var(--c-brand);
-}
-.rail__tip {
-  position: absolute; left: calc(100% + var(--s-3));
-  padding: var(--s-1) var(--s-3);
-  border-radius: var(--r-tight);
-  background: var(--c-ink); color: var(--c-paper);
-  font-family: var(--f-mono); font-size: var(--t-label);
-  letter-spacing: var(--tr-label); text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0; transform: translateX(-6px);
-  transition: opacity var(--d-fast) var(--e-out), transform var(--d-fast) var(--e-out);
-  pointer-events: none;
-}
-.rail__tick:hover .rail__tip,
-.rail__tick:focus-visible .rail__tip { opacity: 1; transform: translateX(0); }
-
-.rail__mark {
-  position: absolute; top: var(--s-5);
-  font-family: var(--f-mono); font-size: var(--t-label);
-  font-weight: 500;
-  letter-spacing: var(--tr-label); color: var(--c-ink-3);
-}
-.rail__pct {
-  position: absolute; bottom: var(--s-5);
-  font-family: var(--f-mono); font-size: var(--t-label);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.08em; color: var(--c-ink-4);
+    linear-gradient(180deg, rgba(251,251,249,0.90) 0%, rgba(251,251,249,0.86) 45%, rgba(251,251,249,0.93) 100%);
 }
 
 /* =========================================================================

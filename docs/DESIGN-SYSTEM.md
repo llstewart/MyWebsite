@@ -1,6 +1,6 @@
 # Design system
 
-**Version:** 3.0, 2 August 2026
+**Version:** 3.1, 2 August 2026
 **Source of truth:** `assets/css/tokens.css`. If a value is not in that file, it
 should not exist anywhere else.
 
@@ -97,7 +97,7 @@ Radii: `--r-glass: 28px`, `--r-panel: 18px`, `--r-tight: 10px`.
 build the displacement map's neutral inset. Change it and the refraction band
 stops matching the corner.
 
-**Pills are used, deliberately and only twice.** An earlier version of this
+**Pills are used, deliberately.** An earlier version of this
 system banned them. Lincoln reversed that on 2 August 2026, and he is right that
 the capsule is the correct form here: the nav bar and the landing's section row
 are both floating chrome over content, which is exactly what iOS uses a capsule
@@ -124,14 +124,31 @@ same order: drop shadow, `inset 0 1px 1px` specular, `inset 0 -8px 20px` lift,
 alpha on the tint and the drop shadow: hers assume a dark photograph underneath,
 and used unchanged on light paper they read as a grey box.
 
-**On backgrounds, since it comes up.** Refraction bends what is behind it, so it
-needs high frequency detail to bend. Her demo puts a photograph back there for
-precisely this reason. A flat white page is the worst possible surface for this
-effect: there is nothing to displace and the glass collapses to plain frost. On
-this page the nav is the surface that reads properly, because real page content
-scrolls underneath it, which is also how iOS 26 uses the material. The background
-wash is deliberately quiet and the contour lines that used to give it structure
-were removed on 2 August 2026.
+**The background is a photograph, for a technical reason.** Refraction bends what
+is behind it, so it needs high frequency detail to bend. Her demo puts a
+photograph back there for precisely this reason. A flat white page is the worst
+possible surface for this effect: there is nothing to displace and every glass
+element collapses to plain frost.
+
+So the page carries an aerial of the **Bat&eacute;k&eacute; Plateau in the
+Democratic Republic of the Congo**, which is where Lincoln is from and which is
+already the brand language of his own product. It is used at two strengths:
+
+- **Page wide**, under a `rgba(251,251,249,0.88)` paper wash. At that strength it
+  reads as texture rather than as a photograph, the detail survives for the
+  displacement map, and black type still clears contrast.
+- **The approach section**, at full strength, full bleed, with the glass panel on
+  top. This is the one surface on the site where the material does what it was
+  designed for, and it is placed where the Congo is the subject rather than the
+  decoration. The texture the reader has been half seeing for the whole page
+  resolves into the actual place.
+
+The panel there sits at 0.86 to 0.80 white rather than the 0.34 used elsewhere.
+A photograph under body copy needs more white behind the type than paper does:
+measured worst case is 7.89:1 against the brightest pixel in the image.
+
+Lightening the file itself was rejected. It would have thrown away the very
+detail the effect needs.
 
 **Only three surfaces ever get a displacement map.** The landing has no panel
 at all: it is type on paper, and the glass appears first as the nav bar. Map generation is O(w x h)
@@ -172,9 +189,8 @@ frame, reveals are off, and view transitions are disabled.
 
 | Component | Notes |
 |---|---|
-| **Rail** | Fixed left gauge. One tick per section, the current one lit, scroll depth at the bottom. Navigation and a position readout at once. Hidden below 900px |
-| **Nav** | Glass bar aligned to the content column, not bled to the window. Collapses to the palette below 1000px |
-| **Hub** | The landing's contents table. Five rows, each a name, a note, and its reading order. This is the whole navigation on arrival |
+| **Nav** | A floating glass capsule of section links and search. No name, no title. Collapses to the palette below 720px |
+| **Pills** | The landing's section row. Real refraction, not a blur: five small surfaces at `scale: -34`, `chroma: 0`, since a prism fringe on a 40px control reads as a rendering fault |
 | **Languages** | Seven cards, name over years, on a rule. The heaviest thing in the skills section because it is the first thing matched against |
 | **Feature** | One project, given the weight it earns. Two columns: lede with the result rule, and the detail |
 | **Index** | Five projects, one scannable line each, opening in place. Name, claim, and the metric that matters, in three columns |

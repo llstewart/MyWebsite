@@ -109,7 +109,7 @@ body { opacity: 1; transition: opacity var(--d-base) linear; }
    ========================================================================= */
 
 .action, .nav__link, .nav__cmd, .palette__item, .palette__close,
-.rail__tick, .link, .skip, .entry__head, .incident__head, .pill {
+.link, .skip, .entry__head, .incident__head, .pill {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -121,7 +121,6 @@ body { opacity: 1; transition: opacity var(--d-base) linear; }
 .palette__item.is-pressed   { background: rgba(16, 26, 23, 0.10); color: var(--c-ink); }
 .nav__cmd.is-pressed,
 .palette__close.is-pressed  { border-color: var(--c-brand); color: var(--c-brand); }
-.rail__tick.is-pressed::before { width: 28px; background: var(--c-brand); }
 .link.is-pressed            { background-size: 100% var(--hairline); }
 .entry__head.is-pressed,
 .incident__head.is-pressed  { background: rgba(16, 26, 23, 0.06); }
@@ -136,7 +135,6 @@ body { opacity: 1; transition: opacity var(--d-base) linear; }
   }
   .action--primary:hover { background: var(--c-ink); color: var(--c-paper); border-color: var(--c-ink); }
   .link:hover { background-size: 0% var(--hairline); }
-  .rail__tick:hover::before { width: 14px; background: var(--c-line-strong); }
 }
 
 /* Touch targets. 44px is the floor on a coarse pointer. */
@@ -173,7 +171,10 @@ a[data-state="missing"] { color: var(--c-live); }
    ========================================================================= */
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass, .glass--flat, .nav, .palette__panel, .rail, .incident {
+  .field { background-image: none; }
+  .approach__scene { display: none; }
+  .approach { background: var(--c-paper-2); }
+  .glass, .glass--flat, .nav, .palette__panel, .incident, .pill, .approach__panel {
     background: #FBFCFA !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -193,7 +194,12 @@ a[data-state="missing"] { color: var(--c-live); }
    High contrast
    ========================================================================= */
 
+/* A photograph behind body copy is a contrast risk. Under an explicit
+   preference the page wash goes nearly opaque and the scene is dropped. */
 @media (prefers-contrast: more) {
+  .field::after { background: rgba(251, 251, 249, 0.97); }
+  .approach__scene { display: none; }
+
   :root {
     --c-ink-2: #24302C;
     --c-ink-3: #35423D;
@@ -278,11 +284,10 @@ a[data-state="missing"] { color: var(--c-live); }
    ========================================================================= */
 
 @media print {
-  .field, .grain, .rail, .nav, .palette, .loader, .net, .toast,
-  .pills, .entry__toggle { display: none !important; }
+  .field, .grain, .nav, .palette, .loader, .net, .toast,
+  .pills, .entry__toggle, .approach__scene { display: none !important; }
 
   html, body { background: #fff !important; color: #111 !important; }
-  .page { padding-left: 0; }
   .glass, .glass--flat, .incident {
     background: none !important; box-shadow: none !important;
     border: 1px solid #ccc; backdrop-filter: none !important;

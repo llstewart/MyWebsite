@@ -169,7 +169,15 @@
     // with the high frequency detail refraction needs. Close to her defaults.
     nav:      { scale: -96, chroma: 5, blur: 3, saturate: 1.5, border: 0.09, mapBlur: 11 },
     contact:  { scale: -96,  chroma: 6, blur: 3, saturate: 1.5,  border: 0.07, mapBlur: 12 },
-    palette:  { scale: -74,  chroma: 4, blur: 6, saturate: 1.4,  border: 0.09, mapBlur: 10 }
+    palette:  { scale: -74,  chroma: 4, blur: 6, saturate: 1.4,  border: 0.09, mapBlur: 10 },
+    // The approach panel is the only surface with a photograph behind it, so
+    // it gets close to her published defaults. This is the effect at full
+    // strength, and it is the one place on the page that earns it.
+    approach: { scale: -112, chroma: 6, blur: 3, saturate: 1.5,  border: 0.07, mapBlur: 12 },
+    // Small, and there are five of them. A gentle bend, a tight neutral
+    // inset so the band stays inside the capsule, and no chroma: prism
+    // fringe on a 40px control reads as a rendering fault, not as glass.
+    pill:     { scale: -34,  chroma: 0, blur: 5, saturate: 1.35, border: 0.30, mapBlur: 6 }
   };
 
   function applyGlass() {
@@ -351,7 +359,7 @@
 
   /* Touch has no hover, so every control gets a press state instead. */
   function initPressFeedback() {
-    var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .rail__tick, .link, .pill, .entry__head";
+    var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .link, .pill, .entry__head";
 
     document.addEventListener("pointerdown", function (e) {
       var target = e.target.closest ? e.target.closest(SELECTOR) : null;

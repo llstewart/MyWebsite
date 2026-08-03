@@ -80,23 +80,13 @@
 <!-- Connection state. Empty and silent unless the network drops. -->
 <p class="net" id="net-state" role="status" aria-live="polite"></p>
 
-<!-- The living field. Everything with a glass surface refracts this. -->
+<!-- The field. The Bateke Plateau, held far back so it reads as texture
+     rather than as a photograph. It is here so the glass has real detail to
+     bend: refraction over flat paper is just frost. It resolves to full
+     strength once, in the approach section, where it is the subject. -->
+<div class="field" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
-<div class="field" aria-hidden="true">
-  <canvas id="field" class="field__canvas"></canvas>
-</div>
 
-<!-- Position gauge. Ticks are sections, the lit tick is where you are. -->
-<nav class="rail" id="rail" aria-label="Section position">
-  <span class="rail__mark">LS</span>
-  <a class="rail__tick" href="#top"        data-rail="top"><span class="rail__tip">Top</span></a>
-  <a class="rail__tick" href="#skills"     data-rail="skills"><span class="rail__tip">Skills</span></a>
-  <a class="rail__tick" href="#projects"   data-rail="projects"><span class="rail__tip">Projects</span></a>
-  <a class="rail__tick" href="#experience" data-rail="experience"><span class="rail__tip">Experience</span></a>
-  <a class="rail__tick" href="#approach"   data-rail="approach"><span class="rail__tip">Approach</span></a>
-  <a class="rail__tick" href="#contact"    data-rail="contact"><span class="rail__tip">Contact</span></a>
-  <span class="rail__pct" id="rail-pct">00</span>
-</nav>
 
 <header class="nav glass" id="nav" data-glass="nav">
   <nav class="nav__links" aria-label="Sections">
@@ -132,11 +122,11 @@
     </p>
 
     <nav class="pills" aria-label="Contents">
-      <a class="pill" href="#skills">Skills</a>
-      <a class="pill" href="#projects">Projects</a>
-      <a class="pill" href="#experience">Experience</a>
-      <a class="pill" href="#approach">Approach</a>
-      <a class="pill" href="#contact">Contact</a>
+      <a class="pill" data-glass="pill" href="#skills">Skills</a>
+      <a class="pill" data-glass="pill" href="#projects">Projects</a>
+      <a class="pill" data-glass="pill" href="#experience">Experience</a>
+      <a class="pill" data-glass="pill" href="#approach">Approach</a>
+      <a class="pill" data-glass="pill" href="#contact">Contact</a>
       <a class="pill pill--solid" href="./assets/Lincoln_Stewart_Resume.pdf" download>Resume</a>
     </nav>
   </div>
@@ -553,56 +543,65 @@
 
 <!-- ==================================================================
      APPROACH
+
+     The one place the background resolves. Everything above this has been
+     showing a lightened crop of the same photograph; here it comes up to
+     full strength, because here it is the subject rather than the surface.
+     It is also the only place on the page where the glass has a photograph
+     to bend, which is what the material was built for.
      ================================================================== -->
 <section class="section approach" id="approach">
+  <div class="approach__scene" aria-hidden="true"></div>
+
   <div class="shell">
-    <div class="eyebrow" data-reveal>
-      <span class="eyebrow__mark">&#9679;</span> Approach
-      <span class="eyebrow__rule"></span>
-      <span>Why I build the way I do</span>
-    </div>
+    <article class="approach__panel glass" data-glass="approach" data-reveal>
+      <div class="eyebrow">
+        <span class="eyebrow__mark">&#9679;</span> Approach
+        <span class="eyebrow__rule"></span>
+        <span>Bat&eacute;k&eacute; Plateau, DR Congo</span>
+      </div>
 
-    <blockquote class="statement" data-reveal>
-      Software that matters is software somebody is depending on right now.
-    </blockquote>
+      <blockquote class="statement">
+        Software that matters is software <em>somebody is depending on right now.</em>
+      </blockquote>
 
-    <div class="approach__grid">
-      <div class="approach__col" data-reveal>
-        <h3 class="label">Where it starts</h3>
-        <p class="prose">
-          I grew up in the Democratic Republic of the Congo until I was seven, without much access to
-          technology. Getting to it late is why building for the web has never stopped feeling like
-          something worth being careful about. I do not take a working system for granted, because I
-          remember not having one.
-        </p>
+      <div class="approach__grid">
+        <div class="approach__col">
+          <h3 class="label">Where it starts</h3>
+          <p class="prose">
+            I grew up in the Democratic Republic of the Congo until I was seven, without much
+            access to technology. Getting to it late is why building for the web has never stopped
+            feeling like something worth being careful about. I do not take a working system for
+            granted, because I remember not having one.
+          </p>
+        </div>
+        <div class="approach__col">
+          <h3 class="label">Who it is for</h3>
+          <p class="prose">
+            The people using what I build at work are plant operators and maintenance technicians,
+            reading a screen mid shift with a line waiting on them. Watching someone depend on your
+            interface under pressure permanently changes how you think about a loading state, an
+            error message, and where the important number goes.
+          </p>
+        </div>
+        <div class="approach__col">
+          <h3 class="label">How I find problems</h3>
+          <p class="prose">
+            By being in them. Packleads exists because I was the web designer scrolling maps for
+            leads. Sellorie exists because I asked the floor staff what was breaking before I asked
+            the manager. You only learn the real constraint by talking to the people doing the work.
+          </p>
+        </div>
+        <div class="approach__col">
+          <h3 class="label">What I hold to</h3>
+          <p class="prose">
+            If I built it, I stand behind it. That means writing the runbook as well as the service,
+            adding the alert after the incident, and telling you plainly what I have not done yet.
+            Overselling gets found out in week two, and I would rather be the person you keep calling.
+          </p>
+        </div>
       </div>
-      <div class="approach__col" data-reveal style="--reveal-delay:80ms">
-        <h3 class="label">Who it is for</h3>
-        <p class="prose">
-          The people using what I build at work are plant operators and maintenance technicians,
-          reading a screen mid shift with a line waiting on them. Watching someone depend on your
-          interface under pressure permanently changes how you think about a loading state, an error
-          message, and where the important number goes.
-        </p>
-      </div>
-      <div class="approach__col" data-reveal style="--reveal-delay:160ms">
-        <h3 class="label">How I find problems</h3>
-        <p class="prose">
-          By being in them. Packleads exists because I was the web designer scrolling maps for leads.
-          Sellorie exists because I asked the floor staff what was breaking before I asked the
-          manager. The constraint is rarely headcount, it is the money to hire the headcount, and you
-          only learn that by talking to the people doing the work.
-        </p>
-      </div>
-      <div class="approach__col" data-reveal style="--reveal-delay:240ms">
-        <h3 class="label">What I hold to</h3>
-        <p class="prose">
-          If I built it, I stand behind it. That means writing the runbook as well as the service,
-          adding the alert after the incident, and telling you plainly what I have not done yet.
-          Overselling gets found out in week two, and I would rather be the person you keep calling.
-        </p>
-      </div>
-    </div>
+    </article>
   </div>
 </section>
 
@@ -684,7 +683,6 @@
 </div>
 
 <script src="./assets/js/liquid-glass.js"></script>
-<script src="./assets/js/field.js"></script>
 <script src="./assets/js/instrument.js"></script>
 <script src="./assets/js/main.js"></script>
 </body>

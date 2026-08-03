@@ -34,15 +34,12 @@
   }
 
   /* ---------------------------------------------------------------------
-     Position gauge: rail ticks, nav state, scroll percentage
+     Scroll spy. Lights the current section in the nav bar.
      --------------------------------------------------------------------- */
   function initGauge() {
-    var ticks = $$("[data-rail]");
     var navLinks = $$("[data-nav]");
-    var pct = $("#rail-pct");
-    var hint = $("#hero-hint");
-    var sections = ticks
-      .map(function (a) { return document.getElementById(a.getAttribute("data-rail")); })
+    var sections = navLinks
+      .map(function (a) { return document.getElementById(a.getAttribute("data-nav")); })
       .filter(Boolean);
     if (!sections.length) return;
 
@@ -51,9 +48,6 @@
     function setCurrent(id) {
       if (id === current) return;
       current = id;
-      ticks.forEach(function (a) {
-        a.setAttribute("aria-current", a.getAttribute("data-rail") === id ? "true" : "false");
-      });
       navLinks.forEach(function (a) {
         a.setAttribute("aria-current", a.getAttribute("data-nav") === id ? "true" : "false");
       });
@@ -66,11 +60,6 @@
         if (sections[i].offsetTop <= mid) found = sections[i].id;
       }
       setCurrent(found);
-
-      var max = document.documentElement.scrollHeight - window.innerHeight;
-      var p = max > 0 ? Math.round((window.scrollY / max) * 100) : 0;
-      if (pct) pct.textContent = String(Math.min(99, Math.max(0, p))).padStart(2, "0");
-      if (hint) hint.classList.toggle("is-gone", window.scrollY > 60);
     }
 
     var ticking = false;

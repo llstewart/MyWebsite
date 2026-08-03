@@ -104,7 +104,7 @@
 .nav {
   position: fixed;
   top: var(--s-3);
-  left: calc(50% + var(--rail-width) / 2);
+  left: 50%;
   transform: translate(-50%, 0);
   z-index: var(--z-nav);
   display: flex; align-items: center; gap: var(--s-2);
@@ -115,7 +115,6 @@
   transition-delay: 300ms;
 }
 .is-loading .nav { transform: translate(-50%, calc(-100% - var(--s-5))); }
-@media (max-width: 900px) { .nav { left: 50%; } }
 
 .nav__links { display: flex; gap: var(--s-1); }
 @media (max-width: 720px) { .nav__links { display: none; } }

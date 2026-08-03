@@ -13,7 +13,7 @@
    Caching opaque responses buys nothing and hides failures.
    =========================================================================== */
 
-var VERSION = "ls-2026-08-02";
+var VERSION = "ls-2026-08-02b";
 var CORE = [
   "./",
   "./index.html",
@@ -24,10 +24,10 @@ var CORE = [
   "./assets/css/sections.css",
   "./assets/css/states.css",
   "./assets/js/liquid-glass.js",
-  "./assets/js/field.js",
   "./assets/js/instrument.js",
   "./assets/js/main.js",
   "./assets/icon.svg",
+  "./assets/img/bateke-plateau.webp",
   "./manifest.json"
 ];
 

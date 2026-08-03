@@ -51,10 +51,10 @@ assets/
     states.css          arrival, departure, offline, pointer, preferences, print
   js/
     liquid-glass.js     deepika-builds/liquid-glass, byte for byte, MIT
-    field.js            the contour field canvas
     instrument.js       reveal, position gauge, disclosures, command palette
     main.js             lifecycle, glass tier decision, resilience
   icon.svg
+  img/                Bateke Plateau aerial, 2000w and 1100w webp
   Lincoln_Stewart_Resume.pdf
 
 docs/
@@ -102,8 +102,13 @@ re-fetch it. The CSS dressing in `glass.css` follows her `demo/index.html`
 recipe, and the cursor tracked glare in `main.js` is hers.
 
 Refraction bends what is behind it, so it needs detail to bend. Her demo puts a
-photograph back there. A flat white page is the worst surface for this effect.
-Here the nav reads properly because real page content scrolls under it.
+photograph back there. A flat white page is the worst possible surface for it.
+
+So this page carries an aerial of the Bateke Plateau in the DR Congo, where
+Lincoln is from, at two strengths: page wide under an 0.88 paper wash where it
+reads as texture and feeds the displacement maps, and full strength behind the
+approach section where the Congo is the subject. Do not pre-lighten the file;
+that throws away the detail the effect needs.
 
 Three tiers, chosen per device by `main.js`:
 
