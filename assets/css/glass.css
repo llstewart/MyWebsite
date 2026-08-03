@@ -299,40 +299,78 @@
 }
 
 /* =========================================================================
-   Command palette. Keyboard first on a desktop, a bottom sheet on a phone.
+   Command palette.
+
+   The one modal on the site, so it is the one place the material has a
+   whole surface to itself. It was never brought through the monochrome
+   pass, the type scale, or the corner language, so it was still carrying a
+   green selected row, a one-off input size, and an 18px radius on a page
+   where every other glass surface had moved to 28 or to a capsule.
+
+   Keyboard first on a desktop, a bottom sheet on a phone.
    ========================================================================= */
 
 .palette {
   position: fixed; inset: 0;
   z-index: var(--z-modal);
   display: grid; place-items: start center;
-  padding-top: 14vh;
-  background: rgba(16, 26, 23, 0.28);
-  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  padding-top: 13vh;
+  background: rgba(16, 26, 23, 0.22);
+  backdrop-filter: blur(4px) saturate(1.1);
+  -webkit-backdrop-filter: blur(4px) saturate(1.1);
   opacity: 0; pointer-events: none;
-  transition: opacity var(--d-base) var(--e-out);
+  transition: opacity var(--d-close) var(--e-sheet);
 }
-.palette.is-open { opacity: 1; pointer-events: auto; }
+.palette.is-open { opacity: 1; pointer-events: auto; transition-duration: var(--d-open); }
 
+/* Opens the way a sheet does: up from slightly below, settling rather than
+   snapping, on the same curve as every disclosure on the page. */
 .palette__panel {
-  width: min(36rem, calc(100vw - 2 * var(--s-5)));
-  padding: var(--s-3);
-  border-radius: var(--r-panel);
-  transform: translateY(-10px) scale(0.985);
-  transition: transform var(--d-base) var(--e-out);
+  --card-pad: var(--s-3);
+  width: min(38rem, calc(100vw - 2 * var(--s-5)));
+  padding: var(--card-pad);
+  border-radius: var(--r-glass);
+  transform: translateY(14px) scale(0.97);
+  opacity: 0;
+  transition:
+    transform var(--d-close) var(--e-sheet),
+    opacity calc(var(--d-close) * 0.6) linear;
 }
-.palette.is-open .palette__panel { transform: none; }
+.palette.is-open .palette__panel {
+  transform: none; opacity: 1;
+  transition:
+    transform var(--d-open) var(--e-sheet),
+    opacity calc(var(--d-open) * 0.5) linear;
+}
 
 .palette__field {
   display: flex; align-items: center; gap: var(--s-3);
   padding: var(--s-3) var(--s-4);
   border-bottom: var(--hairline) solid var(--c-line);
 }
+/* The search glyph, drawn rather than imported. No icon set for one mark. */
+.palette__glyph {
+  flex: none; width: 15px; height: 15px;
+  border: 1.6px solid var(--c-ink-3);
+  border-radius: 50%;
+  position: relative;
+}
+.palette__glyph::after {
+  content: "";
+  position: absolute; right: -5px; bottom: -4px;
+  width: 7px; height: 1.6px;
+  background: var(--c-ink-3);
+  transform: rotate(45deg);
+  transform-origin: left center;
+}
 .palette__input {
   flex: 1; min-width: 0;
   border: 0; background: none; outline: none;
   color: var(--c-ink);
-  font-family: var(--f-display); font-size: 1.05rem; font-weight: 400;
+  font-family: var(--f-display);
+  font-size: var(--t-lead);
+  font-weight: 400;
+  letter-spacing: -0.012em;
 }
 .palette__input::placeholder { color: var(--c-ink-4); }
 
@@ -340,19 +378,20 @@
 .palette__close {
   flex: none;
   padding: var(--s-2) var(--s-3);
-  border: var(--hairline) solid var(--c-line-strong);
-  border-radius: var(--r-tight);
+  border: 0;
+  border-radius: 999px;
+  background: rgba(16, 26, 23, 0.05);
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-ink-3);
-  transition: color var(--d-fast) linear, border-color var(--d-fast) linear;
+  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
 }
 .palette__close:hover, .palette__close:focus-visible {
-  color: var(--c-brand); border-color: var(--c-brand-edge);
+  color: var(--c-ink); background: rgba(16, 26, 23, 0.09);
 }
 
 .palette__list {
-  max-height: 21rem; overflow-y: auto; padding: var(--s-2) 0 0;
+  max-height: 22rem; overflow-y: auto; padding: var(--s-2) 0 0;
   scrollbar-width: thin;
   scrollbar-color: var(--c-line-strong) transparent;
   overscroll-behavior: contain;
@@ -361,20 +400,41 @@
 .palette__list::-webkit-scrollbar-track { background: transparent; }
 .palette__list::-webkit-scrollbar-thumb { background: var(--c-line-strong); border-radius: 3px; }
 
+/* Concentric: the row radius is the panel radius minus the panel padding. */
 .palette__item {
   display: flex; align-items: center; gap: var(--s-4);
   width: 100%; padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-tight);
-  text-align: left; color: var(--c-ink-2);
+  border-radius: calc(var(--r-glass) - var(--card-pad));
+  text-align: left;
+  color: var(--c-ink-2);
+  font-size: var(--t-body);
   transition: background-color var(--d-fast) linear, color var(--d-fast) linear;
 }
-.palette__item[aria-selected="true"] { background: rgba(16, 26, 23, 0.07); color: var(--c-ink); }
-.palette__item[aria-selected="true"] .palette__kind { color: var(--c-brand); }
+.palette__item[aria-selected="true"] {
+  background: rgba(16, 26, 23, 0.06);
+  color: var(--c-ink);
+  box-shadow: inset 0 0 0 1px rgba(16, 26, 23, 0.06);
+}
 .palette__kind {
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
   color: var(--c-ink-4); min-width: 4.5rem;
 }
+.palette__item[aria-selected="true"] .palette__kind { color: var(--c-ink-3); }
+
+/* The selected row carries the same chevron every other way in on the site
+   uses, so the affordance is the same shape here as everywhere else. */
+.palette__go {
+  margin-left: auto; flex: none;
+  width: 6px; height: 6px;
+  border-right: 1.5px solid var(--c-ink-3);
+  border-bottom: 1.5px solid var(--c-ink-3);
+  transform: rotate(-45deg);
+  opacity: 0;
+  transition: opacity var(--d-fast) linear, transform var(--d-base) var(--e-sheet);
+}
+.palette__item[aria-selected="true"] .palette__go { opacity: 1; transform: rotate(-45deg) translate(1px, 1px); }
+
 .palette__empty { padding: var(--s-5) var(--s-4); color: var(--c-ink-3); font-size: var(--t-small); }
 .palette__foot {
   display: flex; gap: var(--s-5);

@@ -314,8 +314,9 @@ a[data-state="missing"] { color: var(--c-live); }
     display: flex; flex-direction: column;
     border-radius: var(--r-glass) var(--r-glass) 0 0;
     padding: var(--s-3) var(--s-3) max(var(--s-3), env(safe-area-inset-bottom));
-    transform: translateY(14px);
+    transform: translateY(100%);
   }
+  .palette.is-open .palette__panel { transform: none; }
   .palette__list { flex: 1; max-height: none; }
   /* Keyboard hints are noise on a device with no keyboard. */
   .palette__foot { display: none; }

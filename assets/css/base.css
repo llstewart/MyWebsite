@@ -257,6 +257,28 @@ summary::-webkit-details-marker { display: none; }
 }
 .link--quiet { color: var(--c-ink); }
 
+/* Brand marks.
+
+   The only icons on the site, and the only ones that earn a place: a
+   recognised mark for a service is doing work that a word cannot, which is
+   what separates an icon from decoration. Drawn inline rather than pulled
+   from a set, so there is no icon library for two shapes, and filled with
+   currentColor so they follow the ink rather than introducing a colour.
+
+   The text label stays. A mark on its own is a guess for anyone who does
+   not already know it, and it gives a screen reader nothing.             */
+.mark {
+  width: 15px; height: 15px;
+  flex: none;
+  display: inline-block;
+  vertical-align: -2px;
+  margin-right: var(--s-3);
+  opacity: 0.7;
+  transition: opacity var(--d-fast) linear;
+}
+.link--mark { display: inline-flex; align-items: center; }
+.link--mark:hover .mark, .link--mark:focus-visible .mark { opacity: 1; }
+
 .action {
   display: inline-flex; align-items: center; gap: var(--s-3);
   padding: var(--s-4) var(--s-5);
