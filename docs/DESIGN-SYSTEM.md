@@ -167,139 +167,63 @@ panels use the frosted tier by design, not by omission.
 
 ### The field
 
-`assets/js/field.js`. One full viewport canvas, one WebGL2 fragment shader.
+`assets/js/field.js`. A flow field: thousands of single pixel particles drifting
+along an invisible current, leaving short trails.
 
-The structure is Inigo Quilez's domain warping, which is also what `p5aholic.me`
-uses. Reading that site's shader corrected four things in the first version of
-this file, and all four are worth writing down because each one was a
-plausible-sounding wrong answer.
+**It was a fragment shader first, and that was the wrong architecture.** The
+shader followed `p5aholic.me` closely: domain warped noise, thresholded per pixel
+into stipple. It was replaced because measuring found a fault no tuning could
+reach. It ran the noise at a base span of 0.20 across the viewport, copied from
+the reference, and at that scale less than a fifth of one noise cell covers the
+screen. There is almost no spatial variation at any instant; what looks like a
+pattern is really one value, and as time moves the sample point through noise
+space that value wanders. Measured at nine time samples the median ran 0.24,
+0.22, 0.21, 0.21, 0.64, 0.90, 0.23, 0.72, 0.20. Any fixed threshold against that
+is dense at some moments and completely empty at others, which is what kept
+happening, including at the moment somebody first arrives. Several passes of
+"lower the floor" were fitting constants to a moving target.
 
-**It is a single noise sample, not fBm.** Stacking octaves was the wrong
-instinct. All of the structure comes from warping: the field is sampled at
-coordinates that are themselves noise, twice, with the second warp offset by the
-first. Octaves add fuzz. Warping adds shape.
+A flow field cannot fail that way. The number of particles **is** the coverage,
+so empty is not a state it can reach.
 
-**The warp factor is large.** The first version warped by about 1.0 and came out
-a flat wash. It is 3.2 at rest here, rising with scroll. That number is the
-difference between a smooth gradient and something with ridges and hollows in
-it.
+**How it works.** An invisible grid over the viewport, each cell holding an angle
+taken from value noise, so neighbouring cells point in similar directions and the
+grid reads as a smooth curving current. Particles look up the angle in the cell
+they stand in and step that way. The canvas is never cleared: it is painted with
+paper at a low alpha, so old positions fade over a dozen frames and each particle
+leaves a short trail. **The trails are what read as sweeping waves** rather than
+as drifting dust.
 
-**The output is shaped by a power curve, but only after a contrast stretch.**
-This is the one that took arithmetic rather than taste. The reference raises its
-noise to the sixth power, which crushes everything except the peaks so that
-colour gathers along ridges and most of the surface stays quiet. Copying the
-exponent produced nothing at all on this page. Value noise sits around 0.5, and
-0.5 to the fourth is 0.06, which `smoothstep` then pulls down to 0.01. One
-percent of a tint over paper is not a colour. It works in the reference because
-its base is near black, where a lift of 0.05 is plainly visible. So the range is
-stretched to fill 0..1 first, and the curve then shapes a signal that has
-somewhere to go.
+**Three periods, none of which divide into each other.** The current rotates on
+one, the speed breathes on another, and the clouds that decide where particles
+may spawn drift on a third. Nothing lines up into a loop you can catch. Scroll
+energy rides on top and decays.
 
-**The grain is not additive dithering.** It is a per pixel displacement of where
-the noise gets sampled: one hash gives a magnitude, a second gives an angle, and
-the pair pushes the lookup off its true position. That is why it reads as part
-of the wave rather than as speckle laid on top. It is also fixed in screen
-space, so it sits still like paper texture instead of crawling like television
-static. A small additive dither is kept on top of it, because a gradient this
-soft across two thousand pixels of eight bit colour still bands, and breaking
-the step boundaries apart is what makes the eye average it back to smooth.
+**Density is spawn position, not opacity.** Particles are rejection sampled
+against a slow noise field, so they gather into clouds with clear paper between
+them rather than covering the page evenly. The acceptance test gives up after six
+tries and takes what it has, because a particle still has to go somewhere and a
+possibly-unbounded loop has no place in a frame budget.
 
-Colour took a second attempt too. Mixing all three field hues on every pixel
-produced grey, because sage, sky and sand averaged together are a neutral: the
-result had a lightness range and no colour in it. Walking the palette with the
-field value instead means a region is mostly one hue, and the hue changes as the
-field moves under it.
+Two numbers carry most of the character. Trail alpha started at 0.055, which
+keeps a mark alive about twenty frames, and twenty frames of travel is a stroke:
+the page read as fur. It is 0.17. And each dot draws at 0.34 alpha, because
+density has to carry the effect rather than weight; marks strong enough to read
+individually make a page you cannot read over.
 
-**The numbers matter more than the algorithm.** Having the right structure and
-the wrong scale produced smooth pastel blobs with no texture at all. The
-reference's own uniforms are a base span of 0.20 across the whole viewport, a
-warp of 4.0, and a grain displacement of 0.05. Read as ratios: the warp is
-twenty times wider than the field it is warping, and the displacement is a
-quarter of the visible span. That is a field so low in frequency that less than
-a fifth of one noise cell covers the screen, so almost nothing in the picture
-comes from the noise directly. The large slow shapes are the warp; the fine
-speckle is each pixel sampling a quarter of a screen away from its neighbour.
-The first attempt had the base thirteen times too high and the displacement at
-under one percent of it rather than twenty five.
+Colour is `--c-field-grain`, a space grey rather than the ink.
+`--c-field-grain-dark` sits beside it for whenever dark mode is built, and is
+deliberately not wired to `prefers-color-scheme`, because the site is
+`color-scheme: light` with no dark palette and flipping the spray alone would put
+white dots on white paper.
 
-**Grain only ever darkens.** Centred on zero it clipped, and the measurement
-showed it: the top of the range pinned at 255 and the median rose instead of
-holding. Paper is 251, so a symmetric jitter has four levels of headroom up and
-twenty down, and throwing away everything above 255 both flattens the highlights
-and drags the page lighter. Subtracting fixes it exactly, and paper with grain
-taken out of it is what paper is.
+Capped like the glass: device pixel ratio at 1.5, thirty frames a second, asleep
+when hidden, a static settled frame under `prefers-reduced-motion`, off on a
+metered connection. Any exit leaves the CSS gradients underneath untouched.
 
-**The grain hash had to be replaced.** `fract(sin(dot(p, k)))` is fine for the
-noise lattice, which is sampled at integer corners and interpolated. Fed screen
-coordinates directly it produced visible vertical striping rather than speckle,
-because `sin()` at arguments that large loses precision and the dot product
-lines the failures up in columns. Grain with a direction in it reads as a
-rendering fault. It uses a PCG style integer hash now, which needs the integer
-support WebGL2 already required. The test is cheap: isotropic noise has equal
-horizontal and vertical neighbour deltas and near zero variance between column
-means. Striped noise does not.
-
-**It is stipple, not grain.** This is the thing I got wrong repeatedly. The
-reference is not a gradient with texture laid over it. It is thousands of
-discrete dots whose *density* varies, like an airbrush: dense in the core,
-thinning outward, clean paper beyond. `pow(n, 6.0)` is not a contrast curve, it
-is a threshold. Combined with a displacement that samples a quarter of a screen
-away, it collapses almost every pixel to nothing and lets a scattered few spike,
-and the survivors are the dots.
-
-Reproducing that implicitly did not work here, and measuring said why: the
-reference's normalised simplex spans the full range, and three nested value
-noise lattices do not. Replayed on the CPU over three thousand samples this
-field spans 0.24 to 0.54 and sits at 0.40, so raising it to the sixth gives
-0.015 almost everywhere and nothing ever crosses. The threshold is therefore
-explicit: each cell holds one fixed random number and is drawn in ink when the
-local density exceeds it, which makes a pixel ink with a probability equal to
-the density. Same result, under control.
-
-The threshold is fixed per cell and never re-rolled. Re-rolling every frame is
-television static. Holding it still and letting the density drift underneath is
-what makes dots switch on and off as the cloud passes over them.
-
-**The cloud is confined, and that is most of the effect.** The reference does not
-spray the whole page. It keeps the stipple inside one large soft off-centre
-ellipse and leaves everything outside it clean, so what moves is mostly what
-happens *inside* that area while the area itself drifts. A vignette cannot do
-this: a vignette is centred and symmetric and only fades edges. This is an
-ellipse whose middle wanders on two different periods so it never returns to the
-same place on a catchable loop.
-
-**Colour: none.** The dots are `--c-field-grain`, a space grey. Not the ink,
-because at full ink a page of dots reads as dirt. `--c-field-grain-dark` is
-written down beside it for whenever dark mode gets built; it is deliberately not
-wired to `prefers-color-scheme`, because the site is `color-scheme: light` with
-no dark palette, and flipping the spray alone would put white dots on white
-paper.
-
-**A measurement note for anyone tuning this.** Do not judge it from a
-full page screenshot. Captures downscale 1920 to 1568, which blends single pixel
-dots straight into the paper and makes a correct render look empty. Zoom in, or
-read the canvas back and count pixels below a threshold.
-
-**The intensity is not constant**, which is the part of the reference that reads
-as the background responding rather than looping. It tweens noise frequency,
-warp and grain per section. Here the same three follow scroll energy: they lift
-while the page is moving and settle back over a couple of seconds when it stops.
-Rest has to lose every argument against the type, because that is when someone
-is reading. Peak happens while the page is in motion, when nothing is being read
-anyway.
-
-The first version of all this was tuned until it measured a range of 237 to 251
-out of 255. That is a five percent swing, and five percent is below the point
-where a person notices anything is there. Being able to prove an effect is
-running is not the same as being able to see it.
-
-It is capped hard, on the same tiering discipline as the glass: device pixel
-ratio at 1.5, thirty frames a second, asleep when the tab is hidden, a single
-static frame under `prefers-reduced-motion`, and it does not start at all on a
-metered connection. Every one of those exits leaves the CSS radial gradients
-underneath untouched, and `.has-shader` is only set on `<html>` after a frame
-has actually been drawn, so a shader that fails to compile degrades to the old
-background rather than to a blank page.
+**A note for tuning it.** Do not judge this from a full page screenshot. Captures
+downscale 1920 to 1568, which blends single pixel marks into the paper and makes
+a correct render look empty. Zoom in, or read the canvas back and count.
 
 ### Depth
 
