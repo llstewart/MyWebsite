@@ -16,7 +16,7 @@
 /* Bump this on every deploy that changes CORE. The activate handler deletes
    every cache that is not this version, so a stale name is what keeps an old
    asset alive. */
-var VERSION = "ls-2026-08-03o";
+var VERSION = "ls-2026-08-03p";
 var CORE = [
   "./",
   "./index.html",
