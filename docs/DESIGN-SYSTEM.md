@@ -210,6 +210,35 @@ result had a lightness range and no colour in it. Walking the palette with the
 field value instead means a region is mostly one hue, and the hue changes as the
 field moves under it.
 
+**The numbers matter more than the algorithm.** Having the right structure and
+the wrong scale produced smooth pastel blobs with no texture at all. The
+reference's own uniforms are a base span of 0.20 across the whole viewport, a
+warp of 4.0, and a grain displacement of 0.05. Read as ratios: the warp is
+twenty times wider than the field it is warping, and the displacement is a
+quarter of the visible span. That is a field so low in frequency that less than
+a fifth of one noise cell covers the screen, so almost nothing in the picture
+comes from the noise directly. The large slow shapes are the warp; the fine
+speckle is each pixel sampling a quarter of a screen away from its neighbour.
+The first attempt had the base thirteen times too high and the displacement at
+under one percent of it rather than twenty five.
+
+**Grain only ever darkens.** Centred on zero it clipped, and the measurement
+showed it: the top of the range pinned at 255 and the median rose instead of
+holding. Paper is 251, so a symmetric jitter has four levels of headroom up and
+twenty down, and throwing away everything above 255 both flattens the highlights
+and drags the page lighter. Subtracting fixes it exactly, and paper with grain
+taken out of it is what paper is.
+
+**The grain hash had to be replaced.** `fract(sin(dot(p, k)))` is fine for the
+noise lattice, which is sampled at integer corners and interpolated. Fed screen
+coordinates directly it produced visible vertical striping rather than speckle,
+because `sin()` at arguments that large loses precision and the dot product
+lines the failures up in columns. Grain with a direction in it reads as a
+rendering fault. It uses a PCG style integer hash now, which needs the integer
+support WebGL2 already required. The test is cheap: isotropic noise has equal
+horizontal and vertical neighbour deltas and near zero variance between column
+means. Striped noise does not.
+
 **The intensity is not constant**, which is the part of the reference that reads
 as the background responding rather than looping. It tweens noise frequency,
 warp and grain per section. Here the same three follow scroll energy: they lift

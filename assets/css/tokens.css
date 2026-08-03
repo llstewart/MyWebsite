@@ -158,7 +158,11 @@
 
      If a component needs a size that is not here, the answer is one of
      these, not a sixth.                                                    */
-  --t-display: clamp(2.4rem, 11.6vw, 8.6rem);   /* the name, once           */
+  /* Trimmed from 11.6vw/8.6rem when the tracking was loosened to stop the
+     rt pair in Stewart touching. Looser tracking over fifteen characters is
+     about a quarter of an em of extra width, so the size gives that back
+     and the name still runs the column on one line. */
+  --t-display: clamp(2.3rem, 11.0vw, 8.2rem);   /* the name, once           */
   --t-title:   clamp(1.9rem, 4.2vw, 3.2rem);    /* section heads, statement */
   --t-lead:    clamp(1.05rem, 1.6vw, 1.35rem);  /* subheads, entry names    */
   --t-body:    1rem;                            /* prose                    */

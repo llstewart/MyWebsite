@@ -19,11 +19,23 @@
 /* Sized to run the full width of the column on one line. 15 characters at
    Satoshi 600 with this tracking is close enough to 0.55em each that
    11.6vw fills the measure and stops at the column cap. */
+/* Tracking, and why it is not tighter.
+
+   This was -0.045em, which at the top of the display clamp pulls each pair
+   about six pixels closer. Most pairs survive that. The r and the t in
+   Stewart do not: r has a short right sidebearing and t has almost no left
+   one, so they were the first pair to actually touch.
+
+   Kerning cannot rescue it, and reaching for font-kerning here would have
+   been fixing the wrong thing. The glyphs each sit in their own inline
+   block for the arrival animation, so no pair is kerned at all, but the
+   default advances for r and t do not collide on their own. The negative
+   tracking is the whole cause. */
 .hero__name {
   font-size: var(--t-display);
   font-weight: 600;
   line-height: 1.02;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.028em;
   color: var(--c-ink);
   white-space: nowrap;
 }

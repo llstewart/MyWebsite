@@ -92,8 +92,40 @@
 
     "#define TAU 6.283185307179586",
 
+    /* Two hashes, because they have different jobs and the cheap one is
+       not fit for the second.
+
+       hash() is the classic fract(sin(dot)) trick, and it is fine for the
+       value noise lattice below: that is sampled at integer cell corners
+       and interpolated, so any structure in it is buried under the
+       interpolation.
+
+       It is not fine for per pixel grain. Fed screen coordinates directly
+       it produced visible vertical striping rather than speckle, because
+       sin() at arguments that large loses precision and the dot product
+       with those constants lines the failures up in columns. Grain with a
+       direction in it reads as a rendering fault, not as paper.
+
+       rand() is a proper integer hash instead, PCG style: multiply, mix
+       the two lanes into each other, xor down the high bits, repeat. It
+       needs the integer support that only came with WebGL2, which this
+       already requires. */
     "float hash(vec2 p) {",
     "  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);",
+    "}",
+
+    "uint uhash(uvec2 p) {",
+    "  p = p * 1664525u + 1013904223u;",
+    "  p.x += p.y * 1664525u;",
+    "  p.y += p.x * 1664525u;",
+    "  p ^= (p >> 16u);",
+    "  p.x += p.y * 1664525u;",
+    "  p.y += p.x * 1664525u;",
+    "  p ^= (p >> 16u);",
+    "  return p.x;",
+    "}",
+    "float rand(vec2 fc, uint salt) {",
+    "  return float(uhash(uvec2(fc) + salt)) / 4294967295.0;",
     "}",
 
     /* Value noise, normalised to 0..1 the way snoise01 is in the reference.
@@ -129,8 +161,8 @@
     /* The grain, as a displacement. One hash is how far, the other is which
        way. Keyed to gl_FragCoord so it is fixed to the screen and does not
        crawl. */
-    "  float gm = pow(hash(gl_FragCoord.xy * 0.61), 1.5);",
-    "  float ga = hash(gl_FragCoord.xy * 1.37 + 19.7);",
+    "  float gm = pow(rand(gl_FragCoord.xy, 0u), 1.5);",
+    "  float ga = rand(gl_FragCoord.xy, 7919u);",
     "  float ax = u_disp * gm * cos(ga * TAU);",
     "  float ay = u_disp * gm * sin(ga * TAU);",
 
@@ -170,9 +202,22 @@
     "  vec3 col = mix(u_paper, tint, n * u_lift * vig);",
 
     /* Additive dither, last, against the banding. */
-    "  float d1 = hash(gl_FragCoord.xy + 0.5) - 0.5;",
-    "  float d2 = hash(gl_FragCoord.xy * 2.13 - 7.1) - 0.5;",
-    "  col += d1 * (1.0 / 255.0) + d2 * u_grain;",
+    /* The grain only ever darkens.
+
+       Centred on zero it clipped, and the measurement showed it plainly:
+       the top of the range pinned at 255 and the median rose instead of
+       staying put. Paper is 251, so a symmetric jitter has four levels of
+       headroom upward and twenty downward. Everything above 255 is thrown
+       away, which both flattens the highlights and drags the whole page
+       lighter, because only the darkening half survives in full.
+
+       Subtracting solves it exactly. On near white there is nowhere to go
+       but down, and paper with grain taken out of it is what paper is. The
+       anti banding term stays symmetric, since one level either way cannot
+       clip anything. */
+    "  float d1 = rand(gl_FragCoord.xy, 104729u) - 0.5;",
+    "  float d2 = rand(gl_FragCoord.xy, 15485863u);",
+    "  col += d1 * (1.0 / 255.0) - d2 * u_grain;",
 
     "  outColor = vec4(col, 1.0);",
     "}"
@@ -235,7 +280,21 @@
   gl.uniform3fv(U.a, tripletToRgb(token("--c-field-sage", "118,168,140")));
   gl.uniform3fv(U.b, tripletToRgb(token("--c-field-sky", "124,160,200")));
   gl.uniform3fv(U.c, tripletToRgb(token("--c-field-sand", "224,190,136")));
-  gl.uniform1f(U.grain, 0.030);
+  /* Two jobs in one number, and the second is why it is not tiny.
+
+     The displacement produces grain in the wave, but how much of that
+     reaches the screen is capped by how far the colour travels: a tint at
+     twenty percent over paper can only swing about twenty levels in total,
+     so the speckle inside it is small no matter how hard the sample is
+     scrambled. The reference does not have that ceiling, because its base
+     is near black and its front is mid grey, a hundred and fifteen levels
+     apart, and its grain gets the whole of that range to move in.
+
+     That contrast is not available on near white paper without darkening
+     the page, which is not a trade worth making. So this term carries the
+     texture directly as a luminance jitter, on top of the wave rather than
+     inside it. */
+  gl.uniform1f(U.grain, 0.085);
 
   /* ------------------------------------------------------------------
      Intensity.
@@ -255,8 +314,29 @@
      you are moving, when nothing is being read anyway. The reference varies
      these per section with a tween; here they follow scroll energy, which
      gets the same effect without needing a section to be the trigger. */
-  var REST = { scale: 2.60, warp: 3.20, disp: 0.020, lift: 0.17 };
-  var PEAK = { scale: 3.55, warp: 4.60, disp: 0.052, lift: 0.32 };
+  /* These are the reference's own numbers, and the ratios between them are
+     the entire look. Reading its uniforms rather than only its shader is
+     what fixed this.
+
+       base span   0.20 across the whole viewport
+       warp        4.00, which is twenty times the base span
+       grain       0.05, a quarter of the base span
+
+     That is a field so low in frequency that less than a fifth of one noise
+     cell covers the screen. Almost nothing in the picture comes from the
+     noise directly. The large slow shapes come from the warp, which is
+     twenty times wider than the field it is warping, and the fine speckle
+     comes from displacing each pixel's sample by a quarter of the visible
+     span, so neighbouring pixels land far apart in noise space and read as
+     grain.
+
+     My first version had the base at 2.60, thirteen times too high, and the
+     displacement at 0.02, which against that base is under one percent
+     rather than twenty five. Same algorithm, wrong by two orders of
+     magnitude in the one ratio that produces the texture, which is why it
+     came out as smooth pastel blobs with no grain in them. */
+  var REST = { scale: 0.20, warp: 4.00, disp: 0.095, lift: 0.21 };
+  var PEAK = { scale: 0.30, warp: 5.30, disp: 0.150, lift: 0.36 };
 
   var cur = { scale: REST.scale, warp: REST.warp, disp: REST.disp, lift: REST.lift };
   var energy = 0, lastScroll = window.scrollY;
