@@ -83,12 +83,11 @@
     "uniform float u_scale;",   /* noise frequency        */
     "uniform float u_warp;",    /* domain warp strength   */
     "uniform float u_disp;",    /* grain displacement     */
-    "uniform float u_grain;",   /* additive dither        */
-    "uniform float u_lift;",    /* overall colour amount  */
+    "uniform float u_lift;",    /* stipple density        */
+    "uniform float u_dot;",     /* dot size, device px    */
+    "uniform float u_weight;",  /* how dark a dot is      */
     "uniform vec3  u_paper;",
-    "uniform vec3  u_a;",
-    "uniform vec3  u_b;",
-    "uniform vec3  u_c;",
+    "uniform vec3  u_ink;",
 
     "#define TAU 6.283185307179586",
 
@@ -158,66 +157,84 @@
     "void main() {",
     "  vec2 uv = gl_FragCoord.xy / u_res;",
 
-    /* The grain, as a displacement. One hash is how far, the other is which
-       way. Keyed to gl_FragCoord so it is fixed to the screen and does not
-       crawl. */
+    /* A small scatter of where the density is read. With an explicit
+       threshold below this is no longer doing the dithering, so it can be
+       gentle: its only job is to keep the edge of the cloud from reading as
+       a contour line. The angle carries a time term so each pixel's sample
+       orbits slowly, which is part of what keeps the spray alive. */
     "  float gm = pow(rand(gl_FragCoord.xy, 0u), 1.5);",
-    "  float ga = rand(gl_FragCoord.xy, 7919u);",
+    "  float ga = rand(gl_FragCoord.xy, 7919u) + u_time * 0.058;",
     "  float ax = u_disp * gm * cos(ga * TAU);",
     "  float ay = u_disp * gm * sin(ga * TAU);",
 
-    /* y runs at twice the frequency of x, which stretches the field
-       horizontally. On a wide screen that reads as weather rather than as
-       a tiled pattern. */
     "  float nx = uv.x * u_scale + ax;",
     "  float ny = uv.y * u_scale * 2.0 + ay;",
 
-    /* Stretch first, then shape.
+    /* The density field. Smooth, 0 to 1, and it is not what gets drawn.
+       It only says how LIKELY a dot is here. */
+    /* The edges here are the field's real range, not a guess.
 
-       The reference raises this to the sixth and it works there because its
-       base colour is near black: a value of 0.05 still lifts visibly off a
-       dark ground. Copying the exponent onto near white paper produced
-       nothing at all, and the arithmetic says why. Value noise sits around
-       0.5, and 0.5 to the fourth is 0.06, which smoothstep then pulls down
-       to 0.01. One percent of a tint over paper is not a colour.
+       Measured, by replaying this exact pattern function on the CPU over
+       three thousand samples: it spans 0.24 to 0.54 and sits around 0.40.
+       Three nested lattice interpolations pile up around the middle, so it
+       never approaches either end. Mapping from 0.20 to 0.82 therefore used
+       less than half the curve and left peak density near five percent,
+       which is why the first stipple came out as scattered specks instead
+       of a cloud. These edges put the real range across the full 0 to 1. */
+    "  float density = smoothstep(0.30, 0.47, pattern(vec2(nx, ny)));",
 
-       So the range is stretched to fill 0..1 before the curve is applied.
-       The power still does its job, holding most of the page near paper and
-       letting colour gather along the ridges, but now it is shaping a signal
-       that has somewhere to go. */
-    "  float raw = pattern(vec2(nx, ny));",
-    "  float n = smoothstep(0.30, 0.80, raw);",
-    "  n = pow(n, 1.8);",
+    /* The region, and this is the part I had missed entirely.
 
-    /* One hue at a time, walked by the field value. Mixing all three on
-       every pixel was the first attempt and it produced grey, because sage,
-       sky and sand averaged together are a neutral. */
-    "  float h = pattern(vec2(nx * 0.55 + 3.1, ny * 0.55 - 2.4));",
-    "  float hs = smoothstep(0.32, 0.74, h);",
-    "  vec3 tint = mix(u_a, u_b, smoothstep(0.00, 0.55, hs));",
-    "  tint = mix(tint, u_c, smoothstep(0.50, 1.00, hs));",
+       The reference does not spray the whole page. The cloud lives inside
+       one large soft area, roughly a squashed half circle off to one side,
+       and everything outside it is clean paper. What moves is mostly what
+       happens INSIDE that area, while the area itself drifts slowly. That
+       containment is most of why it reads as a deliberate object on the
+       page rather than as an all over texture.
 
-    /* Edges settle toward paper so the field never fights the type. */
-    "  float vig = smoothstep(1.35, 0.12, length((uv - 0.5) * vec2(1.15, 1.0)));",
-    "  vec3 col = mix(u_paper, tint, n * u_lift * vig);",
+       A vignette cannot do this, because a vignette is centred and
+       symmetric and only ever fades edges. This is an off centre ellipse
+       whose middle wanders on two different periods, so it never returns to
+       the same place on a loop you can catch. */
+    "  vec2 cc = vec2(0.36 + 0.10 * sin(u_time * 0.037),",
+    "                 0.50 + 0.07 * cos(u_time * 0.029));",
+    "  float reg = 1.0 - smoothstep(0.08, 0.60, length((uv - cc) * vec2(1.45, 1.0)));",
 
-    /* Additive dither, last, against the banding. */
-    /* The grain only ever darkens.
+    /* Internal variation, so the region is not an even fill. */
+    "  float env = smoothstep(0.15, 0.80, pattern(vec2(nx * 0.4 + 11.3, ny * 0.4 - 5.7)));",
+    "  float amount = density * u_lift * mix(0.45, 1.0, env) * reg;",
 
-       Centred on zero it clipped, and the measurement showed it plainly:
-       the top of the range pinned at 255 and the median rose instead of
-       staying put. Paper is 251, so a symmetric jitter has four levels of
-       headroom upward and twenty downward. Everything above 255 is thrown
-       away, which both flattens the highlights and drags the whole page
-       lighter, because only the darkening half survives in full.
+    /* Stochastic threshold. This is the whole effect.
 
-       Subtracting solves it exactly. On near white there is nowhere to go
-       but down, and paper with grain taken out of it is what paper is. The
-       anti banding term stays symmetric, since one level either way cannot
-       clip anything. */
-    "  float d1 = rand(gl_FragCoord.xy, 104729u) - 0.5;",
-    "  float d2 = rand(gl_FragCoord.xy, 15485863u);",
-    "  col += d1 * (1.0 / 255.0) - d2 * u_grain;",
+       The reference gets its dots implicitly: it scatters each pixel's
+       sample a quarter of a screen away and then raises the result to the
+       sixth, so almost everything collapses to nothing and a few survivors
+       spike. I tried to reproduce that and it stayed invisible, and
+       measuring said why. Its normalised simplex spans the full range, and
+       my value noise does not: three nested lattice interpolations pile up
+       around the middle, so raising them to the sixth gives 0.015 almost
+       everywhere and nothing ever crosses.
+
+       So the threshold is explicit here rather than emergent. Each cell
+       gets one fixed random number and is drawn in ink when the local
+       density exceeds it, which makes a pixel ink with a probability equal
+       to the density. That is what an airbrush does, and it is what the
+       reference looks like: dense in the core, thinning at the edges, clean
+       paper beyond.
+
+       The threshold is fixed per cell and never re-rolled. Re-rolling it
+       each frame is television static. Holding it still and letting the
+       density drift underneath means dots switch on and off as the cloud
+       moves over them, which is movement the eye reads as a thing rather
+       than as noise. */
+    "  vec2 cell = floor(gl_FragCoord.xy / u_dot);",
+    "  float thr = rand(cell, 2654435761u);",
+    "  float ink = step(thr, amount);",
+
+    "  vec3 col = mix(u_paper, u_ink, ink * u_weight);",
+
+    /* One least significant bit, against banding in the envelope. */
+    "  col += (rand(gl_FragCoord.xy, 104729u) - 0.5) * (1.0 / 255.0);",
 
     "  outColor = vec4(col, 1.0);",
     "}"
@@ -257,7 +274,7 @@
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   var U = {};
-  ["res", "time", "scale", "warp", "disp", "grain", "lift", "paper", "a", "b", "c"]
+  ["res", "time", "scale", "warp", "disp", "lift", "dot", "weight", "paper", "ink"]
     .forEach(function (k) { U[k] = gl.getUniformLocation(prog, "u_" + k); });
 
   /* Colour comes from the tokens file, so the palette has one home. */
@@ -271,30 +288,19 @@
             parseInt(h.slice(2, 4), 16) / 255,
             parseInt(h.slice(4, 6), 16) / 255];
   }
-  function tripletToRgb(t) {
-    var n = t.split(",").map(function (x) { return parseFloat(x) / 255; });
-    return n.length === 3 ? n : [0.5, 0.5, 0.5];
-  }
-
   gl.uniform3fv(U.paper, hexToRgb(token("--c-paper", "#FBFBF9")));
-  gl.uniform3fv(U.a, tripletToRgb(token("--c-field-sage", "118,168,140")));
-  gl.uniform3fv(U.b, tripletToRgb(token("--c-field-sky", "124,160,200")));
-  gl.uniform3fv(U.c, tripletToRgb(token("--c-field-sand", "224,190,136")));
-  /* Two jobs in one number, and the second is why it is not tiny.
+  gl.uniform3fv(U.ink, hexToRgb(token("--c-field-grain", "#4A5054")));
 
-     The displacement produces grain in the wave, but how much of that
-     reaches the screen is capped by how far the colour travels: a tint at
-     twenty percent over paper can only swing about twenty levels in total,
-     so the speckle inside it is small no matter how hard the sample is
-     scrambled. The reference does not have that ceiling, because its base
-     is near black and its front is mid grey, a hundred and fifteen levels
-     apart, and its grain gets the whole of that range to move in.
+  /* Dot size in device pixels. One, because the reference's grains are
+     finer than mine were and a two pixel dot is visibly chunky next to it.
+     The device pixel ratio is capped at 1.5, so this is at most one and a
+     half device pixels and never a block. */
+  gl.uniform1f(U.dot, 1.0);
 
-     That contrast is not available on near white paper without darkening
-     the page, which is not a trade worth making. So this term carries the
-     texture directly as a luminance jitter, on top of the wave rather than
-     inside it. */
-  gl.uniform1f(U.grain, 0.085);
+  /* How much of the grain colour a dot carries. The colour is already a
+     space grey rather than the ink, so this can sit high without the page
+     going dirty. */
+  gl.uniform1f(U.weight, 0.88);
 
   /* ------------------------------------------------------------------
      Intensity.
@@ -335,8 +341,12 @@
      rather than twenty five. Same algorithm, wrong by two orders of
      magnitude in the one ratio that produces the texture, which is why it
      came out as smooth pastel blobs with no grain in them. */
-  var REST = { scale: 0.20, warp: 4.00, disp: 0.095, lift: 0.21 };
-  var PEAK = { scale: 0.30, warp: 5.30, disp: 0.150, lift: 0.36 };
+  /* lift is now stipple density, not tint strength, so it lives near one.
+     A dot that lands has to be ink or it is not a dot. How MUCH of the page
+     is covered is set by disp: more scatter puts more pixels into the tail
+     of the distribution that the power curve lets through. */
+  var REST = { scale: 0.20, warp: 4.00, disp: 0.075, lift: 1.00 };
+  var PEAK = { scale: 0.30, warp: 5.30, disp: 0.135, lift: 1.00 };
 
   var cur = { scale: REST.scale, warp: REST.warp, disp: REST.disp, lift: REST.lift };
   var energy = 0, lastScroll = window.scrollY;

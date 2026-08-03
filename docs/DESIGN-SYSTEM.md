@@ -239,6 +239,47 @@ support WebGL2 already required. The test is cheap: isotropic noise has equal
 horizontal and vertical neighbour deltas and near zero variance between column
 means. Striped noise does not.
 
+**It is stipple, not grain.** This is the thing I got wrong repeatedly. The
+reference is not a gradient with texture laid over it. It is thousands of
+discrete dots whose *density* varies, like an airbrush: dense in the core,
+thinning outward, clean paper beyond. `pow(n, 6.0)` is not a contrast curve, it
+is a threshold. Combined with a displacement that samples a quarter of a screen
+away, it collapses almost every pixel to nothing and lets a scattered few spike,
+and the survivors are the dots.
+
+Reproducing that implicitly did not work here, and measuring said why: the
+reference's normalised simplex spans the full range, and three nested value
+noise lattices do not. Replayed on the CPU over three thousand samples this
+field spans 0.24 to 0.54 and sits at 0.40, so raising it to the sixth gives
+0.015 almost everywhere and nothing ever crosses. The threshold is therefore
+explicit: each cell holds one fixed random number and is drawn in ink when the
+local density exceeds it, which makes a pixel ink with a probability equal to
+the density. Same result, under control.
+
+The threshold is fixed per cell and never re-rolled. Re-rolling every frame is
+television static. Holding it still and letting the density drift underneath is
+what makes dots switch on and off as the cloud passes over them.
+
+**The cloud is confined, and that is most of the effect.** The reference does not
+spray the whole page. It keeps the stipple inside one large soft off-centre
+ellipse and leaves everything outside it clean, so what moves is mostly what
+happens *inside* that area while the area itself drifts. A vignette cannot do
+this: a vignette is centred and symmetric and only fades edges. This is an
+ellipse whose middle wanders on two different periods so it never returns to the
+same place on a catchable loop.
+
+**Colour: none.** The dots are `--c-field-grain`, a space grey. Not the ink,
+because at full ink a page of dots reads as dirt. `--c-field-grain-dark` is
+written down beside it for whenever dark mode gets built; it is deliberately not
+wired to `prefers-color-scheme`, because the site is `color-scheme: light` with
+no dark palette, and flipping the spray alone would put white dots on white
+paper.
+
+**A measurement note for anyone tuning this.** Do not judge it from a
+full page screenshot. Captures downscale 1920 to 1568, which blends single pixel
+dots straight into the paper and makes a correct render look empty. Zoom in, or
+read the canvas back and count pixels below a threshold.
+
 **The intensity is not constant**, which is the part of the reference that reads
 as the background responding rather than looping. It tweens noise frequency,
 warp and grain per section. Here the same three follow scroll energy: they lift

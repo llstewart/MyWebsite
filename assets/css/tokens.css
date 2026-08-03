@@ -56,6 +56,18 @@
   --c-live:       #3A4642;
 
   /* Field hues. These exist only behind glass, never in the interface. */
+  /* The spray. Space grey, not the ink: at full ink the dots read as dirt
+     on the page, and the reference's are plainly a grey rather than a
+     black. field.js reads this, so the palette still has one home.
+
+     The dark counterpart is here rather than in a media query on purpose.
+     The site is color-scheme: light and has no dark palette, so flipping
+     this alone under prefers-color-scheme would put white spray on white
+     paper. It is written down so that whoever builds dark mode has the
+     value, and it is not wired up until there is a dark mode to wire it to. */
+  --c-field-grain:      #4A5054;
+  --c-field-grain-dark: #F2F4F5;   /* unused until dark mode exists */
+
   --c-field-sage: 118, 168, 140;
   --c-field-sky:  124, 160, 200;
   --c-field-sand: 224, 190, 136;
