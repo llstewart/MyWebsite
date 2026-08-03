@@ -167,30 +167,61 @@ panels use the frosted tier by design, not by omission.
 
 ### The field
 
-`assets/js/field.js`. One full viewport canvas, one WebGL2 fragment shader, two
-effects stacked.
+`assets/js/field.js`. One full viewport canvas, one WebGL2 fragment shader.
 
-**The wave** is fractal Brownian motion: five octaves of value noise, sampled at
-coordinates that are themselves noise. That second step is what matters. An fBm
-field moved by a time uniform slides; a *domain warped* one folds into itself,
-which is the difference between a texture panning past and a surface that is
-alive.
+The structure is Inigo Quilez's domain warping, which is also what `p5aholic.me`
+uses. Reading that site's shader corrected four things in the first version of
+this file, and all four are worth writing down because each one was a
+plausible-sounding wrong answer.
 
-**The grain** is deliberate per pixel dithering, and it is a fix for a technical
-problem that happens to look like film. A gradient this soft, stretched across
-two thousand pixels of eight bit colour, bands: you can see the stripes where
-the value steps. Adding a small random offset per pixel breaks those step
-boundaries apart, and the eye averages it back to smooth while still reading the
-texture up close. Two terms, one at roughly a single least significant bit to
-kill the banding and one slightly larger that is the visible grain.
+**It is a single noise sample, not fBm.** Stacking octaves was the wrong
+instinct. All of the structure comes from warping: the field is sampled at
+coordinates that are themselves noise, twice, with the second warp offset by the
+first. Octaves add fuzz. Warping adds shape.
 
-Colour was the part that took a second attempt. Mixing all three field hues on
-every pixel produced grey, because sage, sky and sand averaged together are a
-neutral: the result had a lightness range and no colour in it. Walking the
-palette with the field value instead means a region is mostly one hue and the
-hue changes as the field moves under it. Measured across the viewport the whole
-range sits between 237 and 251, so it stays paper with a breath of colour in it
-rather than a picture.
+**The warp factor is large.** The first version warped by about 1.0 and came out
+a flat wash. It is 3.2 at rest here, rising with scroll. That number is the
+difference between a smooth gradient and something with ridges and hollows in
+it.
+
+**The output is shaped by a power curve, but only after a contrast stretch.**
+This is the one that took arithmetic rather than taste. The reference raises its
+noise to the sixth power, which crushes everything except the peaks so that
+colour gathers along ridges and most of the surface stays quiet. Copying the
+exponent produced nothing at all on this page. Value noise sits around 0.5, and
+0.5 to the fourth is 0.06, which `smoothstep` then pulls down to 0.01. One
+percent of a tint over paper is not a colour. It works in the reference because
+its base is near black, where a lift of 0.05 is plainly visible. So the range is
+stretched to fill 0..1 first, and the curve then shapes a signal that has
+somewhere to go.
+
+**The grain is not additive dithering.** It is a per pixel displacement of where
+the noise gets sampled: one hash gives a magnitude, a second gives an angle, and
+the pair pushes the lookup off its true position. That is why it reads as part
+of the wave rather than as speckle laid on top. It is also fixed in screen
+space, so it sits still like paper texture instead of crawling like television
+static. A small additive dither is kept on top of it, because a gradient this
+soft across two thousand pixels of eight bit colour still bands, and breaking
+the step boundaries apart is what makes the eye average it back to smooth.
+
+Colour took a second attempt too. Mixing all three field hues on every pixel
+produced grey, because sage, sky and sand averaged together are a neutral: the
+result had a lightness range and no colour in it. Walking the palette with the
+field value instead means a region is mostly one hue, and the hue changes as the
+field moves under it.
+
+**The intensity is not constant**, which is the part of the reference that reads
+as the background responding rather than looping. It tweens noise frequency,
+warp and grain per section. Here the same three follow scroll energy: they lift
+while the page is moving and settle back over a couple of seconds when it stops.
+Rest has to lose every argument against the type, because that is when someone
+is reading. Peak happens while the page is in motion, when nothing is being read
+anyway.
+
+The first version of all this was tuned until it measured a range of 237 to 251
+out of 255. That is a five percent swing, and five percent is below the point
+where a person notices anything is there. Being able to prove an effect is
+running is not the same as being able to see it.
 
 It is capped hard, on the same tiering discipline as the glass: device pixel
 ratio at 1.5, thirty frames a second, asleep when the tab is hidden, a single
@@ -199,6 +230,61 @@ metered connection. Every one of those exits leaves the CSS radial gradients
 underneath untouched, and `.has-shader` is only set on `<html>` after a frame
 has actually been drawn, so a shader that fails to compile degrades to the old
 background rather than to a blank page.
+
+### Depth
+
+`assets/css/depth.css`, and it is the only file that decides height.
+
+Before it existed the page had two hand written shadows, invented independently
+for the glass and the card, and everything else was flat. That is why nothing
+read as being in front of anything: there was no scale, so there was no
+comparison to make.
+
+Six levels, `--e-1` to `--e-6`, and each is the same shadow at a different
+distance rather than a different effect. Three parts each:
+
+| Part | Job |
+|---|---|
+| contact | Tight and nearly opaque, directly under the edge. This is what says an object is *touching* a surface. A lone large blur without it reads as a glow, not a shadow |
+| key | Offset downward, carrying the direction of the light |
+| ambient | Wide, faint, negatively spread so it only escapes at the sides. It grows fastest with height, which is what separates near from far |
+
+Opacity falls as blur grows. A shadow that keeps its density while spreading
+reads as dirt on the page rather than as distance from it. The hue is the ink,
+never black: a neutral black shadow on warm paper goes visibly grey and flattens
+the warmth out of everything beneath it.
+
+The order, from the page outward: the field, then type directly on paper with no
+surface at all, then resting surfaces (index rows, language cards, roles,
+disclosures), then raised ones (the feature, contact, the approach panel), then
+chrome, then modal.
+
+Two rules keep it honest.
+
+**Nothing skips a level on hover.** A surface resting at `--e-2` goes to `--e-3`
+under the pointer, never to `--e-5`. A hover that jumps three levels reads as the
+element leaping at you rather than rising to meet you.
+
+**Height is earned by importance, not by decoration.** The feature project sits
+above the index because it matters more. The index rows sit above the paper
+because you can open them. Nothing is raised merely to look raised, and the index
+rows are flat at rest because eleven raised rows is a stack of cards, not an
+index.
+
+There is also recession, and it is the reason the raised things read as raised.
+The proof column is set *into* the page with an inset shadow, and disclosure
+bodies carry one at their top edge so content emerges from beneath its own
+heading rather than appearing beside it. Without something below the surface
+there is only one plane with a pile of shadows on it.
+
+Pressing goes down. An element drops to the level below its resting one and the
+contact shadow tightens, so it reads as being pushed toward the page. A press
+that keeps its shadow is a colour change pretending to be a button.
+
+Shadows are stripped entirely for print, where they come out as grey mud on
+paper that has no backlight. `prefers-reduced-motion` kills the transitions but
+keeps the elevation, because depth is information about what is in front of
+what, and that is not an animation.
 
 ## 6. Motion
 

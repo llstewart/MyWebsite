@@ -1,0 +1,248 @@
+/* ===========================================================================
+   depth.css — where everything sits.
+
+   Loaded after sections.css so it is the single place that decides height.
+   Before this file the page had two hand written shadows and a lot of flat
+   rectangles, which is why layers did not read as layers.
+
+   The order, from the page outward:
+
+     0   the field          the shader, behind everything
+     1   the page           type directly on paper, no surface at all
+     2   resting surfaces   rows, cards, roles, disclosures
+     3   raised surfaces    the feature, contact, the approach panel
+     4   chrome             the navigation bar, which floats over content
+     5   modal              the palette and the toast, over everything
+
+   Two rules hold it together.
+
+   Nothing skips a level on hover. A surface at rest at --e-2 goes to --e-3
+   when you point at it, never to --e-5. A hover that jumps three levels
+   reads as the element leaping at you rather than as it rising to meet you.
+
+   Height is earned by importance, not by decoration. The feature project
+   sits above the index because it matters more, and the index rows sit
+   above the paper because you can open them. Nothing is raised merely to
+   look raised.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Level 2. Resting surfaces.
+   --------------------------------------------------------------------------- */
+
+/* The index rows. Flat while you read down the list, lifting only under the
+   pointer, because eleven rows all raised at once is a stack of cards and
+   not an index. */
+.entry {
+  border-radius: var(--r-tight);
+  transition:
+    box-shadow var(--d-base) var(--e-out),
+    background-color var(--d-base) linear,
+    transform var(--d-base) var(--e-out);
+}
+@media (hover: hover) {
+  .entry:hover {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: var(--e-2), var(--edge-lit);
+  }
+}
+/* Open, it stays raised: it is now a panel holding content, not a row. */
+.entry:has(> details[open]) {
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: var(--e-3), var(--edge-lit), var(--edge-line);
+}
+
+/* Language cards. The heaviest thing in skills, so they get a real surface
+   rather than a rule. */
+.lang {
+  border-radius: var(--r-tight);
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: var(--e-1), var(--edge-lit);
+  transition: box-shadow var(--d-base) var(--e-out), transform var(--d-base) var(--e-out);
+}
+@media (hover: hover) {
+  .lang:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--e-2), var(--edge-lit);
+  }
+}
+
+/* Skills rows. The lightest touch on the page: no resting surface at all,
+   just enough on hover to show the row you are on. Ten rows with shadows
+   would be a table pretending to be cards. */
+.skills__row {
+  border-radius: var(--r-tight);
+  transition: background-color var(--d-base) linear, box-shadow var(--d-base) var(--e-out);
+}
+@media (hover: hover) {
+  .skills__row:hover {
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: var(--e-1);
+  }
+}
+
+/* Roles. A resting surface, because each one is a discrete period of work
+   and the eye should be able to count them without reading the dates. */
+.role {
+  border-radius: var(--r-panel);
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow: var(--e-1), var(--edge-lit);
+  transition: box-shadow var(--d-base) var(--e-out);
+}
+@media (hover: hover) {
+  .role:hover { box-shadow: var(--e-2), var(--edge-lit); }
+}
+
+/* Disclosure triggers. Small controls, so the smallest elevation there is.
+   They are the one thing on the page that says "there is more underneath",
+   and a control that promises depth should have some. */
+.more,
+.incident,
+.feature__more-head,
+.skills__more,
+.role__more {
+  border-radius: var(--r-tight);
+  transition: box-shadow var(--d-fast) var(--e-out), background-color var(--d-fast) linear;
+}
+@media (hover: hover) {
+  .more:hover,
+  .incident:hover,
+  .feature__more-head:hover {
+    background: rgba(255, 255, 255, 0.55);
+    box-shadow: var(--e-1), var(--edge-lit);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Recession. The other direction, and the reason the raised things read as
+   raised: without something below the surface there is only one plane and a
+   pile of shadows on it.
+   --------------------------------------------------------------------------- */
+
+/* The proof column. Evidence sits behind the argument, so it is set into the
+   page rather than onto it. */
+.proof {
+  border-radius: var(--r-tight);
+  background: rgba(16, 26, 23, 0.022);
+  box-shadow: var(--e-in-1);
+}
+
+/* Disclosure bodies come out from under their own heading. The inset at the
+   top edge is what sells that: the content is emerging from beneath the row,
+   not appearing next to it. */
+.dsc__inner > * {
+  border-radius: var(--r-tight);
+}
+.entry__body,
+.incident__body {
+  box-shadow: var(--e-in-1);
+  background: rgba(16, 26, 23, 0.018);
+  border-radius: var(--r-tight);
+}
+
+/* ---------------------------------------------------------------------------
+   Level 3. Raised surfaces.
+   --------------------------------------------------------------------------- */
+
+.card {
+  box-shadow: var(--e-3), var(--edge-lit), var(--edge-line);
+  transition: box-shadow var(--d-base) var(--e-out), transform var(--d-base) var(--e-out);
+}
+@media (hover: hover) {
+  .card:hover { box-shadow: var(--e-4), var(--edge-lit), var(--edge-line); }
+}
+
+/* The approach panel sits over the photograph rather than over paper, which
+   is the one place on the page where a surface has to separate itself from
+   real detail underneath. It gets a level more than any other content. */
+.approach__panel {
+  box-shadow: var(--e-5), var(--edge-lit);
+}
+
+/* Glass keeps its own inset dressing, the highlight and the rim that make
+   the bent light read as a material. Only the outer shadow comes from the
+   scale, so it sits in the same room as everything else. */
+.glass,
+.glass--flat {
+  box-shadow:
+    var(--e-4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    inset 0 -8px 20px rgba(255, 255, 255, 0.30),
+    inset 0 0 0 1px rgba(16, 26, 23, 0.10);
+}
+.glass--lift:hover {
+  box-shadow:
+    var(--e-5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -8px 20px rgba(255, 255, 255, 0.34),
+    inset 0 0 0 1px rgba(16, 26, 23, 0.13);
+}
+
+/* ---------------------------------------------------------------------------
+   Controls.
+   --------------------------------------------------------------------------- */
+
+.pill {
+  box-shadow: var(--e-1), var(--edge-lit), var(--edge-line);
+}
+@media (hover: hover) {
+  .pill:hover { box-shadow: var(--e-2), var(--edge-lit), var(--edge-line); }
+}
+.pill--solid {
+  box-shadow: var(--e-2);
+}
+@media (hover: hover) {
+  .pill--solid:hover { box-shadow: var(--e-3); }
+}
+
+/* Pressed goes DOWN, and this is the whole point of having a scale. The
+   element drops to the level below its resting one and the contact shadow
+   tightens, so it reads as being pushed toward the page. A press that keeps
+   its shadow is a colour change pretending to be a button. */
+.pill:active, .pill.is-pressed,
+.nav__cmd:active, .nav__cmd.is-pressed,
+.nav__link:active, .nav__link.is-pressed {
+  box-shadow:
+    0 1px 1px rgba(var(--sh), 0.07),
+    var(--edge-line);
+}
+.pill--solid:active, .pill--solid.is-pressed { box-shadow: var(--e-1); }
+.card:active, .glass--lift:active { box-shadow: var(--e-2), var(--edge-lit), var(--edge-line); }
+
+/* ---------------------------------------------------------------------------
+   Level 4 and 5. Chrome and modal.
+   --------------------------------------------------------------------------- */
+
+.nav {
+  box-shadow:
+    var(--e-4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -8px 20px rgba(255, 255, 255, 0.32),
+    inset 0 0 0 1px rgba(16, 26, 23, 0.10);
+}
+
+.palette__panel { box-shadow: var(--e-6), var(--edge-lit); }
+.toast { box-shadow: var(--e-5); }
+
+/* ---------------------------------------------------------------------------
+   Print, and reduced motion.
+
+   Shadows do not print: they come out as grey mud on paper that has no
+   backlight. Motion preference kills the transitions but not the elevation,
+   because depth is information about what is in front of what, and that is
+   not an animation.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  .entry, .lang, .role, .card, .pill, .pill--solid, .proof,
+  .entry__body, .incident__body, .approach__panel, .nav, .palette__panel {
+    box-shadow: none !important;
+    background: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry, .lang, .skills__row, .role, .card, .more, .incident,
+  .feature__more-head { transition: none; }
+  .lang:hover { transform: none; }
+}

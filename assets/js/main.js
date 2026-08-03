@@ -379,7 +379,7 @@
     var nav = document.getElementById("nav");
     if (!nav) return;
 
-    var RANGE = 140;          // px of scroll over which the bar collapses
+    var RANGE = 420;          // px of scroll over which the bar collapses
     var last = -1, settle = null;
 
     /* The displacement map is generated for one exact size and rebuilding it
@@ -397,7 +397,19 @@
 
     /* Direction, with a dead zone. Without one a trackpad's small reverse
        jitter flickers the bar in and out on every frame. */
-    var prevY = window.scrollY, away = false;
+    var prevY = window.scrollY, away = false, downRun = 0;
+
+    /* How long the bar stays before it leaves.
+
+       It used to go after six pixels of downward movement past y=260, which
+       in practice meant it vanished almost as soon as you started reading
+       and came back on the smallest correction. Two changes: it has to see a
+       sustained run downward, not one frame of it, and that run only starts
+       counting well down the page. Any upward movement at all brings it back
+       immediately, because wanting the bar is the whole reason a person
+       scrolls up. */
+    var HOLD = 620;   // px of continuous downward travel before it leaves
+    var FLOOR = 900;  // and not until this far down the page at all
 
     function direction() {
       var y = window.scrollY;
@@ -405,7 +417,12 @@
       if (Math.abs(d) < 6) return;
       prevY = y;
 
-      var next = d > 0 && y > 260;
+      downRun = d > 0 ? downRun + d : 0;
+
+      var next = away;
+      if (d < 0) next = false;
+      else if (y > FLOOR && downRun > HOLD) next = true;
+
       if (next === away) return;
       away = next;
       nav.classList.toggle("is-away", away);

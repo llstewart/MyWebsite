@@ -72,6 +72,68 @@
       0 14px 30px -14px rgba(16, 26, 23, 0.16),
       0 40px 80px -50px rgba(16, 26, 23, 0.30);
 
+  /* --- Elevation ----------------------------------------------------------
+     One room, one light, six heights.
+
+     The page had exactly one shadow before this: a bespoke stack on the
+     glass and another on the card, invented independently. Everything else
+     was flat, which is why nothing read as being in front of anything.
+
+     Every level here is the same shadow at a different distance, so
+     surfaces read as sitting at different heights under one light rather
+     than as having different effects applied to them. Three parts each:
+
+       contact  tight and almost opaque, directly under the edge. This is
+                the part that says an object is touching a surface, and
+                leaving it out is why a lone large blur reads as a glow.
+       key      offset downward, carrying the direction of the light.
+       ambient  wide, faint, and negatively spread so it only escapes at
+                the sides. It grows fastest with height, which is what
+                separates near from far.
+
+     Opacity falls as blur grows. A shadow that keeps its density while
+     spreading reads as dirt on the page rather than as distance from it.
+
+     The hue is the ink, never black. A neutral black shadow on warm paper
+     goes visibly grey and flattens the warmth out of everything under it.
+                                                                            */
+  --sh: 16, 26, 23;
+
+  --e-1:
+      0 1px 1px    rgba(var(--sh), 0.045),
+      0 2px 4px -2px rgba(var(--sh), 0.06);
+  --e-2:
+      0 1px 2px    rgba(var(--sh), 0.04),
+      0 4px 8px -3px rgba(var(--sh), 0.075),
+      0 10px 20px -12px rgba(var(--sh), 0.10);
+  --e-3:
+      0 1px 2px    rgba(var(--sh), 0.04),
+      0 8px 16px -6px rgba(var(--sh), 0.085),
+      0 22px 38px -18px rgba(var(--sh), 0.14);
+  --e-4:
+      0 1px 2px    rgba(var(--sh), 0.04),
+      0 14px 28px -10px rgba(var(--sh), 0.095),
+      0 36px 62px -28px rgba(var(--sh), 0.17);
+  --e-5:
+      0 2px 4px    rgba(var(--sh), 0.05),
+      0 24px 48px -16px rgba(var(--sh), 0.12),
+      0 58px 98px -44px rgba(var(--sh), 0.22);
+  --e-6:
+      0 2px 6px    rgba(var(--sh), 0.06),
+      0 40px 80px -24px rgba(var(--sh), 0.15),
+      0 92px 152px -60px rgba(var(--sh), 0.28);
+
+  /* Edges. A raised surface catches the light on its top edge and is
+     bounded by a hairline. Both are inset, so they compose after any
+     elevation above without a second element. */
+  --edge-lit:  inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  --edge-line: inset 0 0 0 1px rgba(var(--sh), 0.07);
+
+  /* Recession, the opposite direction. Used where content should read as
+     coming from under the surface rather than sitting on it. */
+  --e-in-1: inset 0 1px 3px rgba(var(--sh), 0.06);
+  --e-in-2: inset 0 2px 8px rgba(var(--sh), 0.09);
+
   /* --- Type ---------------------------------------------------------------
      Mona Sans carries the voice. IBM Plex Mono carries the data. There is no
      third family, and the mono is never used for prose.

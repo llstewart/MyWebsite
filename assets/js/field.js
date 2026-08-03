@@ -1,30 +1,49 @@
 /* ===========================================================================
    field.js — the paper, drawn by the GPU.
 
-   A single full viewport canvas running one WebGL2 fragment shader. It is
-   two effects stacked, and the second one is the interesting half.
+   One full viewport canvas, one WebGL2 fragment shader.
 
-   The wave. A fractal Brownian motion field, five octaves of value noise,
-   domain warped by a second fBm field so the shape folds into itself
-   instead of sliding. A time uniform moves it. This is what undulates.
+   The structure here is Inigo Quilez's domain warping, which is also what
+   p5aholic.me uses, and reading that site's shader corrected four things in
+   the first version of this file.
 
-   The grain. Deliberate per pixel dithering. A smooth gradient stretched
-   across two thousand pixels in eight bit colour visibly bands: you see
-   stripes where the value steps. Adding a small random value per pixel
-   breaks the step boundaries apart, and the eye averages it back to a
-   smooth gradient while still reading the texture up close. It is a fix for
-   a technical problem that happens to look like film.
+   1. It is a SINGLE noise sample, not fBm. Stacking octaves was the wrong
+      instinct. All of the structure comes from warping: the field is sampled
+      at coordinates that are themselves noise, twice, and the second warp is
+      offset by the first. Octaves add fuzz, warping adds shape.
 
-   The colour is the page palette and nothing else: paper, and the three
-   field hues at an amplitude low enough that the whole thing reads as a
-   tinted surface rather than as a picture.
+   2. The warp factor is large. The first version warped by about 1.0 and
+      came out a flat wash. It is 4.0 here, which is what turns a smooth
+      gradient into something with ridges and hollows in it.
 
-   Costs are held down deliberately. Device pixel ratio is capped at 1.5,
-   because a fragment shader is per pixel and the top of that range buys
-   nothing on a field this soft. Thirty frames a second. It sleeps when the
-   tab is hidden, renders exactly one frame under reduced motion, and does
-   not start at all on a metered connection. If WebGL2 is missing the CSS
-   gradients underneath are left alone and this file does nothing.
+   3. The output is raised to a power. This is the whole look. A noise field
+      is mostly mid values, so mixing colour straight from it gives an even
+      mush everywhere. Raising it to the fourth crushes everything except the
+      peaks, so most of the page stays paper and colour appears only along
+      the ridges. Restraint, done in the shader rather than by turning the
+      amplitude down until nothing is visible.
+
+   4. The grain is not additive dithering. It is a per pixel displacement of
+      where the noise is sampled: one hash gives a magnitude, a second gives
+      an angle, and the pair pushes the lookup off its true position. That is
+      why it reads as part of the wave rather than as speckle laid on top.
+      It is also fixed in screen space, so it sits still like paper texture
+      instead of crawling like television static.
+
+      A small additive dither is kept on top of that, because a gradient this
+      soft across two thousand pixels of eight bit colour still bands, and
+      breaking the step boundaries apart is what makes it read as smooth.
+
+   The intensity is not constant. Noise frequency, warp strength and grain
+   displacement all lift with scroll velocity and settle back when the page
+   is still, which is the part of the reference that reads as the background
+   responding to you rather than looping.
+
+   Cost is capped the same way the glass is: device pixel ratio at 1.5,
+   thirty frames a second, asleep when the tab is hidden, one static frame
+   under reduced motion, and it does not start at all on a metered
+   connection. Every one of those exits leaves the CSS gradients underneath
+   untouched.
    =========================================================================== */
 
 (function () {
@@ -61,18 +80,26 @@
     "out vec4 outColor;",
     "uniform vec2  u_res;",
     "uniform float u_time;",
-    "uniform float u_grain;",
+    "uniform float u_scale;",   /* noise frequency        */
+    "uniform float u_warp;",    /* domain warp strength   */
+    "uniform float u_disp;",    /* grain displacement     */
+    "uniform float u_grain;",   /* additive dither        */
+    "uniform float u_lift;",    /* overall colour amount  */
     "uniform vec3  u_paper;",
     "uniform vec3  u_a;",
     "uniform vec3  u_b;",
     "uniform vec3  u_c;",
 
+    "#define TAU 6.283185307179586",
+
     "float hash(vec2 p) {",
     "  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);",
     "}",
 
-    /* Value noise. Cheaper than simplex and indistinguishable once five
-       octaves are stacked and the amplitude is this low. */
+    /* Value noise, normalised to 0..1 the way snoise01 is in the reference.
+       Simplex would be smoother; at this amplitude, behind a warp this
+       strong and a power curve this steep, the difference does not survive
+       to the screen, and value noise is a third of the instructions. */
     "float noise(vec2 p) {",
     "  vec2 i = floor(p);",
     "  vec2 f = fract(p);",
@@ -81,49 +108,70 @@
     "             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);",
     "}",
 
-    "float fbm(vec2 p) {",
-    "  float v = 0.0;",
-    "  float a = 0.5;",
-    "  for (int i = 0; i < 5; i++) {",
-    "    v += a * noise(p);",
-    "    p *= 2.02;",
-    "    a *= 0.5;",
-    "  }",
-    "  return v;",
+    /* Time moves x and y at different rates, so the field never repeats a
+       diagonal slide. Every warp layer below calls this, at its own offset,
+       which is what makes the layers pass through each other instead of
+       travelling together. */
+    "float n2(vec2 st) {",
+    "  return noise(vec2(st.x + u_time * 0.020, st.y - u_time * 0.040));",
+    "}",
+
+    "float pattern(vec2 p) {",
+    "  vec2 q = vec2(n2(p), n2(p + vec2(5.2, 1.3)));",
+    "  vec2 r = vec2(n2(p + u_warp * q + vec2(1.7, 9.2)),",
+    "                n2(p + u_warp * q + vec2(8.3, 2.8)));",
+    "  return n2(p + r);",
     "}",
 
     "void main() {",
     "  vec2 uv = gl_FragCoord.xy / u_res;",
-    "  vec2 p  = vec2(uv.x * (u_res.x / u_res.y), uv.y);",
-    "  float t = u_time * 0.023;",
 
-    /* Domain warp: the field is sampled at coordinates that are themselves
-       noise, which is what makes it fold rather than drift sideways. */
-    "  vec2 q = vec2(fbm(p * 1.30 + vec2(0.0, t)),",
-    "                fbm(p * 1.30 + vec2(5.2, 1.3 - t)));",
-    "  vec2 r = vec2(fbm(p * 1.70 + q * 1.1 + vec2(1.7, 9.2) + t * 0.5),",
-    "                fbm(p * 1.70 + q * 1.1 + vec2(8.3, 2.8) - t * 0.4));",
-    "  float f = fbm(p * 1.9 + r * 0.9);",
+    /* The grain, as a displacement. One hash is how far, the other is which
+       way. Keyed to gl_FragCoord so it is fixed to the screen and does not
+       crawl. */
+    "  float gm = pow(hash(gl_FragCoord.xy * 0.61), 1.5);",
+    "  float ga = hash(gl_FragCoord.xy * 1.37 + 19.7);",
+    "  float ax = u_disp * gm * cos(ga * TAU);",
+    "  float ay = u_disp * gm * sin(ga * TAU);",
 
-    /* One hue at a time, not three at once.
+    /* y runs at twice the frequency of x, which stretches the field
+       horizontally. On a wide screen that reads as weather rather than as
+       a tiled pattern. */
+    "  float nx = uv.x * u_scale + ax;",
+    "  float ny = uv.y * u_scale * 2.0 + ay;",
 
-       Stacking all three tints on every pixel was the first attempt and it
-       came out grey: sage, sky and sand averaged together are a neutral, so
-       the field had a lightness range and no colour in it at all. Walking
-       the palette with the field value instead means a given region is
-       mostly one hue, and the hue changes as the field moves under it. */
-    "  vec3 tint = mix(u_a, u_b, smoothstep(0.26, 0.64, f));",
-    "  tint = mix(tint, u_c, smoothstep(0.55, 0.95, r.y + 0.35));",
+    /* Stretch first, then shape.
 
-    /* Edges settle back toward paper so the field never fights the type. */
-    "  float vig = smoothstep(1.20, 0.20, length((uv - 0.5) * vec2(1.25, 1.0)));",
-    "  float amt = (0.045 + 0.085 * smoothstep(0.18, 0.82, f)) * vig;",
-    "  vec3 col = mix(u_paper, tint, amt);",
+       The reference raises this to the sixth and it works there because its
+       base colour is near black: a value of 0.05 still lifts visibly off a
+       dark ground. Copying the exponent onto near white paper produced
+       nothing at all, and the arithmetic says why. Value noise sits around
+       0.5, and 0.5 to the fourth is 0.06, which smoothstep then pulls down
+       to 0.01. One percent of a tint over paper is not a colour.
 
-    /* The dither. Two terms: one at roughly one least significant bit to
-       kill the banding, and one a little larger that is the visible grain. */
-    "  float d1 = hash(gl_FragCoord.xy + fract(u_time) * 17.0) - 0.5;",
-    "  float d2 = hash(gl_FragCoord.xy * 1.7 - fract(u_time) * 11.0) - 0.5;",
+       So the range is stretched to fill 0..1 before the curve is applied.
+       The power still does its job, holding most of the page near paper and
+       letting colour gather along the ridges, but now it is shaping a signal
+       that has somewhere to go. */
+    "  float raw = pattern(vec2(nx, ny));",
+    "  float n = smoothstep(0.30, 0.80, raw);",
+    "  n = pow(n, 1.8);",
+
+    /* One hue at a time, walked by the field value. Mixing all three on
+       every pixel was the first attempt and it produced grey, because sage,
+       sky and sand averaged together are a neutral. */
+    "  float h = pattern(vec2(nx * 0.55 + 3.1, ny * 0.55 - 2.4));",
+    "  float hs = smoothstep(0.32, 0.74, h);",
+    "  vec3 tint = mix(u_a, u_b, smoothstep(0.00, 0.55, hs));",
+    "  tint = mix(tint, u_c, smoothstep(0.50, 1.00, hs));",
+
+    /* Edges settle toward paper so the field never fights the type. */
+    "  float vig = smoothstep(1.35, 0.12, length((uv - 0.5) * vec2(1.15, 1.0)));",
+    "  vec3 col = mix(u_paper, tint, n * u_lift * vig);",
+
+    /* Additive dither, last, against the banding. */
+    "  float d1 = hash(gl_FragCoord.xy + 0.5) - 0.5;",
+    "  float d2 = hash(gl_FragCoord.xy * 2.13 - 7.1) - 0.5;",
     "  col += d1 * (1.0 / 255.0) + d2 * u_grain;",
 
     "  outColor = vec4(col, 1.0);",
@@ -163,15 +211,9 @@
   gl.enableVertexAttribArray(loc);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
-  var U = {
-    res:   gl.getUniformLocation(prog, "u_res"),
-    time:  gl.getUniformLocation(prog, "u_time"),
-    grain: gl.getUniformLocation(prog, "u_grain"),
-    paper: gl.getUniformLocation(prog, "u_paper"),
-    a:     gl.getUniformLocation(prog, "u_a"),
-    b:     gl.getUniformLocation(prog, "u_b"),
-    c:     gl.getUniformLocation(prog, "u_c")
-  };
+  var U = {};
+  ["res", "time", "scale", "warp", "disp", "grain", "lift", "paper", "a", "b", "c"]
+    .forEach(function (k) { U[k] = gl.getUniformLocation(prog, "u_" + k); });
 
   /* Colour comes from the tokens file, so the palette has one home. */
   function token(name, fallback) {
@@ -193,7 +235,44 @@
   gl.uniform3fv(U.a, tripletToRgb(token("--c-field-sage", "118,168,140")));
   gl.uniform3fv(U.b, tripletToRgb(token("--c-field-sky", "124,160,200")));
   gl.uniform3fv(U.c, tripletToRgb(token("--c-field-sand", "224,190,136")));
-  gl.uniform1f(U.grain, 0.017);
+  gl.uniform1f(U.grain, 0.030);
+
+  /* ------------------------------------------------------------------
+     Intensity.
+
+     The reference tweens its noise frequency, warp and grain per section,
+     which is what makes the background feel like it is reacting rather than
+     looping. Here the same three are driven by how fast the page is moving:
+     they lift while scrolling and settle back over a couple of seconds when
+     it stops. Every value is eased toward its target rather than set, so a
+     flick of the wheel does not snap the whole field.
+     ------------------------------------------------------------------ */
+
+  /* Two settings, and the gap between them is the point.
+
+     Rest is what the page looks like while you are reading it, and it has
+     to lose every argument against the type. Peak is what it reaches while
+     you are moving, when nothing is being read anyway. The reference varies
+     these per section with a tween; here they follow scroll energy, which
+     gets the same effect without needing a section to be the trigger. */
+  var REST = { scale: 2.60, warp: 3.20, disp: 0.020, lift: 0.17 };
+  var PEAK = { scale: 3.55, warp: 4.60, disp: 0.052, lift: 0.32 };
+
+  var cur = { scale: REST.scale, warp: REST.warp, disp: REST.disp, lift: REST.lift };
+  var energy = 0, lastScroll = window.scrollY;
+
+  window.addEventListener("scroll", function () {
+    var y = window.scrollY;
+    var d = Math.abs(y - lastScroll);
+    lastScroll = y;
+    energy = Math.min(1, energy + d / 900);
+  }, { passive: true });
+
+  function ease(k) {
+    var target = REST[k] + (PEAK[k] - REST[k]) * energy;
+    cur[k] += (target - cur[k]) * 0.05;
+    return cur[k];
+  }
 
   /* ------------------------------------------------------------------ */
 
@@ -216,7 +295,12 @@
 
   function draw(t) {
     gl.uniform1f(U.time, t / 1000);
+    gl.uniform1f(U.scale, ease("scale"));
+    gl.uniform1f(U.warp, ease("warp"));
+    gl.uniform1f(U.disp, ease("disp"));
+    gl.uniform1f(U.lift, ease("lift"));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    energy *= 0.94;
   }
 
   function loop(now) {
