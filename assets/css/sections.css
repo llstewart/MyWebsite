@@ -606,6 +606,7 @@ details[open].is-closing > summary .entry__toggle::before {
   background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.80));
 }
 
+.approach__title { margin-bottom: 0; }
 .statement {
   margin-block: var(--s-6) var(--s-7);
   max-width: 24ch;

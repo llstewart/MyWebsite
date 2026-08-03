@@ -75,10 +75,21 @@ summary::-webkit-details-marker { display: none; }
 }
 .label--brand { color: var(--c-brand); }
 
-/* The section label. A name, nothing else. An earlier version carried a
-   bullet, a rule, and a short phrase off to the right on every section; it
-   read as a tic rather than as structure. */
-.section__label { color: var(--c-ink-3); }
+/* No section eyebrow. It was removed on 2 August 2026 along with the
+   headline aphorisms it duplicated. A heading that says "Skills." does not
+   need a label above it saying "Skills", and the clever line that used to
+   sit beside it carried no information at all.
+
+   The pattern now is Apple's: a plain noun with a period at display size,
+   then one line that is a fact. */
+.section__sub {
+  margin-top: var(--s-4);
+  max-width: 56ch;
+  font-size: var(--t-lead);
+  line-height: 1.45;
+  color: var(--c-ink-3);
+  text-wrap: pretty;
+}
 
 .h1 {
   font-size: var(--t-h1); font-weight: 500;
@@ -130,13 +141,13 @@ summary::-webkit-details-marker { display: none; }
 .section { position: relative; padding-block: var(--s-9); }
 .section--tight { padding-block: var(--s-7); }
 .section__head { margin-bottom: var(--s-6); }
-.section__title { margin-top: var(--s-4); }
-/* One typographic move, used the same way in every section head: the turn of
-   the sentence takes the brand colour. Not italic, despite the element. */
-.section__title em {
-  font-style: normal;
-  color: var(--c-brand);
-}
+
+/* The two-tone heading is retired. Used on every section it stopped being a
+   device and became a mannerism, which is the same failure as the bullet and
+   the rule that preceded it. It survives in exactly one place, the approach
+   statement, where it marks the turn of the only sentence on this site that
+   is allowed to be a sentence rather than a label. */
+.statement em { font-style: normal; color: var(--c-brand); }
 .section__note {
   margin-top: var(--s-4);
   max-width: 56ch;
