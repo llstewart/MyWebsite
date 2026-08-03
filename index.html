@@ -249,10 +249,7 @@
     <header class="section__head">
       <h2 class="h1 section__title" data-reveal>Projects.</h2>
       <p class="section__sub" data-reveal>
-        Six, every one in production or delivered to real users.
-      </p>
-      <p class="section__note" data-reveal>
-        Problem, build, result, in that order, because that is the order that matters.
+        Six of them. All shipped, all used by somebody who was not me.
       </p>
     </header>
 
@@ -328,9 +325,14 @@
       <li class="entry" id="sys-sellorie">
         <details class="entry__d">
           <summary class="entry__head">
-            <span class="entry__name">Sellorie</span>
-            <span class="entry__claim">AI voice automation that answers the restaurant phone when nobody on the floor can.</span>
-            <span class="entry__meta label">Product &middot; 2025</span>
+            <span class="entry__year num">2025</span>
+            <span class="entry__id">
+              <span class="entry__name">Sellorie</span>
+              <span class="entry__claim">AI voice automation that answers the restaurant phone when nobody on the floor can.</span>
+            </span>
+            <span class="entry__stat">
+              <span class="entry__where label">Product</span>
+            </span>
             <span class="entry__toggle" aria-hidden="true"></span>
           </summary>
           <div class="entry__body">
@@ -353,9 +355,15 @@
       <li class="entry" id="sys-grb">
         <details class="entry__d">
           <summary class="entry__head">
-            <span class="entry__name">Global Report Builder</span>
-            <span class="entry__claim">One reporting surface across every plant, so sites stopped reporting in their own private dialect.</span>
-            <span class="entry__meta label">Oshkosh &middot; 2024 &middot; 100+ users</span>
+            <span class="entry__year num">2024</span>
+            <span class="entry__id">
+              <span class="entry__name">Global Report Builder</span>
+              <span class="entry__claim">One reporting surface across every plant, so sites stopped reporting in their own private dialect.</span>
+            </span>
+            <span class="entry__stat">
+            <span class="entry__n num">100+ users</span>
+              <span class="entry__where label">Oshkosh</span>
+            </span>
             <span class="entry__toggle" aria-hidden="true"></span>
           </summary>
           <div class="entry__body">
@@ -378,9 +386,15 @@
       <li class="entry" id="sys-vision">
         <details class="entry__d">
           <summary class="entry__head">
-            <span class="entry__name">Serial number recognition</span>
-            <span class="entry__claim">Cameras that read stamped, etched, and handwritten serial numbers off equipment while the line keeps moving.</span>
-            <span class="entry__meta label">Oshkosh &middot; 2022 to 2024 &middot; 98% accuracy</span>
+            <span class="entry__year num">2022&ndash;24</span>
+            <span class="entry__id">
+              <span class="entry__name">Serial number recognition</span>
+              <span class="entry__claim">Cameras that read stamped, etched, and handwritten serial numbers off equipment while the line keeps moving.</span>
+            </span>
+            <span class="entry__stat">
+            <span class="entry__n num">98% accuracy</span>
+              <span class="entry__where label">Oshkosh</span>
+            </span>
             <span class="entry__toggle" aria-hidden="true"></span>
           </summary>
           <div class="entry__body">
@@ -403,9 +417,15 @@
       <li class="entry" id="sys-pulsehue">
         <details class="entry__d">
           <summary class="entry__head">
-            <span class="entry__name">PulseHue</span>
-            <span class="entry__claim">Room lighting that follows what is playing, without a round trip through a vendor cloud.</span>
-            <span class="entry__meta label">Personal &middot; 2025 &middot; 700ms end to end</span>
+            <span class="entry__year num">2025</span>
+            <span class="entry__id">
+              <span class="entry__name">PulseHue</span>
+              <span class="entry__claim">Room lighting that follows what is playing, without a round trip through a vendor cloud.</span>
+            </span>
+            <span class="entry__stat">
+            <span class="entry__n num">700ms end to end</span>
+              <span class="entry__where label">Personal</span>
+            </span>
             <span class="entry__toggle" aria-hidden="true"></span>
           </summary>
           <div class="entry__body">
@@ -428,9 +448,14 @@
       <li class="entry" id="sys-agency">
         <details class="entry__d">
           <summary class="entry__head">
-            <span class="entry__name">Client web builds</span>
-            <span class="entry__claim">Production websites built against a defined system rather than page by page.</span>
-            <span class="entry__meta label">Independent &middot; 2024 to present</span>
+            <span class="entry__year num">2024&ndash;</span>
+            <span class="entry__id">
+              <span class="entry__name">Client web builds</span>
+              <span class="entry__claim">Production websites built against a defined system rather than page by page.</span>
+            </span>
+            <span class="entry__stat">
+              <span class="entry__where label">Independent</span>
+            </span>
             <span class="entry__toggle" aria-hidden="true"></span>
           </summary>
           <div class="entry__body">
@@ -461,9 +486,6 @@
   <div class="shell shell--mid">
     <header class="section__head">
       <h2 class="h1 section__title" data-reveal>Experience.</h2>
-      <p class="section__sub" data-reveal>
-        Four years at Oshkosh Corporation, June 2022 to now. One employer, steadily larger scope.
-      </p>
     </header>
 
     <div class="roles">
@@ -491,13 +513,13 @@
           <details class="role__more">
           <summary class="feature__more-head">What I do there<span class="entry__toggle" aria-hidden="true"></span></summary>
           <ul class="role__points">
-            <li>Own the front end for three internal dashboards in React and Vue.js, used daily by operations managers across manufacturing plants to track production throughput, equipment status, and alarm history.</li>
-            <li>Write Python services that pull sensor telemetry over MQTT from edge gateways, transform it, and land it in time series stores backing Grafana dashboards. Uptime and response times improved 25%.</li>
-            <li>Rebuilt REST endpoints in Node.js and reworked the SQL and indexes behind them, bringing average dashboard load from roughly four seconds to under 800ms.</li>
-            <li>Stood up the team's CI/CD on GitHub Actions and Docker, moving releases from a manual two day process to same day automated deploys with rollback. Playwright suites gate every merge. 40% faster release cycles, zero downtime.</li>
-            <li>Provision cloud environments as code with Terraform, GitHub Actions, and Ansible, running Terraform Enterprise for centralized state across connected vehicle, IoT, and ERP platforms.</li>
-            <li>Integrated Ignition SCADA across multiple sites: gateway networks, redundancy, tag provider design, Perspective, Vision, Tag Historian, and alarm notification.</li>
-            <li>Review roughly four teammate pull requests a week, and write the runbooks, deployment procedures, and architecture docs for the systems I ship.</li>
+            <li>I own the front end of three internal dashboards, React and Vue.js. Operations managers across the plants open them every morning to check production throughput, equipment status, and alarm history.</li>
+            <li>I write the Python services that pull sensor telemetry off the edge gateways over MQTT, transform it, and land it in time series stores behind Grafana. Uptime and response times improved 25%.</li>
+            <li>The dashboards took about four seconds to load, which is long enough that people stop opening them. I rebuilt the REST endpoints in Node.js and reworked the SQL and the indexes behind them, and got it under 800ms.</li>
+            <li>Releasing used to take two days of somebody doing it by hand. I stood up the team CI/CD on GitHub Actions and Docker so it happens the same day, automatically, with a rollback if it goes wrong and Playwright suites gating every merge. 40% faster, and nothing went down while we moved.</li>
+            <li>I provision our cloud environments as code with Terraform, GitHub Actions, and Ansible, and run Terraform Enterprise so state lives in one place across the connected vehicle, IoT, and ERP platforms.</li>
+            <li>I integrated Ignition SCADA across several sites, which meant gateway networks, redundancy, tag provider design, Perspective, Vision, Tag Historian, and alarm notification.</li>
+            <li>I review about four of my teammates pull requests a week, and I write the runbooks, the deployment procedures, and the architecture docs for anything I ship.</li>
           </ul>
 
           <details class="incident" data-reveal>
@@ -541,10 +563,10 @@
           <details class="role__more">
           <summary class="feature__more-head">What I did there<span class="entry__toggle" aria-hidden="true"></span></summary>
           <ul class="role__points">
-            <li>Trained and deployed a TensorFlow computer vision model on Azure ML for automated text recognition on welding labels, reaching 98% accuracy across three production lines.</li>
-            <li>Built React dashboards backed by Python and PostgreSQL that consolidated alarm data, cutting average troubleshooting for maintenance technicians from about 45 minutes to under 20 and reducing equipment downtime 25%.</li>
-            <li>Refactored control logic for robotic welding cells, improving cycle consistency and welding precision 30%, validated live on the floor with controls engineers and technicians.</li>
-            <li>Configured Linux servers to support 24/7 diagnostics, improving uptime roughly 20%.</li>
+            <li>I trained and deployed a TensorFlow model on Azure ML that reads the text off welding labels, and got it to 98% accuracy across three production lines.</li>
+            <li>Alarm data was spread across systems, so a technician spent about 45 minutes working out what had actually failed. I built React dashboards on Python and PostgreSQL that put it in one place, and that came down to under 20 minutes. Downtime dropped 25%.</li>
+            <li>I refactored the control logic on the robotic welding cells for cycle consistency and precision, 30% better, and validated every change on live equipment with the controls engineers and the floor technicians.</li>
+            <li>I configured the Linux servers behind the round the clock diagnostics, which took uptime up about 20%.</li>
           </ul>
           </details>
         </div>
@@ -639,8 +661,8 @@
         <h2 class="h1 contact__title">Contact.</h2>
         <p class="lead">
           I work on backend, full stack, and platform, and anywhere real time data has to reach a
-          person who is about to make a decision with it. Maryland, four years of it remote, and
-          the DC and Baltimore corridor.
+          person who is about to make a decision with it. I am in Maryland, four years of that
+          remote, and I am glad to be in the DC and Baltimore corridor.
         </p>
       </div>
 

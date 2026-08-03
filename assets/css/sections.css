@@ -380,19 +380,39 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
 .entry { border-top: var(--hairline) solid var(--c-line-strong); }
 .entry:last-child { border-bottom: var(--hairline) solid var(--c-line-strong); }
 
+/* A year-led index, the way a filmography or an exhibition list is set.
+
+   The rows used to carry a mono string reading Oshkosh, middot, 2024,
+   middot, 100+ users: three unrelated things, where and when and how well,
+   crammed into one dot separated blob. That is a default, not a decision,
+   and it was the same tic as the section eyebrows.
+
+   The dimensions are separated now. The year leads, because it is the sort
+   key and the fastest thing in the row to scan. The name and the sentence
+   sit together. The number gets the same treatment it gets in the feature
+   and in the roles, so the page has one way of showing evidence rather
+   than three. */
 .entry__head {
   display: grid;
-  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) auto 30px;
+  grid-template-columns: 5.5rem minmax(0, 1fr) minmax(0, 11rem) 24px;
   gap: var(--s-5);
-  align-items: baseline;
+  align-items: start;
   padding-block: var(--s-5);
   cursor: pointer;
   list-style: none;
   transition: background-color var(--d-fast) linear;
 }
 .entry__head::-webkit-details-marker { display: none; }
-.entry__head:hover { background: rgba(16, 26, 23, 0.04); }
+.entry__head:hover { background: rgba(16, 26, 23, 0.03); }
 
+.entry__year {
+  font-size: var(--t-small);
+  color: var(--c-ink-3);
+  padding-top: 0.28em;
+  white-space: nowrap;
+}
+
+.entry__id { display: grid; gap: var(--s-2); min-width: 0; }
 .entry__name {
   font-size: var(--t-lead);
   font-weight: 500;
@@ -406,16 +426,21 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
   color: var(--c-ink-2);
   text-wrap: pretty;
 }
-.entry__meta { color: var(--c-ink-3); white-space: nowrap; }
 
-/* A chevron, not a plus box. Apple marks every way in with one and nothing
-   else, which is why their pages carry a great deal of information without
-   ever looking busy: the affordance is always the same shape. */
+.entry__stat { display: grid; gap: var(--s-1); align-content: start; padding-top: 0.1em; }
+.entry__n {
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--c-ink);
+  font-variant-numeric: tabular-nums;
+}
+.entry__where { color: var(--c-ink-4); }
+
 .entry__toggle {
   position: relative;
   width: 24px; height: 24px;
-  align-self: center;
   justify-self: end;
+  margin-top: 0.15em;
 }
 .entry__toggle::before {
   content: "";
@@ -424,16 +449,11 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
   border-right: 1.5px solid var(--c-ink-3);
   border-bottom: 1.5px solid var(--c-ink-3);
   transform: translateY(-2px) rotate(45deg);
-  transition: transform var(--d-open) var(--e-sheet),
-              border-color var(--d-fast) linear;
+  transition: transform var(--d-open) var(--e-sheet), border-color var(--d-fast) linear;
 }
 details[open] > .entry__head .entry__toggle::before,
-details[open] > summary .entry__toggle::before {
-  transform: translateY(1px) rotate(-135deg);
-}
-details[open].is-closing > summary .entry__toggle::before {
-  transform: translateY(-2px) rotate(45deg);
-}
+details[open] > summary .entry__toggle::before { transform: translateY(1px) rotate(-135deg); }
+details[open].is-closing > summary .entry__toggle::before { transform: translateY(-2px) rotate(45deg); }
 .entry__head:hover .entry__toggle::before,
 .feature__more-head:hover .entry__toggle::before { border-color: var(--c-ink); }
 
@@ -441,9 +461,9 @@ details[open].is-closing > summary .entry__toggle::before {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--s-6);
-  padding: 0 0 var(--s-6);
+  padding: 0 0 var(--s-6) calc(5.5rem + var(--s-5));
 }
-@media (max-width: 900px) { .entry__body { grid-template-columns: 1fr; gap: var(--s-5); } }
+@media (max-width: 900px) { .entry__body { grid-template-columns: 1fr; gap: var(--s-5); padding-left: 0; } }
 
 .entry__col h4 { margin-bottom: var(--s-3); }
 .entry__col p {
@@ -464,14 +484,13 @@ details[open].is-closing > summary .entry__toggle::before {
 
 @media (max-width: 900px) {
   .entry__head {
-    grid-template-columns: minmax(0, 1fr) 30px;
-    gap: var(--s-3) var(--s-4);
-    align-items: start;
+    grid-template-columns: 4rem minmax(0, 1fr) 24px;
+    gap: var(--s-2) var(--s-4);
   }
-  .entry__name { grid-column: 1; }
-  .entry__toggle { grid-column: 2; grid-row: 1 / span 3; align-self: start; }
-  .entry__claim, .entry__meta { grid-column: 1; }
-  .entry__meta { white-space: normal; }
+  .entry__year { grid-column: 1; grid-row: 1; }
+  .entry__id   { grid-column: 2; grid-row: 1; }
+  .entry__stat { grid-column: 2; grid-row: 2; display: flex; gap: var(--s-4); }
+  .entry__toggle { grid-column: 3; grid-row: 1; }
 }
 
 /* =========================================================================
