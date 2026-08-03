@@ -255,7 +255,7 @@
   text-wrap: pretty;
 }
 
-.role__lede { font-size: var(--t-small); line-height: 1.68; max-width: 56ch; }
+.role__lede { font-size: var(--t-small); line-height: 1.68; max-width: var(--measure); }
 
 /* =========================================================================
    The way in.
@@ -310,7 +310,7 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
 }
 .feature__claim {
   margin-top: var(--s-4);
-  max-width: 34ch;
+  max-width: 46ch;
   font-size: var(--t-lead);
   line-height: 1.42;
   color: var(--c-ink-2);
@@ -401,6 +401,7 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
 }
 .entry__claim {
   font-size: var(--t-small);
+  max-width: var(--measure);
   line-height: 1.5;
   color: var(--c-ink-2);
   text-wrap: pretty;
@@ -503,7 +504,14 @@ details[open].is-closing > summary .entry__toggle::before {
 }
 .role__note { margin-top: var(--s-4); max-width: 52ch; color: var(--c-ink-2); font-size: var(--t-small); }
 
-.role__points { margin-top: var(--s-5); display: grid; gap: var(--s-4); max-width: 68ch; }
+/* The font size is set here rather than only on the item, because ch
+   resolves against the element it is written on: a 62ch cap on a 16px
+   container holding 14px text is 12 characters too wide. */
+.role__points {
+  margin-top: var(--s-5); display: grid; gap: var(--s-4);
+  font-size: var(--t-small);
+  max-width: var(--measure);
+}
 .role__points li {
   position: relative;
   padding-left: var(--s-5);
@@ -522,7 +530,7 @@ details[open].is-closing > summary .entry__toggle::before {
 
 .incident {
   margin-top: var(--s-5);
-  max-width: 68ch;
+  max-width: var(--measure);
   border: var(--hairline) solid var(--c-line-strong);
   border-radius: var(--r-panel);
   background: rgba(255, 255, 255, 0.5);
@@ -614,14 +622,14 @@ details[open].is-closing > summary .entry__toggle::before {
    CONTACT
    ========================================================================= */
 
+/* One column. At the narrow measure a two up would give each side about
+   330px, which is under the width prose needs, and the close of the page
+   reads better as a single funnel than as a split. */
 .contact {
   --card-pad: clamp(1.5rem, 2.8vw, 2.75rem);
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: var(--s-7);
   padding: var(--card-pad);
 }
-@media (max-width: 900px) { .contact { grid-template-columns: 1fr; gap: var(--s-5); } }
+.contact__list { margin-top: var(--s-6); }
 
 .contact__lead .label { margin-bottom: var(--s-5); }
 .contact__title { margin-bottom: var(--s-4); }
@@ -629,7 +637,7 @@ details[open].is-closing > summary .entry__toggle::before {
 .contact__list { display: grid; align-content: start; }
 .contact__row {
   display: grid;
-  grid-template-columns: 8rem minmax(0, 1fr);
+  grid-template-columns: 9rem minmax(0, 1fr);
   gap: var(--s-4);
   padding-block: var(--s-3);
   border-top: var(--hairline) solid var(--c-line);

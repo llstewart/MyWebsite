@@ -58,21 +58,8 @@
   -webkit-backdrop-filter: blur(16px) saturate(1.5);
 }
 
-/* Her cursor tracked glare, unchanged in geometry and stops. main.js writes
-   --gx and --gy from pointermove. */
-.glass::after,
-.glass--flat::after {
-  content: "";
-  position: absolute; inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    160px circle at var(--gx, 25%) var(--gy, 15%),
-    rgba(255, 255, 255, 0.22),
-    rgba(255, 255, 255, 0.04) 45%,
-    transparent 70%
-  );
-  pointer-events: none;
-}
+/* Her cursor tracked glare lives further down, folded together with the
+   touch illumination, because they are the same highlight. */
 
 .glass--tight { border-radius: var(--r-panel); }
 
@@ -146,31 +133,43 @@
 /* ---------------------------------------------------------------------------
    Touch-point illumination.
 
-   Of everything Apple documents about how the material behaves, this is the
-   one that is genuinely theirs and that a CSS reimplementation almost never
-   does: pressing one piece of glass illuminates the glass NEAR it, weighted
-   by distance from the touch. The material behaves like a connected surface
-   rather than a set of independent buttons.
+   Of everything Apple document about the material, this is the one that is
+   genuinely theirs and that a reimplementation almost never does: pressing
+   one piece of glass lights the glass NEAR it, weighted by distance from the
+   touch, so the surface reads as connected rather than as a row of separate
+   buttons.
 
-   Apple publish no numbers for any of this, so these are chosen to match the
-   description: the pressed element goes to full brightness, neighbours fall
-   off over roughly 320px, and the whole thing decays in under half a second.
-   main.js writes --lit per surface on pointerdown.
+   It is folded into the glare rather than added as its own layer. .glass
+   already uses ::before for the specular sweep and ::after for the cursor
+   glare, and an earlier attempt at a third layer silently destroyed the
+   first. Brightening the highlight that is already there is also nearer to
+   what Apple describe than stacking a second one on top.
+
+   Apple publish no numbers for any interactive state, so the falloff is
+   chosen to match the description: full at the touch, gone by 320px, and
+   decayed within half a second.
    --------------------------------------------------------------------------- */
 
-.glass, .glass--flat, .pill, .nav__cmd, .nav__link {
-  --lit: 0;
-}
-.glass::before, .glass--flat::before, .pill::before, .nav__cmd::before {
+.glass, .glass--flat, .pill, .nav__cmd { --lit: 0; }
+.pill, .nav__cmd { position: relative; }
+
+.glass::after,
+.glass--flat::after,
+.pill::after,
+.nav__cmd::after {
   content: "";
   position: absolute; inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: rgba(255, 255, 255, calc(var(--lit) * 0.5));
-  opacity: calc(var(--lit));
-  transition: opacity 420ms var(--e-sheet), background-color 420ms var(--e-sheet);
+  background:
+    radial-gradient(
+      calc(160px + var(--lit) * 120px) circle at var(--gx, 50%) var(--gy, 50%),
+      rgba(255, 255, 255, calc(0.22 + var(--lit) * 0.55)),
+      rgba(255, 255, 255, calc(0.04 + var(--lit) * 0.22)) 45%,
+      transparent 70%
+    );
+  transition: background 380ms var(--e-sheet);
 }
-.pill, .nav__cmd { position: relative; overflow: hidden; }
 
 /* The press. Short in, long out, and it never bounces past its own size. */
 .pill:active, .nav__cmd:active, .nav__link:active, .action:active,
@@ -240,6 +239,15 @@
   transition-delay: 300ms;
 }
 .is-loading .nav { transform: translate(-50%, calc(-100% - var(--s-5))); }
+
+/* Out of the way while reading down, back the moment you look up.
+
+   Relocating a navigation bar mid scroll was considered and rejected: it
+   moves the target, and neither iOS nor the desktop ever does it. What they
+   do is collapse in place and get out of the way, which is this. The bar
+   keeps its position and its size behaviour and simply leaves while the
+   reader is going forward. */
+.nav.is-away { transform: translate(-50%, calc(-100% - var(--s-6))); }
 
 /* The controls inside ride the same number. */
 .nav__link, .nav__cmd {

@@ -395,7 +395,24 @@
       }, 200);
     }
 
+    /* Direction, with a dead zone. Without one a trackpad's small reverse
+       jitter flickers the bar in and out on every frame. */
+    var prevY = window.scrollY, away = false;
+
+    function direction() {
+      var y = window.scrollY;
+      var d = y - prevY;
+      if (Math.abs(d) < 6) return;
+      prevY = y;
+
+      var next = d > 0 && y > 260;
+      if (next === away) return;
+      away = next;
+      nav.classList.toggle("is-away", away);
+    }
+
     function measure() {
+      direction();
       var t = Math.min(1, Math.max(0, window.scrollY / RANGE));
       if (Math.abs(t - last) < 0.002) return;
       last = t;
@@ -426,7 +443,7 @@
     var RADIUS = 320;
     var surfaces = function () {
       return Array.prototype.slice.call(
-        document.querySelectorAll(".glass, .glass--flat, .pill, .nav__cmd, .nav__link"));
+        document.querySelectorAll(".glass, .glass--flat, .pill, .nav__cmd"));
     };
     var decay = null;
 
@@ -444,7 +461,7 @@
       clearTimeout(decay);
       decay = setTimeout(function () {
         all.forEach(function (el) { el.style.setProperty("--lit", "0"); });
-      }, 130);
+      }, 140);
     }
 
     document.addEventListener("pointerdown", function (e) {

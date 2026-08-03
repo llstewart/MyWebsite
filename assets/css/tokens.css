@@ -112,8 +112,34 @@
   --s-9:  5.5rem;   --s-10: 7rem;     --s-11: 9rem;
 
   --gutter:     clamp(1.15rem, 4.5vw, 4rem);
-  --measure:    68ch;
-  --page-max:   1240px;
+
+  /* Three measures, not one.
+
+     Every section used to start and end at the same 1240px, which is the
+     horizontal version of giving every section the same height: it reads as
+     a template. The widths below are not variation for its own sake, they
+     follow how the content is actually read.
+
+     Wide is for things taken in at a glance or scanned rather than read:
+     a name at display size, the project index, a photograph. It is 1440
+     rather than 1240 so the step down to mid and then to narrow is a
+     difference you can actually see; three widths a hundred pixels apart
+     is not architecture, it is rounding.
+
+     Mid is for a section that mixes scannable data with prose.
+
+     Narrow is for a section that is read start to finish, and for the close
+     of the page, where funnelling down to one column is the point.
+
+     --measure is the hard limit on any line of prose regardless of which
+     of the three it sits in. Past about 65 characters the eye stops
+     reliably finding the start of the next line, which is a fact about
+     reading rather than a matter of taste.                                 */
+  --measure:    62ch;
+  --page-max:   1440px;
+  --w-wide:     1440px;
+  --w-mid:      1040px;
+  --w-narrow:   760px;
   --rail-width: 4.5rem;
 
   /* --- Form ---------------------------------------------------------------

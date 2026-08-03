@@ -84,7 +84,7 @@ summary::-webkit-details-marker { display: none; }
    then one line that is a fact. */
 .section__sub {
   margin-top: var(--s-4);
-  max-width: 56ch;
+  max-width: 46ch;
   font-size: var(--t-lead);
   line-height: 1.45;
   color: var(--c-ink-3);
@@ -133,10 +133,13 @@ summary::-webkit-details-marker { display: none; }
 
 .shell {
   width: 100%;
-  max-width: var(--page-max);
+  max-width: var(--w, var(--page-max));
   margin-inline: auto;
   padding-inline: var(--gutter);
+  transition: max-width var(--d-slow) var(--e-sheet);
 }
+.shell--mid    { --w: var(--w-mid); }
+.shell--narrow { --w: var(--w-narrow); }
 
 /* Sections are not the same height, on purpose.
 
