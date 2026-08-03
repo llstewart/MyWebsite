@@ -20,7 +20,7 @@
    Satoshi 600 with this tracking is close enough to 0.55em each that
    11.6vw fills the measure and stops at the column cap. */
 .hero__name {
-  font-size: clamp(2.4rem, 11.6vw, 8.6rem);
+  font-size: var(--t-display);
   font-weight: 600;
   line-height: 1.02;
   letter-spacing: -0.045em;
@@ -33,7 +33,7 @@
 
 .hero__title {
   margin-top: var(--s-4);
-  font-size: clamp(1.05rem, 2.2vw, 1.65rem);
+  font-size: var(--t-lead);
   font-weight: 400;
   letter-spacing: -0.012em;
   color: var(--c-ink-2);
@@ -42,7 +42,7 @@
 .hero__claim {
   margin-top: var(--s-5);
   max-width: 34ch;
-  font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+  font-size: var(--t-body);
   font-weight: 400;
   line-height: 1.45;
   color: var(--c-ink-2);
@@ -163,7 +163,7 @@
   border-bottom: var(--hairline) solid var(--c-line);
 }
 .lang__name {
-  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  font-size: var(--t-lead);
   font-weight: 500;
   letter-spacing: -0.024em;
   line-height: 1.05;
@@ -240,7 +240,7 @@
 .proof__n {
   display: block;
   font-family: var(--f-mono);
-  font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+  font-size: var(--t-lead);
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--c-ink);
@@ -296,13 +296,13 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
    ========================================================================= */
 
 .feature {
-  padding: clamp(1.75rem, 3.4vw, 3rem);
-  border-radius: var(--r-glass);
+  --card-pad: clamp(1.75rem, 3.4vw, 3rem);
+  padding: var(--card-pad);
 }
 
 .feature__name {
   margin-top: var(--s-4);
-  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-size: var(--t-title);
   font-weight: 500;
   line-height: 1.02;
   letter-spacing: -0.035em;
@@ -394,7 +394,7 @@ details[open].is-closing > .more::after { transform: rotate(-45deg); }
 .entry__head:hover { background: rgba(16, 26, 23, 0.04); }
 
 .entry__name {
-  font-size: var(--t-h3);
+  font-size: var(--t-lead);
   font-weight: 500;
   letter-spacing: -0.016em;
   color: var(--c-ink);
@@ -591,7 +591,7 @@ details[open].is-closing > summary .entry__toggle::before {
 .statement {
   margin-block: var(--s-6) var(--s-7);
   max-width: 24ch;
-  font-size: clamp(1.9rem, 4.4vw, 3.4rem);
+  font-size: var(--t-title);
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: -0.03em;
@@ -615,10 +615,11 @@ details[open].is-closing > summary .entry__toggle::before {
    ========================================================================= */
 
 .contact {
+  --card-pad: clamp(1.5rem, 2.8vw, 2.75rem);
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: var(--s-7);
-  padding: clamp(1.5rem, 2.8vw, 2.75rem);
+  padding: var(--card-pad);
 }
 @media (max-width: 900px) { .contact { grid-template-columns: 1fr; gap: var(--s-5); } }
 
@@ -653,6 +654,12 @@ details[open].is-closing > summary .entry__toggle::before {
   display: flex; flex-wrap: wrap; gap: var(--s-5);
   align-items: baseline; justify-content: space-between;
 }
+.colophon { max-width: 62ch; }
+.colophon .more { font-size: var(--t-label); font-family: var(--f-mono);
+  letter-spacing: var(--tr-label); text-transform: uppercase; color: var(--c-ink-4); }
+.colophon .more:hover { color: var(--c-ink-2); }
+.colophon .footer__note { margin-top: var(--s-3); }
+
 .footer__note {
   max-width: 62ch;
   font-size: var(--t-small);

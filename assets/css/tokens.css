@@ -81,15 +81,23 @@
   --f-display: "Mona Sans", system-ui, -apple-system, sans-serif;
   --f-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  --t-name:    clamp(2.9rem, 8.6vw, 6.6rem);
-  --t-h1:      clamp(1.95rem, 4.4vw, 3.3rem);
-  --t-h2:      clamp(1.4rem, 2.5vw, 1.95rem);
-  --t-h3:      clamp(1.05rem, 1.5vw, 1.25rem);
-  --t-lead:    clamp(1rem, 1.3vw, 1.18rem);
-  --t-body:    1rem;
-  --t-small:   0.9rem;
-  --t-label:   0.688rem;                  /* mono, uppercase, tracked out  */
-  --t-readout: clamp(1.55rem, 3.2vw, 2.4rem);
+  /* Five sizes, and a mono label. Nothing between.
+
+     The page previously carried about twelve, most of them one-off clamps
+     written inline next to the component that needed them, which is how a
+     scale stops being a scale. Apple's own pages run roughly four steps
+     with an enormous jump between the largest and the rest, and that jump
+     is what makes the hierarchy legible at a glance rather than something
+     you have to read to work out.
+
+     If a component needs a size that is not here, the answer is one of
+     these, not a sixth.                                                    */
+  --t-display: clamp(2.4rem, 11.6vw, 8.6rem);   /* the name, once           */
+  --t-title:   clamp(1.9rem, 4.2vw, 3.2rem);    /* section heads, statement */
+  --t-lead:    clamp(1.05rem, 1.6vw, 1.35rem);  /* subheads, entry names    */
+  --t-body:    1rem;                            /* prose                    */
+  --t-small:   0.875rem;                        /* captions, meta, notes    */
+  --t-label:   0.688rem;                        /* mono, uppercase, tracked */
 
   --lh-tight:  0.94;
   --lh-snug:   1.16;

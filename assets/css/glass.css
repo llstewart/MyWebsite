@@ -76,6 +76,30 @@
 
 .glass--tight { border-radius: var(--r-panel); }
 
+/* ---------------------------------------------------------------------------
+   The card.
+
+   Apple's guidance is explicit that Liquid Glass belongs to the navigation
+   layer and is never applied to content. The feature and contact panels are
+   content, and on plain paper the refraction had nothing to bend anyway, so
+   they are plain surfaces: a white fill, a hairline, and a shadow.
+
+   Concentric radii, also Apple's rule: an inner corner equals the outer
+   corner minus the padding between them. Anything else reads as two shapes
+   that happen to be near each other rather than one nested in the other.
+   --------------------------------------------------------------------------- */
+
+.card {
+  position: relative;
+  border-radius: var(--r-glass);
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow:
+    inset 0 0 0 1px rgba(16, 26, 23, 0.07),
+    0 1px 2px rgba(16, 26, 23, 0.03),
+    0 18px 44px -22px rgba(16, 26, 23, 0.16);
+  --r-inner: calc(var(--r-glass) - var(--card-pad, 2rem));
+}
+
 .glass--lift {
   transition: transform var(--d-base) var(--e-out),
               box-shadow var(--d-base) var(--e-out);
@@ -118,6 +142,35 @@
       0 6px 18px -8px rgba(16, 26, 23, 0.22);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Touch-point illumination.
+
+   Of everything Apple documents about how the material behaves, this is the
+   one that is genuinely theirs and that a CSS reimplementation almost never
+   does: pressing one piece of glass illuminates the glass NEAR it, weighted
+   by distance from the touch. The material behaves like a connected surface
+   rather than a set of independent buttons.
+
+   Apple publish no numbers for any of this, so these are chosen to match the
+   description: the pressed element goes to full brightness, neighbours fall
+   off over roughly 320px, and the whole thing decays in under half a second.
+   main.js writes --lit per surface on pointerdown.
+   --------------------------------------------------------------------------- */
+
+.glass, .glass--flat, .pill, .nav__cmd, .nav__link {
+  --lit: 0;
+}
+.glass::before, .glass--flat::before, .pill::before, .nav__cmd::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: rgba(255, 255, 255, calc(var(--lit) * 0.5));
+  opacity: calc(var(--lit));
+  transition: opacity 420ms var(--e-sheet), background-color 420ms var(--e-sheet);
+}
+.pill, .nav__cmd { position: relative; overflow: hidden; }
 
 /* The press. Short in, long out, and it never bounces past its own size. */
 .pill:active, .nav__cmd:active, .nav__link:active, .action:active,

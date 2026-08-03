@@ -168,12 +168,14 @@
     // Page content scrolls under this bar, which is the one place on the page
     // with the high frequency detail refraction needs. Close to her defaults.
     nav:      { scale: -96, chroma: 5, blur: 3, saturate: 1.5, border: 0.09, mapBlur: 11 },
-    contact:  { scale: -96,  chroma: 6, blur: 3, saturate: 1.5,  border: 0.07, mapBlur: 12 },
     palette:  { scale: -74,  chroma: 4, blur: 6, saturate: 1.4,  border: 0.09, mapBlur: 10 },
     // The approach panel is the only surface with a photograph behind it, so
     // it gets close to her published defaults. This is the effect at full
     // strength, and it is the one place on the page that earns it.
     approach: { scale: -112, chroma: 6, blur: 3, saturate: 1.5,  border: 0.07, mapBlur: 12 },
+    // contact and feature were removed on 2026-08-03. Apple's guidance is
+    // that Liquid Glass is for the navigation layer and never for content,
+    // and on plain paper the refraction had nothing to bend regardless.
     // Small, and there are five of them. A gentle bend, a tight neutral
     // inset so the band stays inside the capsule, and no chroma: prism
     // fringe on a 40px control reads as a rendering fault, not as glass.
@@ -337,7 +339,7 @@
      across every glass surface. liquid-glass.js does the refraction, the CSS
      carries the gradient, and this writes the two custom properties it reads. */
   function initGlare() {
-    var surfaces = Array.prototype.slice.call(document.querySelectorAll(".glass, .glass--flat"));
+    var surfaces = Array.prototype.slice.call(document.querySelectorAll(".glass, .glass--flat, .pill"));
     if (!surfaces.length || !window.matchMedia("(any-hover: hover)").matches) return;
     var queued = false, last = null;
 
@@ -410,6 +412,47 @@
     measure();
   }
 
+  /* Touch-point illumination.
+
+     Apple's description of the material is that pressing one piece of glass
+     lights the glass near it, so the surface reads as connected rather than
+     as a row of separate buttons. Nothing in their documentation gives a
+     number for it, so the falloff here is chosen to match the description:
+     the pressed surface goes to full, its neighbours fall away over about
+     320px, and everything decays within half a second.
+
+     --lit is a plain number per surface; the CSS turns it into light. */
+  function initTouchLight() {
+    var RADIUS = 320;
+    var surfaces = function () {
+      return Array.prototype.slice.call(
+        document.querySelectorAll(".glass, .glass--flat, .pill, .nav__cmd, .nav__link"));
+    };
+    var decay = null;
+
+    function light(x, y) {
+      var all = surfaces();
+      for (var i = 0; i < all.length; i++) {
+        var r = all[i].getBoundingClientRect();
+        if (r.bottom < -RADIUS || r.top > window.innerHeight + RADIUS) continue;
+        var cx = Math.max(r.left, Math.min(x, r.right));
+        var cy = Math.max(r.top, Math.min(y, r.bottom));
+        var d = Math.hypot(x - cx, y - cy);
+        var v = d >= RADIUS ? 0 : Math.pow(1 - d / RADIUS, 2);
+        all[i].style.setProperty("--lit", v.toFixed(3));
+      }
+      clearTimeout(decay);
+      decay = setTimeout(function () {
+        all.forEach(function (el) { el.style.setProperty("--lit", "0"); });
+      }, 130);
+    }
+
+    document.addEventListener("pointerdown", function (e) {
+      if (reduced) return;
+      light(e.clientX, e.clientY);
+    }, { passive: true });
+  }
+
   /* Touch has no hover, so every control gets a press state instead. */
   function initPressFeedback() {
     var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .link, .pill, .entry__head";
@@ -445,6 +488,7 @@
     applyGlass();
     initTransitions();
     initGlare();
+    initTouchLight();
     initNavScale();
     initPressFeedback();
     initConnection();
