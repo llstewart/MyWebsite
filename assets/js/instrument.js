@@ -237,25 +237,6 @@
       requestAnimationFrame(paint);   // survive any repaint during the open
     }
     function close_() {
-      /* Put the light out before it leaves.
-
-         The white glow that grew as this closed was the touch illumination
-         doing exactly what it is built to do at exactly the wrong moment.
-         Pressing any glass lights the glass near it, so the click on the
-         close button raised --lit on the panel, and the glare transitions
-         over 380ms while the panel itself leaves in 220. The panel was
-         fading out and brightening at the same time, and the brightening
-         outlasted it.
-
-         Nothing here is wrong except the ordering. Clearing the light at
-         the top of the close means the panel dims and goes, which is one
-         motion instead of two arguing. */
-      var lit = root.querySelectorAll(".glass, .glass--flat, .palette__panel");
-      Array.prototype.forEach.call(lit, function (el) {
-        el.style.setProperty("--lit", "0");
-      });
-      root.style.setProperty("--lit", "0");
-
       root.classList.remove("is-open");
       setTimeout(function () { root.hidden = true; }, reduced ? 0 : 220);
       if (lastFocus && lastFocus.focus) lastFocus.focus();

@@ -325,7 +325,24 @@ a[data-state="missing"] { color: var(--c-live); }
 
 @media (max-width: 560px) {
   :root { --t-label: 0.66rem; --tr-label: 0.13em; }
-  .hero { min-height: auto; padding-block: calc(var(--s-8) + var(--s-4)) var(--s-7); }
+  /* The hero keeps its full screen on a phone.
+
+     This said min-height: auto, which collapsed it to the height of its own
+     contents, so the one section that is supposed to fill the screen was
+     the only one that did not. Removing it there was presumably caution
+     about a small viewport, but the landing is a name, a line and a row of
+     links: it was never at risk of overflowing.
+
+     svh, not dvh or lvh. Small viewport height is the screen with the
+     browser chrome showing, so the hero always fits on arrival and never
+     needs a scroll to reveal its own last line. dvh would resize the
+     section as the URL bar hides and shows, which moves the content under
+     the reader's thumb mid scroll. The background already reaches past the
+     bar on 100lvh, so the page still looks edge to edge. */
+  .hero {
+    min-height: 100svh;
+    padding-block: calc(var(--s-8) + var(--s-4)) var(--s-7);
+  }
   .contact { padding: var(--s-5) var(--s-4); }
   .section { padding-block: var(--s-7); }
   .section--tight { padding-block: var(--s-6); }
@@ -344,7 +361,6 @@ a[data-state="missing"] { color: var(--c-live); }
 @media (max-height: 560px) and (orientation: landscape) {
   .hero { min-height: auto; padding-block: var(--s-8) var(--s-6); }
   .hero__name { font-size: clamp(2.2rem, 7vw, 3.4rem); }
-  .hero { min-height: auto; }
   .palette__panel { max-height: 86dvh; }
 }
 

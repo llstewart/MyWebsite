@@ -402,22 +402,22 @@
 
 /* Opens the way a sheet does: up from slightly below, settling rather than
    snapping, on the same curve as every disclosure on the page. */
-/* The glare leaves with the panel.
+/* No glare on the panel, and the honest answer to what it was for is that
+   it was for something else.
 
-   Clearing --lit on close stopped the bloom, and replaced it with a blink:
-   the glare transitions over 380ms while the panel is hidden at 220, so
-   the light was still fading when the element was taken away, and losing
-   the last of it all at once reads as a blank rather than an exit.
+   Touch illumination earns its place in a ROW: pressing one capsule lights
+   the ones beside it, so five separate controls read as one connected
+   surface. That is the entire idea, and it needs neighbours to work on.
 
-   Fading the highlight itself on the panel's own timing means the two
-   leave together. The light is part of the panel, so it should go when the
-   panel goes, not on a schedule of its own. */
-.palette__panel::after {
-  transition:
-    background 380ms var(--e-sheet),
-    opacity var(--d-close) var(--e-sheet);
-}
-.palette:not(.is-open) .palette__panel::after { opacity: 0; }
+   A modal panel has no neighbours. It is the only glass on screen while it
+   is open, so the effect had nothing to connect and no argument to make.
+   What was left was a large pale circle blooming under the cursor on a
+   surface people are trying to read a list on.
+
+   Two commits went on making it behave, first stopping it lingering past
+   the close, then stopping that fix from blinking. Both were treating
+   symptoms of something that should not have been there. */
+.palette__panel::after { content: none; }
 
 .palette__panel {
   --card-pad: var(--s-3);
@@ -469,19 +469,51 @@
 .palette__input::placeholder { color: var(--c-ink-4); }
 
 /* Touch has no Escape key, so the sheet always carries a visible way out. */
+/* Controls inside the panel are NOT glass, deliberately.
+
+   Glass is a layer, not a decoration. The panel floats above the page and
+   refracts the page. A button sitting ON the panel has only the panel
+   behind it, and the panel has already blurred everything behind IT into a
+   smooth wash, so there is no edge left to bend. Glass on glass is not
+   twice the material, it is the material applied to its own output. iOS
+   does the same: the sheet is glass, the rows in it are plain.
+
+   What they share is the interaction language, which is what makes them
+   feel like part of the same object rather than things resting on it. Same
+   capsule, same specular line along the top edge, same press that goes
+   down rather than changing colour, same timings. The material stops at
+   the panel edge. The behaviour does not. */
 .palette__close {
   flex: none;
   padding: var(--s-2) var(--s-3);
   border: 0;
   border-radius: 999px;
-  background: rgba(var(--c-dn), calc(0.05 * var(--dn-k)));
+  background: rgba(var(--c-up), calc(0.55 * var(--up-k)));
+  box-shadow:
+    inset 0 1px 0 rgba(var(--c-up), calc(0.85 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.09 * var(--dn-k)));
   font-family: var(--f-mono); font-size: var(--t-label);
   letter-spacing: var(--tr-label); text-transform: uppercase;
-  color: var(--c-ink-3);
-  transition: color var(--d-fast) linear, background-color var(--d-fast) linear;
+  color: var(--c-ink-2);
+  transition:
+    color var(--d-fast) linear,
+    background-color var(--d-fast) linear,
+    box-shadow var(--d-fast) var(--e-out),
+    transform var(--d-press) var(--e-out);
+}
+.palette__close:active {
+  transform: scale(0.94);
+  box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.14 * var(--dn-k)));
 }
 .palette__close:hover, .palette__close:focus-visible {
-  color: var(--c-ink); background: rgba(var(--c-dn), calc(0.09 * var(--dn-k)));
+  /* Brightens, like everything else that answers a pointer here. It used to
+     darken, which made it the only control on the site that got heavier as
+     you approached it. */
+  color: var(--c-ink);
+  background: rgba(var(--c-up), calc(0.85 * var(--up-k)));
+  box-shadow:
+    inset 0 1px 0 rgba(var(--c-up), calc(0.95 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.12 * var(--dn-k)));
 }
 
 .palette__list {
@@ -505,7 +537,12 @@
   transition: background-color var(--d-fast) linear, color var(--d-fast) linear;
 }
 .palette__item[aria-selected="true"] {
-  background: rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
+  /* A selected row is a raised surface: it lightens and catches an edge,
+     rather than being shaded in like a table stripe. */
+  background: rgba(var(--c-up), calc(0.72 * var(--up-k)));
+  box-shadow:
+    inset 0 1px 0 rgba(var(--c-up), calc(0.9 * var(--up-k))),
+    inset 0 0 0 1px rgba(var(--c-dn), calc(0.07 * var(--dn-k)));
   color: var(--c-ink);
   box-shadow: inset 0 0 0 1px rgba(var(--c-dn), calc(0.06 * var(--dn-k)));
 }
