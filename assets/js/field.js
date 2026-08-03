@@ -1,26 +1,40 @@
 /* ===========================================================================
-   field.js — STEP 1 of 6: the material.
+   field.js — the flow field.
 
-   Static dots. Nothing moves. No flow field, no trails, no cycling.
+   Particles drifting along an invisible current, leaving short trails, with
+   the current itself cycling through six named movements.
 
-   This is a deliberate restart. The previous version was built all at once
-   and every problem in it turned out to be a different layer: the dots were
-   too faint, then too heavy, then clumping, then moving too slowly to read,
-   then cycling in ways that hid whether any of the rest was right. Judging
-   six things at once meant judging none of them.
+   ARCHITECTURE
 
-   So: one thing at a time, each shipped and looked at before the next.
+   Four parts, each with one job and no knowledge of the others:
 
-     1. the material    <- you are here. Size, weight, colour, density.
-     2. motion          one direction, constant speed. Is it legible?
-     3. the current     replace the direction with a noise flow field.
-     4. trails          how long a mark survives behind a particle.
-     5. the ceiling     stop the current piling dots into a solid patch.
-     6. the movements   cycle between waves, arcs, bands.
+     Noise      pure function. value noise, no state.
+     Movements  pure functions. (cellX, cellY, seconds) -> an angle.
+                A movement never touches a particle, a canvas, or the DOM.
+     Field      owns the grid of angles. Asks the current movement (or two,
+                mid transition) for each cell. Knows nothing about drawing.
+     Renderer   owns the canvas, the particles and the frame loop. Reads
+                angles. Never computes one.
 
-   Nothing below this line does anything except place dots and draw them
-   once. If the density or the weight is wrong, it is wrong here, and it is
-   fixed here before anything is allowed to move.
+   Adding a movement means adding one pure function to MOVEMENTS. It cannot
+   break the renderer, because it cannot reach it.
+
+   TRANSITIONS
+
+   Interpolating between two movements is done on the ANGLE along the
+   shortest arc, not by averaging the two direction vectors.
+
+   Vector averaging is the obvious approach and it has a hole in it: two
+   opposing directions sum to nearly zero, so mid transition those cells hand
+   the renderer a near zero vector and every particle standing in one stalls
+   and jitters. That is what made the previous transitions feel broken. Angle
+   interpolation along the shortest arc always yields a unit direction, so a
+   cell rotates smoothly from one movement to the other and never loses
+   magnitude on the way.
+
+   The grid is also rebuilt every frame rather than every fourth. At a
+   quarter rate the current visibly steps during a transition, which is
+   exactly when it must not.
    =========================================================================== */
 
 (function () {
@@ -30,6 +44,10 @@
   if (!canvas) return;
 
   var root = document.documentElement;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ""))) return;
+
   var ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
@@ -37,80 +55,352 @@
     var v = getComputedStyle(root).getPropertyValue(name).trim();
     return v || fallback;
   }
+  var PAPER = token("--c-paper", "#FBFBF9");
+  var GRAIN = token("--c-field-grain", "#4A5054");
 
-  /* ------------------------------------------------------------------
-     The only four numbers in this step.
-     ------------------------------------------------------------------ */
+  function rgbOf(hex) {
+    hex = hex.replace("#", "");
+    return [parseInt(hex.slice(0, 2), 16),
+            parseInt(hex.slice(2, 4), 16),
+            parseInt(hex.slice(4, 6), 16)];
+  }
+  var P = rgbOf(PAPER);
 
-  var PAPER   = token("--c-paper", "#FBFBF9");
-  var GRAIN   = token("--c-field-grain", "#4A5054");
-  var ALPHA   = 0.38;    // how dark one dot is
-  var SIZE    = 1.15;    // dot size in CSS px
-  var PER_PX  = 170;     // one dot per this many square px of viewport
+  /* ==================================================================
+     Noise. Pure.
+     ================================================================== */
+
+  function hash(x, y, z) {
+    var n = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453123;
+    return n - Math.floor(n);
+  }
+  function ease(t) { return t * t * (3 - 2 * t); }
+  function noise(x, y, z) {
+    var ix = Math.floor(x), iy = Math.floor(y);
+    var fx = ease(x - ix), fy = ease(y - iy);
+    var a = hash(ix, iy, z),     b = hash(ix + 1, iy, z);
+    var c = hash(ix, iy + 1, z), d = hash(ix + 1, iy + 1, z);
+    var top = a + (b - a) * fx, bot = c + (d - c) * fx;
+    return top + (bot - top) * fy;
+  }
+
+  /* ==================================================================
+     Movements. Pure: (x, y, t) -> angle in radians.
+
+     x and y are grid cell indices, t is seconds. Each carries its own
+     speed multiplier, because a pattern of tight arcs and a pattern of
+     long straight bands do not read as the same pace at the same rate.
+     ================================================================== */
+
+  var gridW = 0, gridH = 0;   // read by the centre-relative movements
+
+  var MOVEMENTS = [
+    /* Open noise current. Broad and wandering, no nameable structure. Two
+       octaves, because one alone sweeps the whole page one way. */
+    { name: "drift", speed: 1.00, angle: function (x, y, t) {
+        var s = 0.055, z = t * 0.035;
+        return (noise(x * s, y * s, z) * 0.72 +
+                noise(x * s * 2.7, y * s * 2.7, z * 1.4) * 0.28) * Math.PI * 4;
+      } },
+
+    /* Mini waves, rotating. Short ripples crossing the page with the whole
+       set of them turning, so the direction they travel comes around over a
+       couple of minutes. Medium pace: enough to read as movement, not
+       enough to flicker. */
+    { name: "waves", speed: 1.20, angle: function (x, y, t) {
+        var rot = t * 0.052;
+        return rot + Math.sin((x * Math.cos(rot) + y * Math.sin(rot)) * 0.42
+                              - t * 1.15) * 0.85;
+      } },
+
+    /* Two drifting vortices. Particles run tangentially, pulling the spray
+       into arcs. Weighted by inverse square distance so each one dominates
+       near itself and neither reaches across the whole page. */
+    { name: "swirl", speed: 0.92, angle: function (x, y, t) {
+        var ax = gridW * (0.34 + 0.16 * Math.sin(t * 0.041));
+        var ay = gridH * (0.46 + 0.14 * Math.cos(t * 0.033));
+        var bx = gridW * (0.71 + 0.13 * Math.cos(t * 0.027));
+        var by = gridH * (0.58 + 0.15 * Math.sin(t * 0.045));
+        var dax = x - ax, day = y - ay, dbx = x - bx, dby = y - by;
+        var wa = 1 / (1 + (dax * dax + day * day) * 0.006);
+        var wb = 1 / (1 + (dbx * dbx + dby * dby) * 0.006);
+        var a1 = Math.atan2(day, dax) + Math.PI / 2;
+        var a2 = Math.atan2(dby, dbx) - Math.PI / 2;
+        return Math.atan2(Math.sin(a1) * wa + Math.sin(a2) * wb,
+                          Math.cos(a1) * wa + Math.cos(a2) * wb);
+      } },
+
+    /* Laminar bands sliding across each other at different rates. The most
+       orderly of the set, and the one that makes the others read as
+       disorder by contrast. */
+    { name: "shear", speed: 1.05, angle: function (x, y, t) {
+        return Math.PI * 0.5 * (Math.sin(y * 0.32 + t * 0.16)
+             + 0.35 * Math.sin(y * 0.11 - t * 0.09))
+             + Math.sin(t * 0.02) * 0.6;
+      } },
+
+    /* NEW. A ring travelling outward from a wandering source, like
+       something dropped in water. Particles turn to face the wavefront as
+       it passes and settle back once it has gone by, so the page gets a
+       pulse crossing it rather than a steady current. */
+    { name: "ripple", speed: 1.10, angle: function (x, y, t) {
+        var cx = gridW * (0.5 + 0.22 * Math.sin(t * 0.023));
+        var cy = gridH * (0.5 + 0.18 * Math.cos(t * 0.031));
+        var dx = x - cx, dy = y - cy;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        var radial = Math.atan2(dy, dx);
+        /* The wavefront turns the radial direction into a tangential one
+           and back again as it passes. */
+        return radial + Math.sin(d * 0.34 - t * 1.9) * 1.25;
+      } },
+
+    /* NEW. Turbulence: the noise current sampled at a much finer scale and
+       fed back through itself, so it curls at the size of a paragraph
+       rather than the size of the page. The busiest of the six, which is
+       why it runs slowest. */
+    { name: "curl", speed: 0.80, angle: function (x, y, t) {
+        var s = 0.14, z = t * 0.05;
+        var a = noise(x * s, y * s, z);
+        var b = noise(x * s + a * 1.8, y * s - a * 1.4, z * 1.3);
+        return (a * 0.35 + b * 0.65) * Math.PI * 6;
+      } }
+  ];
+
+  /* ==================================================================
+     Field. Owns the grid of angles and the transition between movements.
+     ================================================================== */
+
+  var CELL = 26;
+  var HOLD = 15;     // seconds on one movement
+  var FADE = 4.5;    // seconds crossfading into the next
+
+  var cols = 0, rows = 0, angles = null;
+  var from = 0, to = 1, blend = 0, phase = 0, speedMul = 1;
+
+  function allocGrid(cw, ch) {
+    cols = Math.ceil(cw / CELL) + 2;
+    rows = Math.ceil(ch / CELL) + 2;
+    gridW = cols; gridH = rows;
+    angles = new Float32Array(cols * rows);
+  }
+
+  function advance(dt) {
+    phase += dt;
+    if (phase < HOLD) {
+      blend = 0;
+    } else if (phase < HOLD + FADE) {
+      var k = (phase - HOLD) / FADE;
+      /* Smoothstep twice. One pass still leaves a detectable start and stop;
+         two makes the handover begin and end below the threshold where the
+         eye can name the moment it happened. */
+      blend = ease(ease(k));
+    } else {
+      phase = 0; blend = 0;
+      from = to;
+      to = (to + 1) % MOVEMENTS.length;
+    }
+    var A = MOVEMENTS[from], B = MOVEMENTS[to];
+    speedMul = A.speed + (B.speed - A.speed) * blend;
+  }
+
+  /* Shortest signed arc from a to b, always in [-PI, PI]. */
+  function arc(a, b) {
+    return Math.atan2(Math.sin(b - a), Math.cos(b - a));
+  }
+
+  function buildGrid(t) {
+    var A = MOVEMENTS[from].angle, B = MOVEMENTS[to].angle, k = blend;
+    for (var y = 0; y < rows; y++) {
+      var base = y * cols;
+      for (var x = 0; x < cols; x++) {
+        var a = A(x, y, t);
+        /* Rotate along the shortest arc rather than averaging vectors.
+           Averaging cancels to zero when the two disagree by 180 degrees,
+           and a zero length direction stalls every particle standing in
+           that cell. */
+        angles[base + x] = k <= 0 ? a : a + arc(a, B(x, y, t)) * k;
+      }
+    }
+  }
+
+  /* ==================================================================
+     Renderer. Owns the canvas, the particles and the loop.
+     ================================================================== */
 
   var DPR_CAP = 1.5;
+  var FRAME_MS = 1000 / 30;
+  var TRAIL = 0.17;      // paper alpha per frame; lower = longer trails
+  var DOT_ALPHA = 0.38;
+  var LIFE = 460;        // frames before a particle is recycled
 
-  var dpr = 1, count = 0;
-  var px = null, py = null;
+  /* Density ceiling. A flow field has sinks, and without a cap those cells
+     take a mark from dozens of particles per frame until the area is solid
+     space grey. Small cells, a fixed budget each, and a particle over
+     budget still moves and still lives, it is simply not drawn this frame.
+     Capping what is DRAWN rather than culling particles matters: culling
+     would thin the current that caused the convergence, removing the
+     evidence along with the cause. */
+  var OCC = 5, OCC_MAX = 4;
+
+  var dpr = 1, cw = 0, ch = 0;
+  var count = 0, px = null, py = null, pl = null, pv = null;
+  var occCols = 0, occRows = 0, occ = null;
+  var raf = null, last = 0, frame = 0;
+  var energy = 0, lastScroll = window.scrollY;
 
   function layout() {
     dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
-    var cw = window.innerWidth, ch = window.innerHeight;
+    cw = window.innerWidth;
+    ch = window.innerHeight;
 
-    canvas.width  = Math.round(cw * dpr);
+    canvas.width = Math.round(cw * dpr);
     canvas.height = Math.round(ch * dpr);
-    canvas.style.width  = cw + "px";
+    canvas.style.width = cw + "px";
     canvas.style.height = ch + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    /* Count follows area, so a phone does not pay for a desktop's coverage
-       and a wide monitor does not come out sparse. */
-    count = Math.min(14000, Math.max(1500, Math.round(cw * ch / PER_PX)));
+    allocGrid(cw, ch);
+
+    occCols = Math.ceil(cw / OCC) + 2;
+    occRows = Math.ceil(ch / OCC) + 2;
+    occ = new Uint8Array(occCols * occRows);
+
+    count = Math.min(11000, Math.max(1600, Math.round(cw * ch / 240)));
     px = new Float32Array(count);
     py = new Float32Array(count);
-    for (var i = 0; i < count; i++) {
-      px[i] = Math.random() * cw;
-      py[i] = Math.random() * ch;
-    }
-  }
+    pl = new Float32Array(count);
+    pv = new Float32Array(count);
+    for (var i = 0; i < count; i++) spawn(i, true);
 
-  function draw() {
-    var cw = window.innerWidth, ch = window.innerHeight;
     ctx.fillStyle = PAPER;
     ctx.fillRect(0, 0, cw, ch);
-
-    ctx.globalAlpha = ALPHA;
-    ctx.fillStyle = GRAIN;
-    for (var i = 0; i < count; i++) {
-      ctx.fillRect(px[i], py[i], SIZE, SIZE);
-    }
-    ctx.globalAlpha = 1;
   }
+
+  function spawn(i, initial) {
+    px[i] = Math.random() * cw;
+    py[i] = Math.random() * ch;
+    /* Staggered ages, or every particle recycles on the same frame and the
+       whole page blinks at once. */
+    pl[i] = initial ? Math.random() * LIFE : 0;
+    pv[i] = 0.6 + Math.random() * 0.85;
+  }
+
+  function step(t) {
+    /* Speed breathes on a period unrelated to the movement cycle, so the
+       two never line up into something you can predict. */
+    var breath = 0.62 + 0.38 * Math.sin(t * 0.11) * Math.sin(t * 0.037);
+    var speed = (1.5 + breath * 1.7 + energy * 2.6) * dpr * speedMul;
+
+    buildGrid(t);
+
+    /* Painted over, not cleared, so each particle leaves a trail. */
+    ctx.fillStyle = "rgba(" + P[0] + "," + P[1] + "," + P[2] + "," + TRAIL + ")";
+    ctx.fillRect(0, 0, cw, ch);
+
+    occ.fill(0);
+    ctx.globalAlpha = DOT_ALPHA;
+    ctx.fillStyle = GRAIN;
+    var size = 1.15;
+
+    for (var i = 0; i < count; i++) {
+      var gx = (px[i] / CELL) | 0;
+      var gy = (py[i] / CELL) | 0;
+      if (gx < 0) gx = 0; else if (gx >= cols) gx = cols - 1;
+      if (gy < 0) gy = 0; else if (gy >= rows) gy = rows - 1;
+
+      var a = angles[gy * cols + gx];
+      var v = speed * pv[i];
+      px[i] += Math.cos(a) * v;
+      py[i] += Math.sin(a) * v;
+
+      var ox = (px[i] / OCC) | 0, oy = (py[i] / OCC) | 0;
+      if (ox >= 0 && oy >= 0 && ox < occCols && oy < occRows) {
+        var oi = oy * occCols + ox;
+        if (occ[oi] < OCC_MAX) {
+          occ[oi]++;
+          ctx.fillRect(px[i], py[i], size, size);
+        }
+      }
+
+      if (++pl[i] > LIFE ||
+          px[i] < -20 || px[i] > cw + 20 || py[i] < -20 || py[i] > ch + 20) {
+        spawn(i, false);
+      }
+    }
+
+    ctx.globalAlpha = 1;
+    energy *= 0.94;
+    frame++;
+  }
+
+  function loop(now) {
+    raf = requestAnimationFrame(loop);
+    if (now - last < FRAME_MS) return;
+    /* Clamped, so a tab that was backgrounded for a minute does not return
+       and advance the whole cycle in one frame. */
+    var dt = last ? Math.min(0.2, (now - last) / 1000) : FRAME_MS / 1000;
+    last = now;
+    advance(dt);
+    step(now / 1000);
+  }
+
+  function start() {
+    if (reduced) return;
+    if (raf === null) { last = 0; raf = requestAnimationFrame(loop); }
+  }
+  function stop() {
+    if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
+  }
+
+  window.addEventListener("scroll", function () {
+    var y = window.scrollY;
+    energy = Math.min(1, energy + Math.abs(y - lastScroll) / 900);
+    lastScroll = y;
+  }, { passive: true });
 
   var resizeTimer = null;
   window.addEventListener("resize", function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { layout(); draw(); }, 160);
+    resizeTimer = setTimeout(layout, 160);
   }, { passive: true });
 
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) stop(); else start();
+  });
+
   layout();
-  draw();
+  buildGrid(0);
 
-  /* Set only after a frame exists, so a failure anywhere above leaves the
-     CSS gradients underneath showing rather than a blank page. */
+  if (reduced) {
+    /* Still a field, just not a moving one: run it far enough to look
+       settled, then leave it. */
+    for (var k = 0; k < 90; k++) step(k / 30);
+  }
+
   root.classList.add("has-dots");
+  start();
 
-  /* A handle for tuning from the console without a rebuild:
-       SignalField.set({ alpha: 0.5, size: 1.4, perPx: 120 }) */
   window.SignalField = {
-    redraw: function () { layout(); draw(); },
-    set: function (o) {
-      if (o.alpha  !== undefined) ALPHA  = o.alpha;
-      if (o.size   !== undefined) SIZE   = o.size;
-      if (o.perPx  !== undefined) PER_PX = o.perPx;
-      layout(); draw();
-      return { alpha: ALPHA, size: SIZE, perPx: PER_PX, dots: count };
+    stop: stop,
+    start: start,
+    redraw: layout,
+    movement: function () {
+      return blend
+        ? MOVEMENTS[from].name + " -> " + MOVEMENTS[to].name +
+          " (" + Math.round(blend * 100) + "%)"
+        : MOVEMENTS[from].name;
     },
-    stats: function () { return { alpha: ALPHA, size: SIZE, perPx: PER_PX, dots: count }; }
+    movements: function () { return MOVEMENTS.map(function (m) { return m.name; }); },
+    /* Jump straight to a movement by name, for looking at one on its own. */
+    go: function (name) {
+      for (var i = 0; i < MOVEMENTS.length; i++) {
+        if (MOVEMENTS[i].name === name) {
+          from = i; to = (i + 1) % MOVEMENTS.length;
+          blend = 0; phase = 0;
+          return MOVEMENTS[i].name;
+        }
+      }
+      return null;
+    }
   };
 })();

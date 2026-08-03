@@ -169,10 +169,10 @@
     // with the high frequency detail refraction needs. Close to her defaults.
     nav:      { scale: -96, chroma: 5, blur: 3, saturate: 1.5, border: 0.09, mapBlur: 11 },
     palette:  { scale: -74,  chroma: 4, blur: 6, saturate: 1.4,  border: 0.09, mapBlur: 10 },
-    // The approach panel is the only surface with a photograph behind it, so
-    // it gets close to her published defaults. This is the effect at full
-    // strength, and it is the one place on the page that earns it.
-    approach: { scale: -112, chroma: 6, blur: 3, saturate: 1.5,  border: 0.07, mapBlur: 12 },
+    // approach was removed on 2026-08-03. Generating a displacement map at
+    // that panel's size and filtering a photograph through it every scroll
+    // frame was the heaviest thing on the page, and the panel's own scrim
+    // hid most of the result. See the note in sections.css.
     // contact and feature were removed on 2026-08-03. Apple's guidance is
     // that Liquid Glass is for the navigation layer and never for content,
     // and on plain paper the refraction had nothing to bend regardless.
@@ -190,7 +190,11 @@
     if (mode !== "refractive") { if (mode !== "opaque") frost(); return; }
 
     Array.prototype.forEach.call(document.querySelectorAll("[data-glass]"), function (el) {
-      var profile = PROFILES[el.getAttribute("data-glass")] || PROFILES.contact;
+      /* PROFILES.contact was removed when contact stopped being glass, but
+         the fallback still named it, so any element with an unrecognised
+         data-glass value handed undefined straight to liquidGlass(). Fall
+         back to a profile that exists. */
+      var profile = PROFILES[el.getAttribute("data-glass")] || PROFILES.nav;
       el.classList.remove("lg-fallback");     // may be re-upgrading after a resize
       try {
         var handle = window.liquidGlass(el, profile);
@@ -491,17 +495,31 @@
   function initPressFeedback() {
     var SELECTOR = ".action, .nav__link, .nav__cmd, .palette__item, .link, .pill, .entry__head";
 
+    /* One element is pressed at a time, so hold a reference to it rather
+       than searching the document to find it again.
+
+       This used to run querySelectorAll(".is-pressed") over the whole
+       document on every scroll event, with capture, on window. That is a
+       full document query per scroll tick to clear at most one class, and
+       scroll is the one event that fires most on this page. */
+    var pressed = null;
+
+    function release() {
+      if (!pressed) return;
+      pressed.classList.remove("is-pressed");
+      pressed = null;
+    }
+
     document.addEventListener("pointerdown", function (e) {
       var target = e.target.closest ? e.target.closest(SELECTOR) : null;
-      if (target) target.classList.add("is-pressed");
+      if (!target) return;
+      release();
+      pressed = target;
+      target.classList.add("is-pressed");
     }, { passive: true });
 
     ["pointerup", "pointercancel", "pointerleave", "scroll"].forEach(function (evt) {
-      window.addEventListener(evt, function () {
-        Array.prototype.forEach.call(document.querySelectorAll(".is-pressed"), function (el) {
-          el.classList.remove("is-pressed");
-        });
-      }, { passive: true, capture: true });
+      window.addEventListener(evt, release, { passive: true, capture: true });
     });
   }
 

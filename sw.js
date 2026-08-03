@@ -13,7 +13,10 @@
    Caching opaque responses buys nothing and hides failures.
    =========================================================================== */
 
-var VERSION = "ls-2026-08-02b";
+/* Bump this on every deploy that changes CORE. The activate handler deletes
+   every cache that is not this version, so a stale name is what keeps an old
+   asset alive. */
+var VERSION = "ls-2026-08-03a";
 var CORE = [
   "./",
   "./index.html",
@@ -22,9 +25,11 @@ var CORE = [
   "./assets/css/base.css",
   "./assets/css/glass.css",
   "./assets/css/sections.css",
+  "./assets/css/depth.css",
   "./assets/css/states.css",
   "./assets/js/liquid-glass.js",
   "./assets/js/instrument.js",
+  "./assets/js/field.js",
   "./assets/js/main.js",
   "./assets/icon.svg",
   "./assets/img/bateke-plateau.webp",

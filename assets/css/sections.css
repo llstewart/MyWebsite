@@ -637,11 +637,27 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
     linear-gradient(180deg, rgba(16,26,23,0.26), rgba(16,26,23,0.14) 40%, rgba(16,26,23,0.30));
 }
 
+/* Not glass, and this is a performance decision as much as a design one.
+
+   It carried .glass and data-glass="approach" until 2026-08-03. That meant a
+   displacement map generated at the panel's own size, which is O(w x h) and
+   about 650,000 pixels here, plus a backdrop-filter re-rasterised over a
+   full bleed photograph on every scroll frame. It was the single heaviest
+   thing on the page and it visibly stalled scrolling through this section.
+
+   It was also buying almost nothing. The panel is already 80 to 86 percent
+   opaque white, because a photograph under body copy needs that much white
+   to stay legible, so the refraction it paid for was mostly hidden behind
+   its own scrim.
+
+   And the rule was already written down: Liquid Glass belongs to the
+   navigation layer and is never applied to content. Contact and the feature
+   panel were taken off it for that reason. This was the last content surface
+   still breaking it. */
 .approach__panel {
   padding: clamp(1.75rem, 3.4vw, 3.25rem);
-  /* Denser than the other glass on the page. A photograph underneath needs
-     more white behind the type than paper does. */
-  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.80));
+  border-radius: var(--r-glass);
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.82));
 }
 
 .approach__title { margin-bottom: 0; }
