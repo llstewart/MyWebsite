@@ -731,53 +731,86 @@ details[open].is-closing > summary .entry__toggle::before { transform: translate
 /* ---------------------------------------------------------------------------
    The measure rule.
 
-   Four places carried a plain 2px line across the top or down the side: the
-   roles, the approach columns, the feature result, and the proof column. A
-   full width 2px rule is the most default thing a stylesheet can do. It is
-   what you get when a divider is needed and nobody decided what it should
-   say, and four of them made the page look assembled from a starter kit.
+   Four places carried a plain 2px line: the roles, the approach columns and
+   the proof column. A full width 2px rule is the most default thing a
+   stylesheet can do, and four of them made the page look assembled from a
+   kit. Replacing it with a short heavy tick and a hairline was not enough
+   either. That is still just a line with an accent on one end.
 
-   This is a ruler mark instead. One short heavy tick where the line starts,
-   then a hairline carrying on to the end. It reads as a measurement rather
-   than as a divider, which is the language the rest of the page already
-   speaks: year led entries, mono labels, counted results. It also sets a
-   direction, since the tick marks the origin and the hairline runs away
-   from it, so the eye is told where the block begins.
+   This is a graduated scale: the edge of a ruler.
 
-   Drawn with backgrounds rather than borders or pseudo elements. Borders
-   cannot do two weights on one edge, and a pseudo element would need a
-   positioning context on every one of these, several of which are grid
-   items where that has consequences.
+     - one major tick at the origin, the full height of the band
+     - a run of minor graduations after it, at a fixed pitch, which stops
+       partway rather than running the width
+     - a hairline baseline carrying on to the end
+
+   It is the only ornament on the page that is also an argument. Everything
+   this site claims is counted: years per language, users, milliseconds,
+   accuracy, a percentage against a named baseline. A ruler edge says the
+   block beneath it is measured, which is the difference between decoration
+   and a mark that means something.
+
+   Three reasons it is drawn with backgrounds. A border cannot carry three
+   weights on one edge. A pseudo element would need a positioning context on
+   every one of these, and several are grid items where that has
+   consequences. And backgrounds let the graduations stop partway with one
+   background-size instead of a second element.
+
+   The graduations stop on purpose. Run across the full width they become a
+   texture and the page already has one moving behind it. Stopping is also
+   what real rulers do at a zero mark.
    --------------------------------------------------------------------------- */
 
 .role,
 .approach__col {
-  --tick: 2.5rem;
+  --rule-band: 7px;    /* height of the major tick     */
+  --rule-pitch: 9px;   /* spacing of the graduations   */
+  --rule-run: 190px;   /* how far the graduations go   */
   border-top: 0;
   background-repeat: no-repeat;
   background-image:
-    linear-gradient(90deg, var(--c-ink) 0 var(--tick), transparent var(--tick)),
-    linear-gradient(90deg, var(--c-line-strong) 0 100%);
-  background-size: 100% 2px, 100% var(--hairline);
-  background-position: 0 0, 0 0;
+    linear-gradient(180deg, var(--c-ink) 0 100%),
+    repeating-linear-gradient(90deg,
+      var(--c-line-strong) 0 1px, transparent 1px var(--rule-pitch)),
+    linear-gradient(90deg, var(--c-line) 0 100%);
+  background-size:
+    2px var(--rule-band),
+    var(--rule-run) 3px,
+    100% var(--hairline);
+  background-position: 0 0, 0 0, 0 0;
 }
 
+/* The proof column runs down the side, so the whole scale turns with it. */
 .proof {
-  --tick: 2.5rem;
+  --rule-band: 7px;
+  --rule-pitch: 9px;
+  --rule-run: 150px;
   border-left: 0;
   background-repeat: no-repeat;
   background-image:
-    linear-gradient(180deg, var(--c-ink) 0 var(--tick), transparent var(--tick)),
-    linear-gradient(180deg, var(--c-line-strong) 0 100%);
-  background-size: 2px 100%, var(--hairline) 100%;
-  background-position: 0 0, 0 0;
+    linear-gradient(90deg, var(--c-ink) 0 100%),
+    repeating-linear-gradient(180deg,
+      var(--c-line-strong) 0 1px, transparent 1px var(--rule-pitch)),
+    linear-gradient(180deg, var(--c-line) 0 100%);
+  background-size:
+    var(--rule-band) 2px,
+    3px var(--rule-run),
+    var(--hairline) 100%;
+  background-position: 0 0, 0 0, 0 0;
 }
+
 @media (max-width: 900px) {
-  /* Stacked, the proof column becomes a top rule like the others. */
+  /* Stacked, the proof column becomes a top scale like the others. */
   .proof {
+    --rule-run: 150px;
     background-image:
-      linear-gradient(90deg, var(--c-ink) 0 var(--tick), transparent var(--tick)),
-      linear-gradient(90deg, var(--c-line-strong) 0 100%);
-    background-size: 100% 2px, 100% var(--hairline);
+      linear-gradient(180deg, var(--c-ink) 0 100%),
+      repeating-linear-gradient(90deg,
+        var(--c-line-strong) 0 1px, transparent 1px var(--rule-pitch)),
+      linear-gradient(90deg, var(--c-line) 0 100%);
+    background-size:
+      2px var(--rule-band),
+      var(--rule-run) 3px,
+      100% var(--hairline);
   }
 }

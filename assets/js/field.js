@@ -108,15 +108,27 @@
   var DPR_CAP = 1.5;
   var FRAME_MS = 1000 / 30;
   var CELL = 26;          // grid cell, CSS px
+
+  /* The density ceiling. See step().
+     Five pixel cells at four marks allow roughly sixteen percent coverage,
+     which lets the current genuinely crowd somewhere and genuinely thin out
+     elsewhere while refusing the extreme. A ceiling, not a target. */
+  var OCC = 5;            // occupancy cell, CSS px
+  var OCC_MAX = 4;        // marks allowed per cell per frame
   /* Trail length. This was 0.055, which left tails long enough that the
      page read as fur rather than as spray: at that alpha a mark survives
      about twenty frames, and twenty frames of travel is a stroke, not a
      dot. Shorter tails, and the type wins again. */
   var TRAIL = 0.17;       // paper alpha per frame; lower = longer trails
-  var LIFE = 190;         // frames before a particle is recycled
+  /* Frames before a particle is recycled. Raised with the speed: at the old
+     rate 190 frames was six seconds of barely moving, and now it would be
+     six seconds of crossing most of the screen and then popping. Longer
+     lives mean fewer of those jumps per second and longer visible paths. */
+  var LIFE = 460;
 
   var W = 0, H = 0, dpr = 1;
   var cols = 0, rows = 0, angles = null;
+  var occCols = 0, occRows = 0, occ = null;
   var px = null, py = null, pl = null, pv = null;
   var count = 0;
   var raf = null, last = 0, frame = 0;
@@ -138,6 +150,10 @@
     cols = Math.ceil(cw / CELL) + 2;
     rows = Math.ceil(ch / CELL) + 2;
     angles = new Float32Array(cols * rows);
+
+    occCols = Math.ceil(cw / OCC) + 2;
+    occRows = Math.ceil(ch / OCC) + 2;
+    occ = new Uint8Array(occCols * occRows);
 
     /* Particle count follows area, so a phone does not pay for a desktop's
        coverage and a wide monitor does not look sparse. */
@@ -188,17 +204,98 @@
     pv[i] = 0.55 + Math.random() * 0.9;   // per particle speed spread
   }
 
-  /* The current. Recomputed on a slow z so it turns over gradually rather
-     than being rebuilt into something unrelated. */
-  function field(z) {
-    var scale = 0.055;
+  /* ------------------------------------------------------------------
+     MOVEMENTS.
+
+     Four ways of deciding which way a cell points. The page holds one for a
+     while, crossfades into the next over a few seconds, and goes round.
+
+     One rule forever was the thing that made this read as a screensaver:
+     never still, but always doing the same thing, so after ten seconds you
+     had seen everything it would ever do. Cycling means the dots come into
+     frame in waves, then run in arcs, then slide in bands.
+
+     Blending is done on the VECTOR, never on the angle. Angles wrap, so
+     interpolating them sends a cell the long way round the circle and the
+     current visibly tears mid handover.
+     ------------------------------------------------------------------ */
+
+  var MOVEMENTS = [
+    /* Open noise current. Broad and wandering, no structure you could name.
+       Two octaves: one alone sweeps the whole page in a single direction. */
+    { name: "drift", speed: 1.00, angle: function (x, y, t) {
+        var sc = 0.055, z = t * 0.035;
+        var n = noise(x * sc, y * sc, z) * 0.72 +
+                noise(x * sc * 2.7, y * sc * 2.7, z * 1.4) * 0.28;
+        return n * Math.PI * 4.0;
+      } },
+
+    /* Mini waves, rotating. Short ripples running across the page with the
+       whole set of them turning, so the direction they travel comes around
+       over a couple of minutes. Medium pace deliberately: fast enough to
+       read as movement, slow enough not to flicker. */
+    { name: "waves", speed: 1.20, angle: function (x, y, t) {
+        var rot = t * 0.052;
+        return rot + Math.sin((x * Math.cos(rot) + y * Math.sin(rot)) * 0.42
+                              - t * 1.15) * 0.85;
+      } },
+
+    /* Two slow vortices, drifting. Particles run tangentially around them,
+       which pulls the spray into arcs. */
+    { name: "swirl", speed: 0.92, angle: function (x, y, t) {
+        var c1x = cols * (0.34 + 0.16 * Math.sin(t * 0.041));
+        var c1y = rows * (0.46 + 0.14 * Math.cos(t * 0.033));
+        var c2x = cols * (0.71 + 0.13 * Math.cos(t * 0.027));
+        var c2y = rows * (0.58 + 0.15 * Math.sin(t * 0.045));
+        var d1x = x - c1x, d1y = y - c1y;
+        var d2x = x - c2x, d2y = y - c2y;
+        var w1 = 1 / (1 + (d1x * d1x + d1y * d1y) * 0.006);
+        var w2 = 1 / (1 + (d2x * d2x + d2y * d2y) * 0.006);
+        var a1 = Math.atan2(d1y, d1x) + Math.PI / 2;
+        var a2 = Math.atan2(d2y, d2x) - Math.PI / 2;
+        return Math.atan2(Math.sin(a1) * w1 + Math.sin(a2) * w2,
+                          Math.cos(a1) * w1 + Math.cos(a2) * w2);
+      } },
+
+    /* Laminar bands sliding across each other. The most orderly of the four,
+       and the one that makes the others read as disorder. */
+    { name: "shear", speed: 1.05, angle: function (x, y, t) {
+        return Math.PI * 0.5 * (Math.sin(y * 0.32 + t * 0.16)
+             + 0.35 * Math.sin(y * 0.11 - t * 0.09))
+             + Math.sin(t * 0.02) * 0.6;
+      } }
+  ];
+
+  var HOLD = 16;    // seconds on one movement
+  var FADE = 3.4;   // seconds crossfading into the next
+  var moveA = 0, moveB = 1, blend = 0, cycleT = 0, speedMul = 1;
+
+  function updateCycle(dt) {
+    cycleT += dt;
+    if (cycleT < HOLD) {
+      blend = 0;
+    } else if (cycleT < HOLD + FADE) {
+      var k = (cycleT - HOLD) / FADE;
+      blend = k * k * (3 - 2 * k);   // eased, so the handover is not linear
+    } else {
+      cycleT = 0; blend = 0;
+      moveA = moveB;
+      moveB = (moveB + 1) % MOVEMENTS.length;
+    }
+    var A = MOVEMENTS[moveA], B = MOVEMENTS[moveB];
+    speedMul = A.speed + (B.speed - A.speed) * blend;
+  }
+
+  function buildField(t) {
+    var A = MOVEMENTS[moveA].angle, B = MOVEMENTS[moveB].angle, k = blend;
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
-        /* Two octaves. One alone gives a current that is too orderly, and
-           the whole page sweeps in a single direction. */
-        var n = noise(x * scale, y * scale, z) * 0.72 +
-                noise(x * scale * 2.7, y * scale * 2.7, z * 1.4) * 0.28;
-        angles[y * cols + x] = n * Math.PI * 4.0;
+        var a = A(x, y, t);
+        if (k <= 0) { angles[y * cols + x] = a; continue; }
+        var b = B(x, y, t);
+        angles[y * cols + x] = Math.atan2(
+          Math.sin(a) * (1 - k) + Math.sin(b) * k,
+          Math.cos(a) * (1 - k) + Math.cos(b) * k);
       }
     }
   }
@@ -215,10 +312,20 @@
        the two never line up into a loop you can catch. Scroll energy rides
        on top and decays on its own. */
     var breath = 0.62 + 0.38 * Math.sin(t * 0.11) * Math.sin(t * 0.037);
-    var speed = (0.30 + breath * 0.62 + energy * 1.3) * dpr;
+    /* Speed, and why it is not lower.
+
+       This was 0.30 + breath * 0.62, which works out to about half a pixel
+       per frame, or twenty pixels a second. At that rate a particle moves
+       less than its own trail is long, so every dot sat vibrating inside
+       its own smear: visibly trying to move and going nowhere. The fix is
+       not a longer trail, it is a particle that actually travels. Around
+       two to four pixels a frame, sixty to a hundred and twenty a second,
+       is where a dot covers ground faster than its tail fades and the eye
+       reads it as flowing rather than as jittering. */
+    var speed = (1.5 + breath * 1.7 + energy * 2.6) * dpr * speedMul;
 
     cloudZ = t * 0.021;
-    if (frame % 6 === 0) field(t * 0.035);
+    if (frame % 4 === 0) buildField(t);
 
     /* Not cleared. Painted over, so what was drawn before fades and every
        particle leaves a trail behind it. */
@@ -229,6 +336,21 @@
        marks strong enough to see individually is a page you cannot read
        over. */
     ctx.globalAlpha = 0.34;
+    /* The density ceiling.
+
+       A flow field has sinks: places where the current converges and every
+       particle that arrives keeps arriving. Left alone those areas fill in
+       solid and the spray becomes a stain of space grey, which is exactly
+       where the eye then goes. Each small cell accepts a fixed number of
+       marks per frame; past that a particle still moves and still lives, it
+       simply is not drawn this frame.
+
+       Capping what is DRAWN rather than removing particles matters. Removing
+       them would thin the current that caused the convergence, so the
+       crowding would vanish along with the evidence of it, and the page
+       would slowly lose the particles it needs everywhere else. */
+    occ.fill(0);
+
     ctx.fillStyle = GRAIN;
     var size = 1 / dpr * 1.1;
 
@@ -243,7 +365,14 @@
       px[i] += Math.cos(a) * v;
       py[i] += Math.sin(a) * v;
 
-      ctx.fillRect(px[i], py[i], size, size);
+      var ox = (px[i] / OCC) | 0, oy = (py[i] / OCC) | 0;
+      if (ox >= 0 && oy >= 0 && ox < occCols && oy < occRows) {
+        var oi = oy * occCols + ox;
+        if (occ[oi] < OCC_MAX) {
+          occ[oi]++;
+          ctx.fillRect(px[i], py[i], size, size);
+        }
+      }
 
       /* Recycle when it leaves or when it has lived long enough. Without
          the age limit particles pile into the field's sinks and the page
@@ -262,7 +391,9 @@
   function loop(now) {
     raf = requestAnimationFrame(loop);
     if (now - last < FRAME_MS) return;
+    var dt = last ? Math.min(0.2, (now - last) / 1000) : FRAME_MS / 1000;
     last = now;
+    updateCycle(dt);
     step(now);
   }
 
@@ -291,7 +422,7 @@
   });
 
   resize();
-  field(0);
+  buildField(0);
 
   if (reduced) {
     /* One frame, no motion: the spray still belongs on the page, it simply
@@ -302,5 +433,10 @@
   root.classList.add("has-shader");
   start();
 
-  window.SignalField = { stop: stop, start: start, redraw: resize };
+  window.SignalField = {
+    stop: stop, start: start, redraw: resize,
+    movement: function () {
+      return MOVEMENTS[moveA].name + (blend ? " -> " + MOVEMENTS[moveB].name : "");
+    }
+  };
 })();
